@@ -1,0 +1,770 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Focus Studio — Pomodoro & Tasks</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = {
+    darkMode: 'class',
+    theme: {
+      extend: {
+        fontFamily: {
+          sans: ['Inter', 'system-ui', 'sans-serif'],
+          mono: ['JetBrains Mono', 'ui-monospace', 'monospace']
+        }
+      }
+    }
+  };
+</script>
+<style>
+  :root {
+    --accent: #f43f5e;
+    --accent-soft: rgba(244, 63, 94, 0.15);
+  }
+  body[data-mode="short"] { --accent: #10b981; --accent-soft: rgba(16, 185, 129, 0.15); }
+  body[data-mode="long"]  { --accent: #3b82f6; --accent-soft: rgba(59, 130, 246, 0.15); }
+
+  html, body { min-height: 100%; }
+  body {
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .ring-progress {
+    transition: stroke-dashoffset 0.3s linear, stroke 0.4s ease;
+  }
+
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: rgba(148, 163, 184, 0.35); border-radius: 9999px; }
+  ::-webkit-scrollbar-thumb:hover { background: rgba(148, 163, 184, 0.55); }
+
+  @keyframes taskIn {
+    from { opacity: 0; transform: translateY(-6px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .task-item { animation: taskIn 0.22s ease-out; }
+
+  @keyframes toastIn {
+    from { opacity: 0; transform: translate(-50%, 20px); }
+    to   { opacity: 1; transform: translate(-50%, 0); }
+  }
+  .toast-show { animation: toastIn 0.28s ease-out forwards; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .ring-progress, .task-item, .toast-show { transition: none; animation: none; }
+  }
+
+  .glass {
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+  }
+</style>
+</head>
+<body class="font-sans antialiased bg-gradient-to-br from-rose-50 via-white to-orange-50 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950 text-slate-800 dark:text-slate-100 transition-colors" data-mode="work">
+
+<div class="min-h-screen flex flex-col">
+  <header class="w-full max-w-5xl mx-auto px-4 sm:px-6 py-5 flex items-center justify-between">
+    <div class="flex items-center gap-3">
+      <div id="logoBadge" class="w-10 h-10 rounded-2xl flex items-center justify-center text-white text-lg font-bold shadow-lg transition-colors" style="background: var(--accent); box-shadow: 0 10px 30px var(--accent-soft);">
+        <svg viewBox="0 0 24 24" class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2.5M9 2h6"/></svg>
+      </div>
+      <div>
+        <h1 class="text-xl font-bold tracking-tight">Focus Studio</h1>
+        <p class="text-[11px] text-slate-500 dark:text-slate-400 tracking-wide uppercase font-semibold">Pomodoro & Tasks</p>
+      </div>
+    </div>
+
+    <div class="flex items-center gap-2">
+      <button id="soundToggle" type="button" aria-label="Toggle sound" title="Toggle sound"
+              class="p-2.5 rounded-xl bg-white/70 dark:bg-slate-900/70 border border-slate-200 dark:border-slate-800 hover:bg-white dark:hover:bg-slate-900 transition-colors">
+        <svg id="soundOnIcon" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H2v6h4l5 4V5z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M18.5 5.5a9 9 0 0 1 0 13"/></svg>
+        <svg id="soundOffIcon" class="w-4 h-4 hidden" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H2v6h4l5 4V5z"/><path d="m22 9-6 6"/><path d="m16 9 6 6"/></svg>
+      </button>
+
+      <button id="themeToggle" type="button" aria-label="Toggle theme" title="Toggle theme"
+              class="p-2.5 rounded-xl bg-white/70 dark:bg-slate-900/70 border border-slate-200 dark:border-slate-800 hover:bg-white dark:hover:bg-slate-900 transition-colors">
+        <svg id="themeLightIcon" class="w-4 h-4 hidden" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+        <svg id="themeDarkIcon" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <main class="w-full max-w-5xl mx-auto px-4 sm:px-6 pb-8 grid gap-5 lg:grid-cols-2 items-start">
+    
+    <section class="glass rounded-3xl border border-white/60 dark:border-slate-800/80 bg-white/70 dark:bg-slate-900/60 shadow-xl shadow-slate-200/50 dark:shadow-slate-950/40 p-6 sm:p-8">
+      
+      <div role="tablist" aria-label="Timer mode" class="flex p-1 rounded-2xl bg-slate-100/80 dark:bg-slate-900/70 mb-7">
+        <button role="tab" data-mode-btn="work"  class="mode-tab flex-1 py-2 text-sm font-semibold rounded-xl transition">Focus</button>
+        <button role="tab" data-mode-btn="short" class="mode-tab flex-1 py-2 text-sm font-semibold rounded-xl transition">Short Break</button>
+        <button role="tab" data-mode-btn="long"  class="mode-tab flex-1 py-2 text-sm font-semibold rounded-xl transition">Long Break</button>
+      </div>
+
+      <div class="relative w-64 h-64 sm:w-72 sm:h-72 mx-auto">
+        <svg viewBox="0 0 240 240" class="w-full h-full -rotate-90">
+          <circle cx="120" cy="120" r="106" fill="none" stroke-width="12" class="text-slate-200/70 dark:text-slate-800" stroke="currentColor"/>
+          <circle id="ringProgress" class="ring-progress" cx="120" cy="120" r="106" fill="none" stroke-width="12" stroke-linecap="round" stroke="currentColor"/>
+        </svg>
+
+        <div class="absolute inset-0 flex flex-col items-center justify-center text-center px-4">
+          <span id="modeLabel" class="mb-1 text-[11px] font-bold uppercase tracking-[0.2em]" style="color: var(--accent);">Focus</span>
+          <span id="timeDisplay" class="font-mono text-5xl sm:text-6xl font-bold tabular-nums tracking-tight" aria-live="polite">25:00</span>
+          <span id="sessionLabel" class="mt-2 text-xs text-slate-500 dark:text-slate-400">Session 1</span>
+          
+          <div id="activeTaskBadge" class="hidden mt-3 max-w-[200px] truncate text-[11px] font-semibold px-2.5 py-1 rounded-full flex items-center gap-1.5" style="background: var(--accent-soft); color: var(--accent);">
+            <svg class="w-3 h-3 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 17v5M9 10.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24V16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V7a1 1 0 0 1 1-1 2 2 0 0 0 0-4H8a2 2 0 0 0 0 4 1 1 0 0 1 1 1z"/></svg>
+            <span id="activeTaskTitle" class="truncate">Task</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="flex items-center justify-center gap-3 mt-8">
+        <button id="resetBtn" type="button" aria-label="Reset timer" title="Reset"
+                class="p-3 rounded-2xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 active:scale-95 transition-all">
+          <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/></svg>
+        </button>
+
+        <button id="startPauseBtn" type="button"
+                class="min-w-[140px] px-7 py-3 rounded-2xl font-bold text-white shadow-lg active:scale-95 transition-all"
+                style="background: var(--accent); box-shadow: 0 10px 30px var(--accent-soft);">
+          <span id="startPauseText">Start</span>
+        </button>
+
+        <button id="skipBtn" type="button" aria-label="Skip to next" title="Skip"
+                class="p-3 rounded-2xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 active:scale-95 transition-all">
+          <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 4 15 12 5 20 5 4"/><line x1="19" y1="5" x2="19" y2="19"/></svg>
+        </button>
+      </div>
+
+      <div class="mt-7 pt-5 border-t border-slate-200/70 dark:border-slate-800/80 grid grid-cols-3 gap-2 text-center">
+        <div>
+          <div id="statSessions" class="font-mono text-xl font-bold">0</div>
+          <div class="text-[10px] uppercase tracking-wider font-semibold text-slate-500 dark:text-slate-400 mt-0.5">Sessions</div>
+        </div>
+        <div>
+          <div id="statTime" class="font-mono text-xl font-bold">0m</div>
+          <div class="text-[10px] uppercase tracking-wider font-semibold text-slate-500 dark:text-slate-400 mt-0.5">Focus time</div>
+        </div>
+        <div>
+          <div id="statStreak" class="font-mono text-xl font-bold">0</div>
+          <div class="text-[10px] uppercase tracking-wider font-semibold text-slate-500 dark:text-slate-400 mt-0.5">Streak</div>
+        </div>
+      </div>
+
+      <details class="mt-5 group">
+        <summary class="cursor-pointer list-none flex items-center justify-between text-xs font-semibold text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 transition-colors">
+          <span>Timer settings</span>
+          <svg class="w-4 h-4 transition-transform group-open:rotate-180" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+        </summary>
+        <div class="mt-4 grid grid-cols-2 sm:grid-cols-4 gap-3">
+          <label class="block">
+            <span class="block text-[10px] uppercase tracking-wider font-semibold text-slate-500 dark:text-slate-400 mb-1.5">Focus</span>
+            <input id="workInput" type="number" min="1" max="120" value="25" inputmode="numeric"
+                   class="w-full rounded-xl bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 px-3 py-2 text-sm font-semibold text-center outline-none focus:border-rose-400 transition">
+          </label>
+          <label class="block">
+            <span class="block text-[10px] uppercase tracking-wider font-semibold text-slate-500 dark:text-slate-400 mb-1.5">Short</span>
+            <input id="shortInput" type="number" min="1" max="60" value="5" inputmode="numeric"
+                   class="w-full rounded-xl bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 px-3 py-2 text-sm font-semibold text-center outline-none focus:border-emerald-400 transition">
+          </label>
+          <label class="block">
+            <span class="block text-[10px] uppercase tracking-wider font-semibold text-slate-500 dark:text-slate-400 mb-1.5">Long</span>
+            <input id="longInput" type="number" min="1" max="90" value="15" inputmode="numeric"
+                   class="w-full rounded-xl bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 px-3 py-2 text-sm font-semibold text-center outline-none focus:border-blue-400 transition">
+          </label>
+          <label class="block">
+            <span class="block text-[10px] uppercase tracking-wider font-semibold text-slate-500 dark:text-slate-400 mb-1.5">Long every</span>
+            <input id="longEveryInput" type="number" min="1" max="12" value="4" inputmode="numeric"
+                   class="w-full rounded-xl bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 px-3 py-2 text-sm font-semibold text-center outline-none focus:border-purple-400 transition">
+          </label>
+        </div>
+        <label class="mt-4 flex items-center gap-2 cursor-pointer text-xs font-medium text-slate-600 dark:text-slate-300">
+          <input id="autoStartInput" type="checkbox" class="w-4 h-4 rounded accent-rose-500">
+          Auto-start the next session
+        </label>
+      </details>
+    </section>
+
+    <section class="glass rounded-3xl border border-white/60 dark:border-slate-800/80 bg-white/70 dark:bg-slate-900/60 shadow-xl shadow-slate-200/50 dark:shadow-slate-950/40 p-6 sm:p-8 flex flex-col">
+      
+      <div class="flex items-center justify-between mb-5">
+        <div>
+          <h2 class="text-lg font-bold">Tasks</h2>
+          <p id="taskSummary" class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">0 tasks</p>
+        </div>
+
+        <div role="tablist" aria-label="Task filter" class="flex p-1 rounded-xl bg-slate-100/80 dark:bg-slate-900/70 text-xs font-semibold">
+          <button role="tab" data-filter-btn="all"    class="filter-tab px-3 py-1.5 rounded-lg transition">All</button>
+          <button role="tab" data-filter-btn="active" class="filter-tab px-3 py-1.5 rounded-lg transition">Active</button>
+          <button role="tab" data-filter-btn="done"   class="filter-tab px-3 py-1.5 rounded-lg transition">Done</button>
+        </div>
+      </div>
+
+      <form id="taskForm" class="flex flex-col sm:flex-row gap-2 mb-5">
+        <input id="taskInput" type="text" maxlength="120" autocomplete="off" placeholder="What are you working on?"
+               class="flex-1 min-w-0 rounded-xl bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 px-4 py-2.5 text-sm outline-none focus:border-rose-400 placeholder:text-slate-400 transition">
+        <div class="flex gap-2">
+          <select id="taskTagSelect" aria-label="Task tag"
+                  class="rounded-xl bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 px-3 py-2.5 text-xs font-semibold outline-none focus:border-rose-400 transition">
+            <option value="Work">💼 Work</option>
+            <option value="Study">📚 Study</option>
+            <option value="Personal">🏠 Personal</option>
+          </select>
+          <button type="submit" class="rounded-xl px-4 py-2.5 text-sm font-bold text-white shadow-md active:scale-95 transition-all shrink-0" style="background: var(--accent); box-shadow: 0 8px 20px var(--accent-soft);">
+            Add
+          </button>
+        </div>
+      </form>
+
+      <ul id="taskList" class="space-y-2 max-h-[360px] overflow-y-auto pr-1 flex-1"></ul>
+
+      <div id="emptyState" class="hidden rounded-2xl border border-dashed border-slate-200 dark:border-slate-800 px-5 py-12 text-center">
+        <div class="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-slate-100 dark:bg-slate-800 text-xl">✓</div>
+        <p class="font-semibold text-sm">No tasks yet</p>
+        <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">Add a task and start your next focus session.</p>
+      </div>
+
+      <div class="mt-5 pt-4 border-t border-slate-200/70 dark:border-slate-800/80 flex items-center justify-between text-xs">
+        <button id="clearDoneBtn" type="button" class="font-semibold text-slate-500 dark:text-slate-400 hover:text-rose-500 transition-colors hidden">
+          Clear completed
+        </button>
+        <span id="completionRate" class="font-semibold text-slate-400 dark:text-slate-500 ml-auto">0% complete</span>
+      </div>
+    </section>
+  </main>
+
+  <footer class="w-full max-w-5xl mx-auto px-4 sm:px-6 pb-6 text-center text-[11px] text-slate-400 dark:text-slate-600">
+    Press <kbd class="px-1.5 py-0.5 rounded border border-slate-300 dark:border-slate-700 font-mono">Space</kbd> start/pause ·
+    <kbd class="px-1.5 py-0.5 rounded border border-slate-300 dark:border-slate-700 font-mono">R</kbd> reset ·
+    <kbd class="px-1.5 py-0.5 rounded border border-slate-300 dark:border-slate-700 font-mono">S</kbd> skip
+  </footer>
+</div>
+
+<div id="toast" role="status" aria-live="polite"
+     class="pointer-events-none fixed left-1/2 bottom-6 -translate-x-1/2 translate-y-24 opacity-0 px-5 py-3 rounded-2xl bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-sm font-semibold shadow-2xl z-50">
+  Session complete
+</div>
+
+<script>
+(() => {
+  'use strict';
+
+  const CIRCUMFERENCE = 2 * Math.PI * 106;
+  const ACCENTS = { work: '#f43f5e', short: '#10b981', long: '#3b82f6' };
+  const ACCENTS_SOFT = {
+    work:  'rgba(244, 63, 94, 0.15)',
+    short: 'rgba(16, 185, 129, 0.15)',
+    long:  'rgba(59, 130, 246, 0.15)'
+  };
+  const MODE_LABEL = { work: 'Focus', short: 'Short Break', long: 'Long Break' };
+  const TAGS = {
+    Work:     'bg-rose-100 dark:bg-rose-950/50 text-rose-700 dark:text-rose-300',
+    Study:    'bg-purple-100 dark:bg-purple-950/50 text-purple-700 dark:text-purple-300',
+    Personal: 'bg-blue-100 dark:bg-blue-950/50 text-blue-700 dark:text-blue-300'
+  };
+
+  const $ = (id) => document.getElementById(id);
+  const el = {
+    ringProgress: $('ringProgress'), timeDisplay: $('timeDisplay'), modeLabel: $('modeLabel'),
+    sessionLabel: $('sessionLabel'), activeTaskBadge: $('activeTaskBadge'), activeTaskTitle: $('activeTaskTitle'),
+    startPauseBtn: $('startPauseBtn'), startPauseText: $('startPauseText'), resetBtn: $('resetBtn'), skipBtn: $('skipBtn'),
+    modeTabs: document.querySelectorAll('[data-mode-btn]'),
+    statSessions: $('statSessions'), statTime: $('statTime'), statStreak: $('statStreak'),
+    workInput: $('workInput'), shortInput: $('shortInput'), longInput: $('longInput'),
+    longEveryInput: $('longEveryInput'), autoStartInput: $('autoStartInput'),
+    taskForm: $('taskForm'), taskInput: $('taskInput'), taskTagSelect: $('taskTagSelect'),
+    taskList: $('taskList'), emptyState: $('emptyState'), taskSummary: $('taskSummary'),
+    completionRate: $('completionRate'), clearDoneBtn: $('clearDoneBtn'),
+    filterTabs: document.querySelectorAll('[data-filter-btn]'),
+    toast: $('toast'), soundToggle: $('soundToggle'), soundOnIcon: $('soundOnIcon'), soundOffIcon: $('soundOffIcon'),
+    themeToggle: $('themeToggle'), themeLightIcon: $('themeLightIcon'), themeDarkIcon: $('themeDarkIcon'),
+    logoBadge: $('logoBadge')
+  };
+
+  const LS = {
+    get(key, fallback) { try { const r = localStorage.getItem(key); return r === null ? fallback : JSON.parse(r); } catch { return fallback; } },
+    set(key, val) { try { localStorage.setItem(key, JSON.stringify(val)); } catch {} }
+  };
+  const clamp = (n, min, max) => Math.min(max, Math.max(min, n));
+
+  const state = {
+    mode: 'work', running: false, remaining: 25 * 60, total: 25 * 60, endTime: 0, intervalId: null,
+    sessionsCompleted: 0, secondsFocused: 0, streak: 0,
+    filter: 'all', activeTaskId: null,
+    settings: { work: 25, short: 5, long: 15, longEvery: 4, autoStart: false, soundEnabled: true, theme: 'auto' },
+    statsDate: new Date().toDateString()
+  };
+  let tasks = [];
+
+  function saveSettings() { LS.set('focusStudio.settings', state.settings); }
+  function loadSettings() {
+    const s = LS.get('focusStudio.settings', {});
+    Object.assign(state.settings, {
+      work: clamp(Number(s.work) || 25, 1, 120),
+      short: clamp(Number(s.short) || 5, 1, 60),
+      long: clamp(Number(s.long) || 15, 1, 90),
+      longEvery: clamp(Number(s.longEvery) || 4, 1, 12),
+      autoStart: !!s.autoStart,
+      soundEnabled: s.soundEnabled !== false,
+      theme: ['auto','light','dark'].includes(s.theme) ? s.theme : 'auto'
+    });
+  }
+  function saveTasks() { LS.set('focusStudio.tasks', tasks); }
+  function loadTasks() {
+    const raw = LS.get('focusStudio.tasks', []);
+    tasks = Array.isArray(raw) ? raw.filter(t => t && typeof t.id === 'string' && typeof t.text === 'string') : [];
+  }
+  function saveStats() { LS.set('focusStudio.stats', { date: state.statsDate, sessions: state.sessionsCompleted, seconds: state.secondsFocused, streak: state.streak }); }
+  function loadStats() {
+    const s = LS.get('focusStudio.stats', null);
+    const today = new Date().toDateString();
+    if (!s || s.date !== today) { state.statsDate = today; state.sessionsCompleted = 0; state.secondsFocused = 0; state.streak = 0; }
+    else { state.statsDate = s.date; state.sessionsCompleted = Number(s.sessions) || 0; state.secondsFocused = Number(s.seconds) || 0; state.streak = Number(s.streak) || 0; }
+  }
+
+  function resolveTheme() { return state.settings.theme === 'auto' ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light') : state.settings.theme; }
+  function applyTheme() {
+    const active = resolveTheme();
+    document.documentElement.classList.toggle('dark', active === 'dark');
+    el.themeLightIcon.classList.toggle('hidden', active !== 'light');
+    el.themeDarkIcon.classList.toggle('hidden', active !== 'dark');
+  }
+
+  function playTone(frequency, duration, delay = 0) {
+    if (!state.settings.soundEnabled) return;
+    try {
+      const Ctx = window.AudioContext || window.webkitAudioContext; if (!Ctx) return;
+      const ctx = new Ctx(); const start = ctx.currentTime + delay;
+      const osc = ctx.createOscillator(); const gain = ctx.createGain();
+      osc.type = 'sine'; osc.frequency.value = frequency;
+      gain.gain.setValueAtTime(0.0001, start);
+      gain.gain.linearRampToValueAtTime(0.2, start + 0.02);
+      gain.gain.exponentialRampToValueAtTime(0.0001, start + duration);
+      osc.connect(gain).connect(ctx.destination);
+      osc.start(start); osc.stop(start + duration + 0.05);
+      setTimeout(() => { try { ctx.close(); } catch {} }, (delay + duration + 0.2) * 1000);
+    } catch {}
+  }
+  const chime = () => { playTone(523.25, 0.18, 0); playTone(659.25, 0.18, 0.16); playTone(783.99, 0.4, 0.32); };
+  const tickSound = () => playTone(440, 0.08);
+
+  function totalFor(mode) { return state.settings[mode] * 60; }
+
+  function updateModeTheme() {
+    document.body.dataset.mode = state.mode;
+    const accent = ACCENTS[state.mode]; const soft = ACCENTS_SOFT[state.mode];
+    document.documentElement.style.setProperty('--accent', accent);
+    document.documentElement.style.setProperty('--accent-soft', soft);
+    el.ringProgress.style.stroke = accent;
+    el.startPauseBtn.style.background = accent;
+    el.startPauseBtn.style.boxShadow = `0 10px 30px ${soft}`;
+    el.logoBadge.style.background = accent;
+    el.logoBadge.style.boxShadow = `0 10px 30px ${soft}`;
+  }
+
+  function render() {
+    const secs = Math.max(0, Math.ceil(state.remaining));
+    const m = Math.floor(secs / 60); const s = secs % 60;
+    const display = `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+    el.timeDisplay.textContent = display;
+
+    const frac = state.total > 0 ? clamp(state.remaining / state.total, 0, 1) : 0;
+    el.ringProgress.style.strokeDasharray = CIRCUMFERENCE;
+    el.ringProgress.style.strokeDashoffset = CIRCUMFERENCE * (1 - frac);
+
+    el.modeLabel.textContent = MODE_LABEL[state.mode];
+    el.sessionLabel.textContent = `Session ${state.sessionsCompleted + 1}`;
+    el.startPauseText.textContent = state.running ? 'Pause' : (state.remaining < state.total - 0.5 ? 'Resume' : 'Start');
+
+    el.modeTabs.forEach(btn => {
+      const active = btn.dataset.modeBtn === state.mode;
+      if (active) { btn.style.background = ACCENTS[btn.dataset.modeBtn]; btn.style.color = '#fff'; btn.setAttribute('aria-selected', 'true'); }
+      else { btn.style.background = 'transparent'; btn.style.color = ''; btn.setAttribute('aria-selected', 'false'); }
+    });
+
+    el.statSessions.textContent = state.sessionsCompleted;
+    el.statTime.textContent = `${Math.round(state.secondsFocused / 60)}m`;
+    el.statStreak.textContent = state.streak;
+
+    document.title = `${display} · ${MODE_LABEL[state.mode]}`;
+  }
+
+  function tick() {
+    state.remaining = Math.max(0, (state.endTime - Date.now()) / 1000);
+    if (state.remaining <= 0) { complete(); return; }
+    render();
+  }
+  function start() {
+    if (state.running) return;
+    if (state.remaining <= 0) state.remaining = totalFor(state.mode);
+    state.running = true; state.endTime = Date.now() + state.remaining * 1000;
+    state.intervalId = setInterval(tick, 100);
+    render();
+  }
+  function pause() {
+    if (!state.running) return;
+    state.running = false;
+    if (state.intervalId) { clearInterval(state.intervalId); state.intervalId = null; }
+    state.remaining = Math.max(0, (state.endTime - Date.now()) / 1000);
+    render();
+  }
+  function toggle() { state.running ? pause() : start(); }
+  function stopClock() { if (state.intervalId) { clearInterval(state.intervalId); state.intervalId = null; } state.running = false; }
+  function reset() { stopClock(); state.total = totalFor(state.mode); state.remaining = state.total; render(); }
+  function setMode(mode, autoStart = false) {
+    if (!MODE_LABEL[mode]) return;
+    stopClock();
+    state.mode = mode;
+    state.total = totalFor(mode);
+    state.remaining = state.total;
+    updateModeTheme(); render();
+    if (autoStart) start();
+  }
+
+  function complete() {
+    stopClock(); state.remaining = 0; render();
+    chime();
+    requestNotification(
+      state.mode === 'work' ? 'Focus session complete' : 'Break complete',
+      state.mode === 'work' ? 'Time to take a break.' : 'Ready to focus?'
+    );
+
+    if (state.mode === 'work') {
+      state.sessionsCompleted += 1;
+      state.secondsFocused += state.settings.work * 60;
+      state.streak += 1;
+      saveStats();
+
+      if (state.activeTaskId) {
+        const t = tasks.find(x => x.id === state.activeTaskId);
+        if (t) { t.pomodoros = (t.pomodoros || 0) + 1; saveTasks(); renderTasks(); }
+      }
+
+      toast(`Focus session complete — session #${state.sessionsCompleted}`);
+      const next = (state.sessionsCompleted % state.settings.longEvery === 0) ? 'long' : 'short';
+      setTimeout(() => setMode(next, state.settings.autoStart), 400);
+    } else {
+      toast('Break complete — ready to focus?');
+      setTimeout(() => setMode('work', state.settings.autoStart), 400);
+    }
+  }
+
+  function skip() {
+    stopClock();
+    let next;
+    if (state.mode === 'work') {
+      next = (state.sessionsCompleted > 0 && state.sessionsCompleted % state.settings.longEvery === 0) ? 'long' : 'short';
+    } else { next = 'work'; }
+    setMode(next, false);
+    toast('Skipped to ' + MODE_LABEL[next]);
+  }
+
+  function requestNotification(title, body) {
+    if (!('Notification' in window)) return;
+    if (Notification.permission === 'granted') { try { new Notification(title, { body }); } catch {} }
+  }
+  function ensureNotificationPermission() {
+    if (!('Notification' in window)) return;
+    if (Notification.permission === 'default') Notification.requestPermission().catch(() => {});
+  }
+
+  let toastTimer = null;
+  function toast(msg) {
+    el.toast.textContent = msg;
+    el.toast.classList.remove('translate-y-24', 'opacity-0');
+    el.toast.classList.add('toast-show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => {
+      el.toast.classList.remove('toast-show');
+      el.toast.classList.add('translate-y-24', 'opacity-0');
+    }, 3200);
+  }
+
+  function renderTasks() {
+    let list = tasks;
+    if (state.filter === 'active') list = tasks.filter(t => !t.completed);
+    else if (state.filter === 'done') list = tasks.filter(t => t.completed);
+
+    el.taskList.innerHTML = '';
+
+    if (list.length === 0) {
+      el.taskList.classList.add('hidden');
+      el.emptyState.classList.remove('hidden');
+      const p = el.emptyState.querySelector('p');
+      p.textContent = state.filter === 'done' ? 'No completed tasks yet'
+                    : state.filter === 'active' ? 'All caught up!'
+                    : 'No tasks yet';
+    } else {
+      el.taskList.classList.remove('hidden');
+      el.emptyState.classList.add('hidden');
+    }
+
+    list.forEach(task => {
+      const isActive = task.id === state.activeTaskId;
+      const li = document.createElement('li');
+      li.dataset.taskId = task.id;
+      li.className = 'task-item group flex items-center gap-3 p-3 rounded-2xl border transition-all ' +
+        (isActive ? 'border-transparent shadow-sm'
+                  : 'border-slate-200/70 dark:border-slate-800 bg-white/60 dark:bg-slate-950/50 hover:border-slate-300 dark:hover:border-slate-700');
+      if (isActive) { li.style.background = 'var(--accent-soft)'; li.style.borderColor = 'var(--accent)'; }
+
+      const cb = document.createElement('button');
+      cb.type = 'button'; cb.dataset.action = 'toggle';
+      cb.setAttribute('aria-label', task.completed ? 'Mark as incomplete' : 'Mark as complete');
+      cb.className = 'w-5 h-5 rounded-lg border-2 flex items-center justify-center shrink-0 transition-colors ' +
+        (task.completed ? 'bg-emerald-500 border-emerald-500 text-white'
+                        : 'border-slate-300 dark:border-slate-600 hover:border-emerald-500');
+      cb.innerHTML = task.completed
+        ? '<svg viewBox="0 0 24 24" class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>'
+        : '';
+
+      const body = document.createElement('div');
+      body.className = 'min-w-0 flex-1';
+
+      const title = document.createElement('p');
+      title.className = 'text-sm font-medium truncate ' + (task.completed ? 'line-through text-slate-400 dark:text-slate-500' : '');
+      title.textContent = task.text;
+
+      const meta = document.createElement('div');
+      meta.className = 'flex items-center gap-2 mt-1';
+
+      const tag = document.createElement('span');
+      tag.className = 'text-[10px] font-bold px-2 py-0.5 rounded ' + (TAGS[task.tag] || TAGS.Work);
+      tag.textContent = task.tag || 'Work';
+
+      const pomo = document.createElement('span');
+      pomo.className = 'text-[10px] font-semibold text-slate-400 dark:text-slate-500 flex items-center gap-1';
+      pomo.innerHTML = '<svg viewBox="0 0 24 24" class="w-3 h-3" fill="currentColor"><path d="M12 2c-1 3-3 4-3 7a3 3 0 0 0 6 0c0-3-2-4-3-7zM7 14a5 5 0 0 0 10 0 5 5 0 0 0-10 0z"/></svg>';
+      const pomoCount = document.createElement('span');
+      pomoCount.textContent = task.pomodoros || 0;
+      pomo.appendChild(pomoCount);
+
+      meta.append(tag, pomo);
+      body.append(title, meta);
+
+      const actions = document.createElement('div');
+      actions.className = 'flex items-center gap-1 shrink-0';
+
+      const pinBtn = document.createElement('button');
+      pinBtn.type = 'button'; pinBtn.dataset.action = 'pin';
+      pinBtn.setAttribute('aria-label', isActive ? 'Unpin task' : 'Pin task to timer');
+      pinBtn.title = isActive ? 'Unpin' : 'Pin to timer';
+      pinBtn.className = 'p-2 rounded-lg text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors';
+      pinBtn.innerHTML = '<svg viewBox="0 0 24 24" class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 17v5"/><path d="M9 10.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24V16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V7a1 1 0 0 1 1-1 2 2 0 0 0 0-4H8a2 2 0 0 0 0 4 1 1 0 0 1 1 1z"/></svg>';
+      if (isActive) pinBtn.style.color = 'var(--accent)';
+
+      const delBtn = document.createElement('button');
+      delBtn.type = 'button'; delBtn.dataset.action = 'delete';
+      delBtn.setAttribute('aria-label', 'Delete task'); delBtn.title = 'Delete';
+      delBtn.className = 'p-2 rounded-lg text-slate-400 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/30 transition-colors';
+      delBtn.innerHTML = '<svg viewBox="0 0 24 24" class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg>';
+
+      actions.append(pinBtn, delBtn);
+      li.append(cb, body, actions);
+      el.taskList.appendChild(li);
+    });
+
+    updateTaskSummary();
+  }
+
+  function updateTaskSummary() {
+    const total = tasks.length;
+    const done = tasks.filter(t => t.completed).length;
+    const active = total - done;
+    const pct = total ? Math.round((done / total) * 100) : 0;
+    el.taskSummary.textContent = `${active} active · ${done} done`;
+    el.completionRate.textContent = `${pct}% complete`;
+    el.clearDoneBtn.classList.toggle('hidden', done === 0);
+  }
+
+  function addTask(text, tag) {
+    const trimmed = text.trim();
+    if (!trimmed) return;
+    tasks.unshift({
+      id: Date.now().toString(36) + Math.random().toString(36).slice(2, 7),
+      text: trimmed, tag: tag || 'Work', completed: false, pomodoros: 0, createdAt: Date.now()
+    });
+    saveTasks(); renderTasks();
+  }
+
+  function toggleTask(id) {
+    const t = tasks.find(x => x.id === id);
+    if (!t) return;
+    t.completed = !t.completed;
+    if (t.completed) {
+      tickSound();
+      if (state.activeTaskId === id) { state.activeTaskId = null; updateActiveBadge(); }
+    }
+    saveTasks(); renderTasks();
+  }
+
+  function deleteTask(id) {
+    tasks = tasks.filter(x => x.id !== id);
+    if (state.activeTaskId === id) { state.activeTaskId = null; updateActiveBadge(); }
+    saveTasks(); renderTasks();
+  }
+
+  function pinTask(id) {
+    state.activeTaskId = state.activeTaskId === id ? null : id;
+    updateActiveBadge(); renderTasks();
+  }
+
+  function updateActiveBadge() {
+    if (!state.activeTaskId) { el.activeTaskBadge.classList.add('hidden'); return; }
+    const t = tasks.find(x => x.id === state.activeTaskId);
+    if (!t) { state.activeTaskId = null; el.activeTaskBadge.classList.add('hidden'); return; }
+    el.activeTaskTitle.textContent = t.text;
+    el.activeTaskBadge.classList.remove('hidden');
+  }
+
+  function clearDone() {
+    tasks = tasks.filter(t => !t.completed);
+    if (state.activeTaskId && !tasks.find(t => t.id === state.activeTaskId)) {
+      state.activeTaskId = null; updateActiveBadge();
+    }
+    saveTasks(); renderTasks();
+  }
+
+  function setFilter(f) {
+    state.filter = f;
+    el.filterTabs.forEach(btn => {
+      const active = btn.dataset.filterBtn === f;
+      btn.className = 'filter-tab px-3 py-1.5 rounded-lg transition ' +
+        (active ? 'bg-white dark:bg-slate-800 text-slate-900 dark:text-white shadow-sm'
+                : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white');
+      btn.setAttribute('aria-selected', active ? 'true' : 'false');
+    });
+    renderTasks();
+  }
+
+  function readSettings() {
+    const prevTotal = totalFor(state.mode);
+    state.settings.work      = clamp(parseInt(el.workInput.value, 10) || 25, 1, 120);
+    state.settings.short     = clamp(parseInt(el.shortInput.value, 10) || 5, 1, 60);
+    state.settings.long      = clamp(parseInt(el.longInput.value, 10) || 15, 1, 90);
+    state.settings.longEvery = clamp(parseInt(el.longEveryInput.value, 10) || 4, 1, 12);
+    state.settings.autoStart = el.autoStartInput.checked;
+
+    el.workInput.value = state.settings.work;
+    el.shortInput.value = state.settings.short;
+    el.longInput.value = state.settings.long;
+    el.longEveryInput.value = state.settings.longEvery;
+
+    const newTotal = totalFor(state.mode);
+    if (!state.running) {
+      if (Math.abs(state.remaining - prevTotal) < 0.5) { state.total = newTotal; state.remaining = newTotal; }
+      else { state.total = newTotal; state.remaining = Math.min(state.remaining, newTotal); }
+    }
+    saveSettings(); render();
+  }
+
+  el.startPauseBtn.addEventListener('click', () => { ensureNotificationPermission(); toggle(); });
+  el.resetBtn.addEventListener('click', reset);
+  el.skipBtn.addEventListener('click', skip);
+
+  el.modeTabs.forEach(btn => {
+    btn.addEventListener('click', () => {
+      const m = btn.dataset.modeBtn;
+      if (m === state.mode && !state.running) return;
+      setMode(m, false);
+    });
+  });
+
+  [el.workInput, el.shortInput, el.longInput, el.longEveryInput].forEach(input => {
+    input.addEventListener('change', readSettings);
+    input.addEventListener('blur', readSettings);
+  });
+
+  el.autoStartInput.addEventListener('change', () => {
+    state.settings.autoStart = el.autoStartInput.checked;
+    saveSettings();
+  });
+
+  el.taskForm.addEventListener('submit', e => {
+    e.preventDefault();
+    addTask(el.taskInput.value, el.taskTagSelect.value);
+    el.taskInput.value = '';
+    el.taskInput.focus();
+  });
+
+  el.taskList.addEventListener('click', e => {
+    const btn = e.target.closest('button[data-action]');
+    if (!btn) return;
+    const li = btn.closest('li[data-task-id]');
+    if (!li) return;
+    const id = li.dataset.taskId; const action = btn.dataset.action;
+    if (action === 'toggle') toggleTask(id);
+    else if (action === 'delete') deleteTask(id);
+    else if (action === 'pin')    pinTask(id);
+  });
+
+  el.clearDoneBtn.addEventListener('click', clearDone);
+
+  el.filterTabs.forEach(btn => {
+    btn.addEventListener('click', () => setFilter(btn.dataset.filterBtn));
+  });
+
+  el.soundToggle.addEventListener('click', () => {
+    state.settings.soundEnabled = !state.settings.soundEnabled;
+    saveSettings(); updateSoundIcon();
+    if (state.settings.soundEnabled) tickSound();
+  });
+
+  el.themeToggle.addEventListener('click', () => {
+    const cycle = { auto: 'light', light: 'dark', dark: 'auto' };
+    state.settings.theme = cycle[state.settings.theme];
+    saveSettings(); applyTheme();
+    toast('Theme: ' + state.settings.theme);
+  });
+
+  document.addEventListener('keydown', e => {
+    const tag = (e.target.tagName || '').toLowerCase();
+    if (tag === 'input' || tag === 'textarea' || tag === 'select' || e.target.isContentEditable) return;
+    if (e.code === 'Space') { e.preventDefault(); toggle(); }
+    else if (e.key === 'r' || e.key === 'R') reset();
+    else if (e.key === 's' || e.key === 'S') skip();
+  });
+
+  window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
+    if (state.settings.theme === 'auto') applyTheme();
+  });
+
+  function updateSoundIcon() {
+    const on = state.settings.soundEnabled;
+    el.soundOnIcon.classList.toggle('hidden', !on);
+    el.soundOffIcon.classList.toggle('hidden', on);
+    el.soundToggle.setAttribute('aria-pressed', on ? 'true' : 'false');
+  }
+
+  function init() {
+    loadSettings(); loadTasks(); loadStats();
+    el.workInput.value = state.settings.work;
+    el.shortInput.value = state.settings.short;
+    el.longInput.value = state.settings.long;
+    el.longEveryInput.value = state.settings.longEvery;
+    el.autoStartInput.checked = state.settings.autoStart;
+
+    applyTheme(); updateSoundIcon();
+
+    state.mode = 'work';
+    state.total = totalFor('work');
+    state.remaining = state.total;
+
+    updateModeTheme();
+    setFilter('all');
+    renderTasks();
+    updateActiveBadge();
+    render();
+  }
+
+  init();
+})();
+</script>
+</body>
+</html>
