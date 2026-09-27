@@ -305,3 +305,601 @@
         vs += '<text x="334" y="94" text-anchor="middle" fill="#6a9cc0" font-size="8" font-family="ui-monospace,monospace">2</text><text x="334" y="234" text-anchor="middle" fill="#6a9cc0" font-size="8" font-family="ui-monospace,monospace">2</text><text x="336" y="163" text-anchor="middle" fill="#6a9cc0" font-size="7" font-family="ui-monospace,monospace">VSI</text><line id="vsiN" x1="352" y1="160" x2="334" y2="160" stroke="#ffd400" stroke-width="2.5" stroke-linecap="round"/>';
         shared.el.vsi.innerHTML = vs;
         shared.el.vsiN = svg.querySelector('#vsiN');
+        shared.el.btm.innerHTML = '<text id="mach" x="140" y="335" text-anchor="middle" fill="#5bd45b" font-size="11" font-family="ui-monospace,monospace" font-weight="bold">M .00</text><text id="gs" x="220" y="335" text-anchor="middle" fill="#5bd45b" font-size="11" font-family="ui-monospace,monospace" font-weight="bold">GS 0</text><text id="dist" x="300" y="335" text-anchor="middle" fill="#5bd45b" font-size="11" font-family="ui-monospace,monospace" font-weight="bold">---</text>';
+        shared.el.mach = svg.querySelector('#mach');
+        shared.el.gs = svg.querySelector('#gs');
+        shared.el.dist = svg.querySelector('#dist');
+    }
+
+    function updatePFD(v) {
+        var el = shared.el;
+        if (!el.pfdAttT) return;
+        var pp = v.pitch * 5.5;
+        el.pfdAttT.setAttribute('transform', 'translate(220,160) rotate(' + v.bank.toFixed(2) + ') translate(0,' + pp.toFixed(2) + ')');
+        if (el.bkP) el.bkP.setAttribute('transform', 'rotate(' + v.bank.toFixed(2) + ' 220 160)');
+        if (el.fdH) { var fdy = 160 + v.fdPitch * 5.5; el.fdH.setAttribute('y1', fdy); el.fdH.setAttribute('y2', fdy); }
+        if (el.fdV) { var fdx = 220 + v.fdRoll * 5.5; el.fdV.setAttribute('x1', fdx); el.fdV.setAttribute('x2', fdx); }
+        if (el.spdSc) el.spdSc.setAttribute('transform', 'translate(0,' + (160 + v.ias * el.spdSc._px).toFixed(1) + ')');
+        if (el.spdV) el.spdV.textContent = Math.round(v.ias);
+        if (el.altSc) el.altSc.setAttribute('transform', 'translate(0,' + (160 + v.alt * el.altSc._px).toFixed(1) + ')');
+        if (el.altV) el.altV.textContent = String(Math.round(v.alt)).padStart(5, '0');
+        if (el.vsiN) { var yn = clamp(160 - (v.vs / 2000) * 100, 60, 260); el.vsiN.setAttribute('y1', yn); el.vsiN.setAttribute('y2', yn); }
+        if (el.hdgSc) {
+            var hdg = ((v.hdg % 360) + 360) % 360;
+            el.hdgSc.setAttribute('transform', 'translate(' + (220 - hdg * el.hdgSc._px).toFixed(1) + ',0)');
+            if (el.hdgV) el.hdgV.textContent = String(Math.round(hdg)).padStart(3, '0');
+        }
+        if (el.fmaAt) el.fmaAt.textContent = v.fmaAt;
+        if (el.fmaRoll) el.fmaRoll.textContent = v.fmaRoll;
+        if (el.fmaPitch) el.fmaPitch.textContent = v.fmaPitch;
+        if (el.mach) el.mach.textContent = 'M ' + v.mach.toFixed(2);
+        if (el.gs) el.gs.textContent = 'GS ' + Math.round(v.gs);
+        if (el.dist) el.dist.textContent = v.nextWp || '---';
+        if (el.wArr) { var wr = (flightSim.windDir + 180) - v.hdg; el.wArr.setAttribute('transform', 'rotate(' + wr.toFixed(0) + ')'); }
+        if (el.wTxt) el.wTxt.textContent = String(Math.round(flightSim.windDir)).padStart(3, '0') + '/' + String(Math.round(flightSim.windSpd)).padStart(2, '0');
+    }
+
+    /* ============================================================
+       ND
+       ============================================================ */
+    function initND() { if (!shared.el.nd) return; ndInit = true; }
+
+    function renderND() {
+        var el = shared.el;
+        if (!el.nd) return;
+        var canvas = el.nd;
+        var ctx = canvas.getContext('2d');
+        var W = canvas.width, H = canvas.height, cx = W / 2, cy = H / 2;
+        var R = Math.min(W, H) * 0.44;
+        ctx.clearRect(0, 0, W, H);
+        ctx.fillStyle = '#050b14';
+        ctx.fillRect(0, 0, W, H);
+        var range = flightSim.ndRange, scale = R / range;
+        var acPos = getACPos(flightSim.progress);
+        var hdg = (shared.runtime.mode === 'work' || shared.runtime.mode === 'stopwatch') ? acPos.hdg : 273;
+        var hr = hdg * Math.PI / 180, sinH = Math.sin(hr), cosH = Math.cos(hr);
+        function proj(wx, wy) {
+            var dx = wx - acPos.x, dy = wy - acPos.y;
+            var fwd = dx * sinH + dy * cosH, rgt = dx * cosH - dy * sinH;
+            return { x: cx + rgt * scale, y: cy - fwd * scale };
+        }
+        ctx.strokeStyle = 'rgba(120,180,255,.35)';
+        ctx.lineWidth = 1;
+        for (var deg = 0; deg < 360; deg += 10) {
+            var sd = deg - hdg, rad = (sd - 90) * Math.PI / 180, mj = deg % 30 === 0, r1 = R + (mj ? -12 : -6);
+            ctx.beginPath();
+            ctx.moveTo(cx + Math.cos(rad) * r1, cy + Math.sin(rad) * r1);
+            ctx.lineTo(cx + Math.cos(rad) * R, cy + Math.sin(rad) * R);
+            ctx.stroke();
+            if (mj) {
+                ctx.fillStyle = 'rgba(120,180,255,.75)';
+                ctx.font = 'bold 13px ui-monospace,monospace';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                var lb = deg === 0 ? 'N' : (deg === 90 ? 'E' : (deg === 180 ? 'S' : (deg === 270 ? 'W' : String(deg / 10))));
+                ctx.fillText(lb, cx + Math.cos(rad) * (r1 - 15), cy + Math.sin(rad) * (r1 - 15));
+            }
+        }
+        ctx.strokeStyle = 'rgba(120,180,255,.22)';
+        ctx.lineWidth = 1.5;
+        [0.25, 0.5, 0.75, 1].forEach(function (f) {
+            ctx.beginPath();
+            ctx.arc(cx, cy, R * f, 0, Math.PI * 2);
+            ctx.stroke();
+        });
+        ctx.fillStyle = 'rgba(120,180,255,.55)';
+        ctx.font = 'bold 12px ui-monospace,monospace';
+        ctx.textAlign = 'left';
+        ctx.textBaseline = 'middle';
+        [1, 2, 3, 4].forEach(function (i) {
+            ctx.fillText(String(Math.round(range / 4 * i)), cx + R * (i / 4) + 5, cy - 5);
+        });
+        if (flightSim.routePoints.length >= 2) {
+            var pts = flightSim.routePoints;
+            ctx.strokeStyle = '#ff00ff';
+            ctx.lineWidth = 3;
+            ctx.lineJoin = 'round';
+            ctx.lineCap = 'round';
+            ctx.beginPath();
+            var started = false;
+            for (var i = 0; i < pts.length; i++) {
+                var p = proj(pts[i].x, pts[i].y);
+                if (p.x < -200 || p.x > W + 200 || p.y < -200 || p.y > H + 200) {
+                    if (started) { ctx.stroke(); ctx.beginPath(); started = false; }
+                    continue;
+                }
+                if (!started) { ctx.moveTo(p.x, p.y); started = true; }
+                else ctx.lineTo(p.x, p.y);
+            }
+            if (started) ctx.stroke();
+            for (var j = 0; j < pts.length; j++) {
+                var wp = pts[j], pr = proj(wp.x, wp.y);
+                if (pr.x < -40 || pr.x > W + 40 || pr.y < -40 || pr.y > H + 40) continue;
+                if (wp.type === 'apt') {
+                    ctx.strokeStyle = '#fff';
+                    ctx.lineWidth = 2;
+                    ctx.beginPath();
+                    ctx.arc(pr.x, pr.y, 9, 0, Math.PI * 2);
+                    ctx.stroke();
+                    ctx.fillStyle = '#fff';
+                    ctx.beginPath();
+                    ctx.arc(pr.x, pr.y, 3, 0, Math.PI * 2);
+                    ctx.fill();
+                } else {
+                    ctx.strokeStyle = '#fff';
+                    ctx.lineWidth = 1.8;
+                    ctx.beginPath();
+                    ctx.moveTo(pr.x, pr.y - 8);
+                    ctx.lineTo(pr.x + 8, pr.y);
+                    ctx.lineTo(pr.x, pr.y + 8);
+                    ctx.lineTo(pr.x - 8, pr.y);
+                    ctx.closePath();
+                    ctx.stroke();
+                }
+                if (wp.name) {
+                    ctx.fillStyle = '#fff';
+                    ctx.font = 'bold 11px ui-monospace,monospace';
+                    ctx.textAlign = 'left';
+                    ctx.textBaseline = 'middle';
+                    ctx.fillText(wp.name, pr.x + 12, pr.y);
+                }
+            }
+        }
+        ctx.strokeStyle = '#fff';
+        ctx.lineWidth = 2;
+        for (var k = 0; k < flightSim.traffic.length; k++) {
+            var t = flightSim.traffic[k], tp = proj(acPos.x + t.x, acPos.y + t.y);
+            if (tp.x < -20 || tp.x > W + 20 || tp.y < -20 || tp.y > H + 20) continue;
+            ctx.beginPath();
+            ctx.moveTo(tp.x, tp.y - 8);
+            ctx.lineTo(tp.x + 8, tp.y);
+            ctx.lineTo(tp.x, tp.y + 8);
+            ctx.lineTo(tp.x - 8, tp.y);
+            ctx.closePath();
+            ctx.stroke();
+            if (t.alt !== 0) {
+                ctx.fillStyle = 'rgba(255,255,255,.7)';
+                ctx.font = '9px ui-monospace,monospace';
+                ctx.textAlign = 'left';
+                ctx.textBaseline = 'middle';
+                ctx.fillText((t.alt > 0 ? '+' : '') + String(Math.round(t.alt / 100)), tp.x + 11, tp.y);
+            }
+        }
+        ctx.strokeStyle = '#ffd400';
+        ctx.lineWidth = 3;
+        ctx.lineCap = 'round';
+        ctx.beginPath();
+        ctx.moveTo(cx - 42, cy); ctx.lineTo(cx - 20, cy);
+        ctx.moveTo(cx + 20, cy); ctx.lineTo(cx + 42, cy);
+        ctx.moveTo(cx, cy - 14); ctx.lineTo(cx, cy + 14);
+        ctx.moveTo(cx - 42, cy); ctx.lineTo(cx - 42, cy + 7);
+        ctx.moveTo(cx + 42, cy); ctx.lineTo(cx + 42, cy + 7);
+        ctx.stroke();
+        ctx.fillStyle = '#ffd400';
+        ctx.beginPath();
+        ctx.arc(cx, cy, 2.5, 0, Math.PI * 2);
+        ctx.fill();
+        var wr = (flightSim.windDir + 180) - hdg;
+        var wrad = (wr - 90) * Math.PI / 180, waX = 60, waY = 60;
+        ctx.save();
+        ctx.translate(waX, waY);
+        ctx.rotate(wrad + Math.PI / 2);
+        ctx.fillStyle = '#5bd45b';
+        ctx.beginPath();
+        ctx.moveTo(0, -14); ctx.lineTo(6, 8); ctx.lineTo(0, 3); ctx.lineTo(-6, 8);
+        ctx.closePath();
+        ctx.fill();
+        ctx.restore();
+        ctx.fillStyle = '#5bd45b';
+        ctx.font = 'bold 13px ui-monospace,monospace';
+        ctx.textAlign = 'left';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(String(Math.round(flightSim.windDir)).padStart(3, '0') + '/' + String(Math.round(flightSim.windSpd)).padStart(2, '0'), waX + 14, waY);
+        ctx.fillStyle = 'rgba(120,180,255,.75)';
+        ctx.font = 'bold 13px ui-monospace,monospace';
+        ctx.textAlign = 'right';
+        ctx.textBaseline = 'middle';
+        ctx.fillText('RNG ' + range + ' NM', W - 20, 40);
+        ctx.textAlign = 'left';
+        ctx.fillText(AIRCRAFT[shared.settings.aircraft].code + ' MAP', 20, 40);
+        var nw = null, nd = Infinity;
+        if (flightSim.routePoints.length >= 2) {
+            for (var m = 0; m < flightSim.routePoints.length; m++) {
+                var rp = flightSim.routePoints[m];
+                var dxr = rp.x - acPos.x, dyr = rp.y - acPos.y;
+                var d = Math.sqrt(dxr * dxr + dyr * dyr);
+                var fwd = dxr * sinH + dyr * cosH;
+                if (fwd > 0 && d < nd) { nd = d; nw = rp; }
+            }
+        }
+        ctx.fillStyle = '#fff';
+        ctx.font = 'bold 13px ui-monospace,monospace';
+        ctx.textAlign = 'left';
+        ctx.textBaseline = 'bottom';
+        ctx.fillText(nw ? ('NEXT ' + (nw.name || '---') + ' ' + Math.round(nd) + ' NM') : 'ARRIVED', 20, H - 20);
+        ctx.textAlign = 'right';
+        ctx.fillStyle = 'rgba(120,180,255,.75)';
+        ctx.fillText(Math.round(flightSim.progress * 100) + '%', W - 20, H - 20);
+    }
+
+    /* ============================================================
+       PHASE / VALUES
+       ============================================================ */
+    function phaseAt(p) {
+        for (var i = 0; i < PHASES.length; i++) if (p < PHASES[i].to || i === PHASES.length - 1) return PHASES[i];
+        return PHASES[PHASES.length - 1];
+    }
+    function getCallout(p) {
+        var m = null;
+        for (var i = 0; i < TAKEOFF_CALLOUTS.length; i++) if (p >= TAKEOFF_CALLOUTS[i].at) m = TAKEOFF_CALLOUTS[i].msg;
+        return m;
+    }
+    function targetN1(phase, lp) {
+        var ac = AIRCRAFT[shared.settings.aircraft];
+        switch (phase.id) {
+            case 'preflight': return ac.n1Idle;
+            case 'taxi': return ac.n1Idle + 2 + lp * 6;
+            case 'takeoff': return ac.n1Takeoff + Math.sin(lp * Math.PI) * 4;
+            case 'climb': return ac.n1Takeoff - 4 - lp * 10;
+            case 'cruise': return ac.cruiseN1;
+            case 'descent': return ac.cruiseN1 - 18 - lp * 10;
+            case 'approach': return ac.n1Idle + 28 + Math.sin(lp * Math.PI * 2) * 3;
+            case 'landing': return ac.n1Idle + 8;
+            default: return ac.n1Idle;
+        }
+    }
+
+    function computeFV(p, isWork) {
+        var ac = AIRCRAFT[shared.settings.aircraft];
+        if (!isWork) {
+            var bp = BREAK_FLIGHT[shared.runtime.mode] || BREAK_FLIGHT.short;
+            var et = shared.totalFor(shared.runtime.mode) - shared.runtime.remaining;
+            var idx = Math.floor(et / 8) % bp.radio.length;
+            return { ias: 0, alt: 0, vs: 0, hdg: 273, pitch: 0, bank: 0, slip: 0, mach: 0, gs: 0, windDir: flightSim.windDir, windSpd: flightSim.windSpd, fdPitch: 0, fdRoll: 0, fmaAt: 'A/T ARM', fmaRoll: '---', fmaPitch: '---', n1: flightSim.n1Current, egt: flightSim.egtCurrent, fuel: '100%', radio: bp.radio[idx], nextWp: '---' };
+        }
+        var phase = phaseAt(p);
+        var lp = clamp((p - phase.from) / (phase.to - phase.from), 0, 1);
+        var sm = lp * lp * (3 - 2 * lp);
+        var alt = phase.altA + (phase.altB - phase.altA) * sm;
+        var ias = phase.spdA + (phase.spdB - phase.spdA) * sm;
+        var pitch = phase.pitchA + (phase.pitchB - phase.pitchA) * sm;
+        var pm = (phase.to - phase.from) * shared.settings.work;
+        var vs = 0;
+        if (pm > 0 && phase.altB !== phase.altA) vs = (phase.altB - phase.altA) / pm;
+        var acPos = getACPos(p);
+        var hdg = acPos.hdg;
+        var hA = getACPos(Math.min(1, p + 0.003)).hdg;
+        var hB = getACPos(Math.max(0, p - 0.003)).hdg;
+        var td = hA - hB;
+        while (td > 180) td -= 360;
+        while (td < -180) td += 360;
+        var bank = clamp(td * 12, -22, 22);
+        var mach = Math.min(0.85, ias / 600);
+        var gs = ias + 20 + Math.sin(p * 8) * 4;
+        var n1 = flightSim.n1Current, egt = flightSim.egtCurrent;
+        var fp = Math.max(6, 100 - p * 55);
+        var fmaAt = 'A/T ARM', fmaRoll = 'HDG SEL', fmaPitch = 'ALT HOLD';
+        if (phase.id === 'takeoff') { fmaAt = 'THR REF'; fmaPitch = 'TO/GA'; }
+        else if (phase.id === 'climb') { fmaAt = 'THR REF'; fmaRoll = 'LNAV'; fmaPitch = 'VNAV SPD'; }
+        else if (phase.id === 'cruise') { fmaAt = 'SPD'; fmaRoll = 'LNAV'; fmaPitch = 'VNAV PTH'; }
+        else if (phase.id === 'descent') { fmaAt = 'SPD'; fmaRoll = 'LNAV'; fmaPitch = 'VNAV PTH'; }
+        else if (phase.id === 'approach') { fmaAt = 'SPD'; fmaRoll = 'LOC'; fmaPitch = 'G/S'; }
+        else if (phase.id === 'landing') { fmaAt = 'SPD'; fmaRoll = 'LOC'; fmaPitch = p > 0.99 ? 'FLARE' : 'G/S'; }
+        var radioMsg;
+        if (phase.id === 'takeoff') radioMsg = getCallout(p) || 'Cleared for takeoff';
+        else {
+            var et2 = shared.totalFor(shared.runtime.mode) - shared.runtime.remaining;
+            var ri = Math.floor(et2 / 7) % phase.radio.length;
+            radioMsg = phase.radio[ri];
+        }
+        var nw = '---', nd = Infinity;
+        if (flightSim.routePoints.length >= 2) {
+            var sH = Math.sin(hdg * Math.PI / 180), cH = Math.cos(hdg * Math.PI / 180);
+            for (var i = 0; i < flightSim.routePoints.length; i++) {
+                var rp = flightSim.routePoints[i];
+                var dxr = rp.x - acPos.x, dyr = rp.y - acPos.y;
+                var fwd = dxr * sH + dyr * cH;
+                var d = Math.sqrt(dxr * dxr + dyr * dyr);
+                if (fwd > 0 && d < nd) { nd = d; nw = rp.name + ' ' + Math.round(d) + 'NM'; }
+            }
+        }
+        return { ias: ias, alt: alt, vs: vs, hdg: hdg, pitch: pitch, bank: bank, slip: 0, mach: mach, gs: gs, windDir: flightSim.windDir, windSpd: flightSim.windSpd, fdPitch: 0, fdRoll: 0, fmaAt: fmaAt, fmaRoll: fmaRoll, fmaPitch: fmaPitch, n1: n1, egt: egt, fuel: Math.round(fp) + '%', radio: radioMsg, nextWp: nw, phase: phase };
+    }
+
+    /* ============================================================
+       RAF LOOP
+       ============================================================ */
+    function startFlightAnim() {
+        if (flightRafId !== null) return;
+        if (shared.settings.deck !== 'flight') return;
+        lastFrameTs = performance.now();
+        flightRafId = requestAnimationFrame(flightFrame);
+    }
+    function stopFlightAnim() {
+        if (flightRafId !== null) { cancelAnimationFrame(flightRafId); flightRafId = null; }
+    }
+    function updateSpool(dt) {
+        var ac = AIRCRAFT[shared.settings.aircraft];
+        var target = ac.n1Idle;
+        if (shared.runtime.running && shared.runtime.mode === 'work') {
+            var ph = phaseAt(flightSim.progress);
+            var lp = clamp((flightSim.progress - ph.from) / (ph.to - ph.from), 0, 1);
+            target = targetN1(ph, lp);
+        }
+        var alpha = 1 - Math.exp(-dt / 1.6);
+        flightSim.n1Current += (target - flightSim.n1Current) * alpha;
+        flightSim.n1Current = clamp(flightSim.n1Current, ac.n1Idle - 2, 102);
+        var te = 380 + (flightSim.n1Current - 20) * 6.5;
+        var ae = 1 - Math.exp(-dt / 3.2);
+        flightSim.egtCurrent += (te - flightSim.egtCurrent) * ae;
+    }
+    function updateShake() {
+        var el = shared.el;
+        if (!el.pfdWrap) return;
+        var shake = false;
+        if (shared.runtime.running && shared.runtime.mode === 'work' && shared.settings.deck === 'flight' && !shared.settings.reduceMotion) {
+            var p = flightSim.progress;
+            if ((p > 0.19 && p < 0.30) || (p > 0.955 && p < 0.995)) shake = true;
+        }
+        el.pfdWrap.classList.toggle('shaking', shake);
+    }
+    function updateRadio(msg) {
+        if (!msg || msg === lastRadioMsg) return;
+        lastRadioMsg = msg;
+        var el = shared.el;
+        el.fdRadio.textContent = msg;
+        el.fdRadio.classList.remove('flash');
+        void el.fdRadio.offsetWidth;
+        el.fdRadio.classList.add('flash');
+    }
+    function renderStepper(p, isWork) {
+        var h = '';
+        var el = shared.el;
+        if (!isWork) {
+            var bp = BREAK_FLIGHT[shared.runtime.mode] || BREAK_FLIGHT.short;
+            var pct = clamp(p * 100, 0, 100);
+            h += '<div class="fd-step active"><div class="fd-step-track"><span class="fd-step-fill" style="width:' + pct + '%"></span></div><div class="fd-step-label">' + bp.label + '</div></div>';
+            el.fdStepper.innerHTML = h;
+            return;
+        }
+        PHASES.forEach(function (ph, i) {
+            var active = p >= ph.from && (p < ph.to || i === PHASES.length - 1);
+            var done = p >= ph.to;
+            var lpct = done ? 100 : (active ? clamp(((p - ph.from) / (ph.to - ph.from)) * 100, 0, 100) : 0);
+            h += '<div class="fd-step' + (active ? ' active' : '') + (done ? ' done' : '') + '"><div class="fd-step-track"><span class="fd-step-fill" style="width:' + lpct.toFixed(1) + '%"></span></div><div class="fd-step-label">' + ph.short + '</div></div>';
+        });
+        el.fdStepper.innerHTML = h;
+    }
+    function checkCabinAnnouncements(p, phase) {
+        if (!phase || !phase.cabin || !phase.cabin.length) return;
+        if (flightSim.cabinAnnounced[phase.id]) return;
+        flightSim.cabinAnnounced[phase.id] = true;
+        var idx = Math.floor(Math.random() * phase.cabin.length);
+        showCabin(phase.cabin[idx]);
+    }
+    function flightFrame(ts) {
+        flightRafId = null;
+        if (shared.settings.deck !== 'flight') return;
+        var el = shared.el;
+        var dt = Math.min(0.1, (ts - lastFrameTs) / 1000);
+        lastFrameTs = ts;
+        var total = shared.totalFor(shared.runtime.mode);
+        flightSim.progress = total > 0 ? clamp(1 - shared.runtime.remaining / total, 0, 1) : 0;
+        updateSpool(dt);
+        if (shared.runtime.running) updateTraffic(dt);
+        if ((shared.runtime.mode === 'work' || shared.runtime.mode === 'stopwatch') && flightSim.routePoints.length >= 2) {
+            var ac = getACPos(flightSim.progress);
+            flightSim.heading = ac.hdg;
+            var hA = getACPos(Math.min(1, flightSim.progress + 0.003)).hdg;
+            var hB = getACPos(Math.max(0, flightSim.progress - 0.003)).hdg;
+            var td = hA - hB;
+            while (td > 180) td -= 360;
+            while (td < -180) td += 360;
+            var tb = clamp(td * 12, -22, 22);
+            flightSim.bank += (tb - flightSim.bank) * (1 - Math.exp(-dt / 0.4));
+        } else {
+            flightSim.heading = 273;
+            flightSim.bank += (0 - flightSim.bank) * (1 - Math.exp(-dt / 0.4));
+        }
+        updateEngineAudio(flightSim.n1Current);
+        var v = computeFV(flightSim.progress, shared.runtime.mode === 'work');
+        if (flightSim.displayMode === 'pfd') updatePFD(v);
+        else renderND();
+        if (el.fdN1) el.fdN1.textContent = v.n1.toFixed(1) + '%';
+        if (el.fdEgt) el.fdEgt.textContent = Math.round(v.egt) + '\u00B0C';
+        updateRadio(v.radio);
+        renderStepper(flightSim.progress, shared.runtime.mode === 'work');
+        updateShake();
+        if (shared.runtime.mode === 'work' && v.phase) checkCabinAnnouncements(flightSim.progress, v.phase);
+        var pct = clamp(flightSim.progress * 100, 0, 100);
+        el.fdRouteFill.style.width = pct + '%';
+        el.fdRoutePlane.style.left = pct + '%';
+        if (shared.settings.deck === 'flight') flightRafId = requestAnimationFrame(flightFrame);
+    }
+
+    /* ============================================================
+       ENGINE AUDIO
+       ============================================================ */
+    function startEngineAudio() {
+        if (!shared.settings.sound) return;
+        try {
+            var C = window.AudioContext || window.webkitAudioContext;
+            if (!C) return;
+            if (!engineAudio.ctx) engineAudio.ctx = new C();
+            var ctx = engineAudio.ctx;
+            if (ctx.state === 'suspended') ctx.resume();
+            if (engineAudio.started) return;
+            var bs = 2 * ctx.sampleRate;
+            var buf = ctx.createBuffer(1, bs, ctx.sampleRate);
+            var d = buf.getChannelData(0);
+            var b0 = 0, b1 = 0, b2 = 0;
+            for (var i = 0; i < bs; i++) {
+                var w = Math.random() * 2 - 1;
+                b0 = 0.99765 * b0 + w * 0.0990460;
+                b1 = 0.96300 * b1 + w * 0.2965164;
+                b2 = 0.57000 * b2 + w * 1.0526913;
+                d[i] = (b0 + b1 + b2 + w * 0.1848) * 0.20;
+            }
+            var src = ctx.createBufferSource();
+            src.buffer = buf;
+            src.loop = true;
+            var flt = ctx.createBiquadFilter();
+            flt.type = 'lowpass';
+            flt.frequency.value = 180;
+            flt.Q.value = 0.8;
+            var g = ctx.createGain();
+            g.gain.value = 0;
+            src.connect(flt);
+            flt.connect(g);
+            g.connect(ctx.destination);
+            src.start();
+            engineAudio.src = src;
+            engineAudio.filter = flt;
+            engineAudio.gain = g;
+            engineAudio.started = true;
+        } catch (e) { }
+    }
+    function updateEngineAudio(n1) {
+        if (!engineAudio.started || !engineAudio.ctx) return;
+        var t = clamp((n1 - 20) / 80, 0, 1);
+        try {
+            engineAudio.filter.frequency.setTargetAtTime(100 + t * 520, engineAudio.ctx.currentTime, 0.1);
+            engineAudio.gain.gain.setTargetAtTime(0.010 + t * 0.055, engineAudio.ctx.currentTime, 0.15);
+        } catch (e) { }
+    }
+    function silenceEngineAudio() {
+        if (!engineAudio.started || !engineAudio.ctx) return;
+        try { engineAudio.gain.gain.setTargetAtTime(0, engineAudio.ctx.currentTime, 0.2); } catch (e) { }
+    }
+
+    /* ============================================================
+       CABIN
+       ============================================================ */
+    function showCabin(text, spoken) {
+        if (!text) return;
+        var el = shared.el;
+        el.cabinText.textContent = text;
+        el.cabinOverlay.classList.add('show');
+        if (cabinTimer) clearTimeout(cabinTimer);
+        cabinTimer = setTimeout(function () { el.cabinOverlay.classList.remove('show'); }, 6500);
+        if (shared.settings.cabinVoice && spoken !== false && 'speechSynthesis' in window) {
+            try {
+                window.speechSynthesis.cancel();
+                var u = new SpeechSynthesisUtterance(text);
+                u.rate = 0.92;
+                u.pitch = 1.0;
+                u.volume = Math.min(1, (parseInt(el.ambientVol.value, 10) || 40) / 100 + 0.2);
+                window.speechSynthesis.speak(u);
+            } catch (e) { }
+        }
+    }
+
+    /* ============================================================
+       DISPLAY TOGGLES
+       ============================================================ */
+    function setDisplayMode(m) {
+        flightSim.displayMode = m;
+        var el = shared.el;
+        var isND = m === 'nd';
+        el.pfd.classList.toggle('hidden', isND);
+        el.nd.classList.toggle('hidden', !isND);
+        el.ndControls.classList.toggle('hidden', !isND);
+        $$('.display-tab').forEach(function (b) {
+            var on = b.dataset.display === m;
+            b.classList.toggle('active', on);
+            b.setAttribute('aria-selected', String(on));
+        });
+    }
+    function setNDRange(r) {
+        flightSim.ndRange = r;
+        $$('.range-btn').forEach(function (b) {
+            b.classList.toggle('active', parseInt(b.dataset.range, 10) === r);
+        });
+    }
+
+    /* ============================================================
+       LIVE FLIGHT (OpenSky)
+       ============================================================ */
+    var liveFlightCooldown = 0;
+    function fetchLiveFlight() {
+        var now = Date.now();
+        if (now < liveFlightCooldown) {
+            var secs = Math.ceil((liveFlightCooldown - now) / 1000);
+            shared.toast('Please wait ' + secs + 's before fetching again');
+            return;
+        }
+        liveFlightCooldown = now + 10000;
+        shared.toast('Fetching live flight...');
+        var btn = shared.el.liveFlightBtn;
+        btn.disabled = true;
+        var bounds = 'lamin=20&lomin=-130&lamax=60&lomax=20';
+        fetch('https://opensky-network.org/api/states/all?' + bounds, { cache: 'no-store' })
+            .then(function (r) {
+                if (!r.ok) throw new Error('HTTP ' + r.status);
+                return r.json();
+            })
+            .then(function (data) {
+                var states = (data && data.states) || [];
+                var valid = states.filter(function (s) {
+                    return s[1] && s[1].trim() && s[5] != null && s[6] != null &&
+                        s[8] != null && s[9] != null && s[5] > 20 && s[9] > 50 && s[10] != null;
+                });
+                if (!valid.length) throw new Error('No suitable aircraft found');
+                var pick = valid[Math.floor(Math.random() * valid.length)];
+                var callsign = (pick[1] || '').trim() || ('FLT' + Math.floor(Math.random() * 9999));
+                shared.flight.dep = 'LIVE';
+                shared.flight.depCity = 'Live from OpenSky';
+                shared.flight.arr = callsign;
+                shared.flight.arrCity = 'Call sign ' + callsign;
+                shared.flight.number = callsign;
+                shared.flight.squawk = String(Math.floor(Math.random() * 7000) + 1000);
+                shared.flight.live = true;
+                shared.flight.lat = pick[6];
+                shared.flight.lon = pick[5];
+                shared.flight.liveAlt = Math.round(pick[13] || pick[7] || 35000);
+                shared.flight.liveVel = Math.round(pick[9] || 450);
+                shared.flight.liveHdg = Math.round(pick[10] || 0);
+                shared.pSession();
+                renderRoute();
+                resetFlightSim();
+                shared.toast('Tracking ' + callsign + ' at ' + shared.flight.liveAlt + ' ft');
+            })
+            .catch(function (err) {
+                shared.toast('Live fetch failed: ' + (err.message || 'unknown') + '. Using simulated flight.');
+                liveFlightCooldown = Date.now() + 3000;
+            })
+            .then(function () {
+                btn.disabled = false;
+            });
+    }
+
+    /* ============================================================
+       INIT / EXPORTS
+       ============================================================ */
+    function init(sharedObj) {
+        shared = sharedObj;
+    }
+
+    window.FlightDeck = {
+        init: init,
+        AIRCRAFT: AIRCRAFT,
+        flightSim: flightSim,
+        newRoute: newRoute,
+        renderRoute: renderRoute,
+        resetFlightSim: resetFlightSim,
+        buildPFD: buildPFD,
+        initND: initND,
+        updateWeather: updateWeather,
+        renderAircraftCode: renderAircraftCode,
+        setDisplayMode: setDisplayMode,
+        setNDRange: setNDRange,
+        fetchLiveFlight: fetchLiveFlight,
+        startFlightAnim: startFlightAnim,
+        stopFlightAnim: stopFlightAnim,
+        startEngineAudio: startEngineAudio,
+        silenceEngineAudio: silenceEngineAudio,
+        showCabin: showCabin,
+        renderND: renderND
+    };
+
+})();
