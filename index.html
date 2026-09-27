@@ -1,27 +1,24 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="dark" data-contrast="normal" data-motion="auto">
+<html lang="en" data-theme="dark" data-contrast="normal" data-motion="auto" data-deck="classic">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="robots" content="noindex, nofollow">
-<meta name="theme-color" content="#0b1120">
-<meta name="description" content="A focused Pomodoro timer and task manager.">
+<meta name="theme-color" content="#050b14">
+<meta name="description" content="A focused Pomodoro timer and task manager with a realistic flight deck theme.">
 <title>Pomodoro Focus</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <style>
   *, *::before, *::after { box-sizing: border-box; }
 
   :root {
-    --bg-1: #0b1120;
-    --bg-2: #0f172a;
+    --bg-1: #0b1120; --bg-2: #0f172a;
     --surface: rgba(30, 41, 59, 0.55);
     --surface-2: rgba(15, 23, 42, 0.55);
     --surface-solid: #1e293b;
     --border: rgba(148, 163, 184, 0.14);
     --border-strong: rgba(148, 163, 184, 0.30);
-    --text: #f1f5f9;
-    --text-dim: #94a3b8;
-    --text-mute: #64748b;
+    --text: #f1f5f9; --text-dim: #94a3b8; --text-mute: #64748b;
     --shadow: 0 24px 50px -24px rgba(0, 0, 0, 0.75);
     --ring-track: rgba(148, 163, 184, 0.16);
     --hover: rgba(148, 163, 184, 0.09);
@@ -30,37 +27,29 @@
     --done: #10b981;
     color-scheme: dark;
   }
-
   [data-theme="light"] {
-    --bg-1: #eef2f7;
-    --bg-2: #e2e8f0;
+    --bg-1: #eef2f7; --bg-2: #e2e8f0;
     --surface: rgba(255, 255, 255, 0.78);
     --surface-2: rgba(248, 250, 252, 0.9);
     --surface-solid: #ffffff;
     --border: rgba(15, 23, 42, 0.10);
     --border-strong: rgba(15, 23, 42, 0.20);
-    --text: #0f172a;
-    --text-dim: #475569;
-    --text-mute: #94a3b8;
+    --text: #0f172a; --text-dim: #475569; --text-mute: #94a3b8;
     --shadow: 0 24px 50px -28px rgba(15, 23, 42, 0.32);
     --ring-track: rgba(15, 23, 42, 0.10);
     --hover: rgba(15, 23, 42, 0.06);
     color-scheme: light;
   }
-
   [data-contrast="high"] {
     --border: rgba(148, 163, 184, 0.5);
     --border-strong: rgba(148, 163, 184, 0.8);
-    --text-dim: #e2e8f0;
-    --text-mute: #cbd5e1;
+    --text-dim: #e2e8f0; --text-mute: #cbd5e1;
   }
   [data-theme="light"][data-contrast="high"] {
     --border: rgba(15, 23, 42, 0.4);
     --border-strong: rgba(15, 23, 42, 0.75);
-    --text-dim: #1e293b;
-    --text-mute: #334155;
+    --text-dim: #1e293b; --text-mute: #334155;
   }
-
   [data-motion="reduced"] * {
     animation-duration: 0.001ms !important;
     animation-iteration-count: 1 !important;
@@ -72,18 +61,12 @@
       transition-duration: 0.001ms !important;
     }
   }
-
   html, body { height: 100%; }
-
   body {
-    margin: 0;
-    background: var(--bg-1);
-    color: var(--text);
+    margin: 0; background: var(--bg-1); color: var(--text);
     font-family: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
+    -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;
   }
-
   .app-bg {
     min-height: 100vh;
     background:
@@ -92,456 +75,415 @@
       linear-gradient(165deg, var(--bg-1) 0%, var(--bg-2) 100%);
     transition: background 0.4s ease;
   }
-
   .card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 26px;
-    box-shadow: var(--shadow);
-    backdrop-filter: blur(16px);
+    position: relative; background: var(--surface);
+    border: 1px solid var(--border); border-radius: 26px;
+    box-shadow: var(--shadow); backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
+    transition: background 0.4s ease, border-color 0.4s ease;
   }
-
+  .card > * { position: relative; z-index: 1; }
   .text-dim { color: var(--text-dim); }
   .text-mute { color: var(--text-mute); }
-
   .divider { border-color: var(--border) !important; }
-
-  /* ---------- Buttons ---------- */
   .btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    border-radius: 999px;
-    font-size: 13px;
-    font-weight: 600;
-    line-height: 1;
-    padding: 11px 18px;
-    border: 1px solid transparent;
-    cursor: pointer;
-    white-space: nowrap;
-    user-select: none;
-    -webkit-tap-highlight-color: transparent;
+    display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+    border-radius: 999px; font-size: 13px; font-weight: 600; line-height: 1;
+    padding: 11px 18px; border: 1px solid transparent; cursor: pointer;
+    white-space: nowrap; user-select: none; -webkit-tap-highlight-color: transparent;
     transition: transform 0.12s ease, background-color 0.18s ease, border-color 0.18s ease,
                 color 0.18s ease, box-shadow 0.18s ease, opacity 0.18s ease;
   }
   .btn:active { transform: scale(0.96); }
   .btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
   .btn[disabled] { opacity: 0.4; pointer-events: none; }
-
-  .btn-primary {
-    background: var(--accent);
-    color: #fff;
-    box-shadow: 0 10px 26px -12px var(--accent);
-  }
+  .btn-primary { background: var(--accent); color: #fff; box-shadow: 0 10px 26px -12px var(--accent); }
   .btn-primary:hover { filter: brightness(1.09); }
-
-  .btn-ghost {
-    background: transparent;
-    color: var(--text-dim);
-    border-color: var(--border-strong);
-  }
+  .btn-ghost { background: transparent; color: var(--text-dim); border-color: var(--border-strong); }
   .btn-ghost:hover { background: var(--hover); color: var(--text); }
-
-  .btn-solid {
-    background: var(--surface-2);
-    color: var(--text);
-    border-color: var(--border);
-  }
-  .btn-solid:hover { border-color: var(--border-strong); }
-
   .btn-icon { padding: 0; width: 38px; height: 38px; border-radius: 12px; }
   .btn-sm { padding: 8px 13px; font-size: 12px; }
-
   .chip {
-    display: inline-flex;
-    align-items: center;
-    gap: 5px;
-    padding: 6px 11px;
-    border-radius: 999px;
-    font-size: 11.5px;
-    font-weight: 600;
-    color: var(--text-dim);
-    background: var(--surface-2);
-    border: 1px solid var(--border);
-    cursor: pointer;
+    display: inline-flex; align-items: center; gap: 5px; padding: 6px 11px;
+    border-radius: 999px; font-size: 11.5px; font-weight: 600; color: var(--text-dim);
+    background: var(--surface-2); border: 1px solid var(--border); cursor: pointer;
     transition: all 0.16s ease;
   }
   .chip:hover { color: var(--text); border-color: var(--border-strong); }
   .chip:active { transform: scale(0.95); }
-
-  /* ---------- Inputs ---------- */
   .input {
-    width: 100%;
-    background: var(--surface-2);
-    border: 1px solid var(--border);
-    border-radius: 13px;
-    padding: 11px 14px;
-    color: var(--text);
-    font-size: 14px;
-    font-family: inherit;
-    outline: none;
+    width: 100%; background: var(--surface-2); border: 1px solid var(--border);
+    border-radius: 13px; padding: 11px 14px; color: var(--text); font-size: 14px;
+    font-family: inherit; outline: none;
     transition: border-color 0.18s ease, box-shadow 0.18s ease;
   }
   .input::placeholder { color: var(--text-mute); }
   .input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
-
   input[type="number"]::-webkit-outer-spin-button,
   input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
   input[type="number"] { -moz-appearance: textfield; }
-
   .field-label {
-    display: block;
-    font-size: 10px;
-    font-weight: 700;
-    letter-spacing: 0.09em;
-    text-transform: uppercase;
-    color: var(--text-mute);
-    margin-bottom: 6px;
+    display: block; font-size: 10px; font-weight: 700; letter-spacing: 0.09em;
+    text-transform: uppercase; color: var(--text-mute); margin-bottom: 6px;
   }
-
-  /* ---------- Segmented control ---------- */
   .segmented {
-    display: flex;
-    gap: 4px;
-    padding: 4px;
-    border-radius: 999px;
-    background: var(--surface-2);
-    border: 1px solid var(--border);
+    display: flex; gap: 4px; padding: 4px; border-radius: 999px;
+    background: var(--surface-2); border: 1px solid var(--border);
   }
   .seg-btn {
-    flex: 1;
-    padding: 9px 10px;
-    border-radius: 999px;
-    border: none;
-    background: transparent;
-    color: var(--text-dim);
-    font-size: 12px;
-    font-weight: 600;
-    font-family: inherit;
-    cursor: pointer;
-    white-space: nowrap;
+    flex: 1; padding: 9px 10px; border-radius: 999px; border: none; background: transparent;
+    color: var(--text-dim); font-size: 12px; font-weight: 600; font-family: inherit;
+    cursor: pointer; white-space: nowrap;
     transition: background-color 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
   }
   .seg-btn:hover { color: var(--text); }
-  .seg-btn.active {
-    background: var(--accent);
-    color: #fff;
-    box-shadow: 0 6px 16px -8px var(--accent);
-  }
+  .seg-btn.active { background: var(--accent); color: #fff; box-shadow: 0 6px 16px -8px var(--accent); }
   .seg-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
-
-  /* ---------- Ring ---------- */
   .ring-svg { transform: rotate(-90deg); }
   .ring-track { stroke: var(--ring-track); }
-  .ring-progress {
-    stroke: var(--accent);
-    transition: stroke-dashoffset 0.2s linear, stroke 0.35s ease;
-  }
-
+  .ring-progress { stroke: var(--accent); transition: stroke-dashoffset 0.2s linear, stroke 0.35s ease; }
   .glow {
-    position: absolute;
-    inset: 12%;
-    border-radius: 999px;
+    position: absolute; inset: 12%; border-radius: 999px;
     background: radial-gradient(circle, var(--accent-soft), transparent 68%);
-    filter: blur(26px);
-    pointer-events: none;
-    transition: background 0.4s ease;
+    filter: blur(26px); pointer-events: none; transition: background 0.4s ease;
   }
-
-  /* ---------- Cycle dots ---------- */
   .cycle-dot {
-    width: 6px;
-    height: 6px;
-    border-radius: 999px;
-    background: var(--border-strong);
+    width: 6px; height: 6px; border-radius: 999px; background: var(--border-strong);
     transition: background-color 0.3s ease, transform 0.3s ease;
   }
   .cycle-dot.on { background: var(--accent); transform: scale(1.2); }
-
-  /* ---------- Switch ---------- */
   .switch {
-    position: relative;
-    width: 42px;
-    height: 23px;
-    flex-shrink: 0;
-    border-radius: 999px;
-    border: none;
-    background: var(--border-strong);
-    cursor: pointer;
+    position: relative; width: 42px; height: 23px; flex-shrink: 0; border-radius: 999px;
+    border: none; background: var(--border-strong); cursor: pointer;
     transition: background-color 0.22s ease;
   }
   .switch::after {
-    content: "";
-    position: absolute;
-    top: 3px;
-    left: 3px;
-    width: 17px;
-    height: 17px;
-    border-radius: 999px;
-    background: #fff;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+    content: ""; position: absolute; top: 3px; left: 3px; width: 17px; height: 17px;
+    border-radius: 999px; background: #fff; box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
     transition: transform 0.22s cubic-bezier(0.4, 0, 0.2, 1);
   }
   .switch[aria-checked="true"] { background: var(--accent); }
   .switch[aria-checked="true"]::after { transform: translateX(19px); }
   .switch:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
-
-  /* ---------- Tasks ---------- */
   .task {
-    display: flex;
-    align-items: flex-start;
-    gap: 10px;
-    padding: 11px 12px;
-    border-radius: 15px;
-    background: var(--surface-2);
-    border: 1px solid var(--border);
+    display: flex; align-items: flex-start; gap: 10px; padding: 11px 12px;
+    border-radius: 15px; background: var(--surface-2); border: 1px solid var(--border);
     transition: border-color 0.18s ease, background-color 0.18s ease,
                 opacity 0.18s ease, box-shadow 0.18s ease;
   }
   .task:hover { border-color: var(--border-strong); }
   .task.is-dragging { opacity: 0.35; }
   .task.is-active { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent-soft); }
-  .task.is-drop { border-color: var(--accent); border-style: dashed; }
-
   .drag-handle {
-    display: grid;
-    place-items: center;
-    width: 20px;
-    height: 22px;
-    flex-shrink: 0;
-    border: none;
-    background: transparent;
-    color: var(--text-mute);
-    cursor: grab;
-    border-radius: 6px;
-    transition: color 0.18s ease, background-color 0.18s ease;
+    display: grid; place-items: center; width: 20px; height: 22px; flex-shrink: 0;
+    border: none; background: transparent; color: var(--text-mute); cursor: grab;
+    border-radius: 6px; transition: color 0.18s ease, background-color 0.18s ease;
   }
   .drag-handle:hover { color: var(--text-dim); background: var(--hover); }
   .drag-handle:active { cursor: grabbing; }
-
   .check {
-    width: 21px;
-    height: 21px;
-    flex-shrink: 0;
-    margin-top: 1px;
-    display: grid;
-    place-items: center;
-    border-radius: 999px;
-    border: 2px solid var(--border-strong);
-    background: transparent;
-    color: transparent;
-    cursor: pointer;
+    width: 21px; height: 21px; flex-shrink: 0; margin-top: 1px; display: grid; place-items: center;
+    border-radius: 999px; border: 2px solid var(--border-strong); background: transparent;
+    color: transparent; cursor: pointer;
     transition: background-color 0.18s ease, border-color 0.18s ease, color 0.18s ease;
   }
   .check:hover { border-color: var(--done); color: var(--text-mute); }
   .check.done { background: var(--done); border-color: var(--done); color: #fff; }
   .check:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
-
   .icon-btn {
-    display: grid;
-    place-items: center;
-    width: 29px;
-    height: 29px;
-    flex-shrink: 0;
-    border-radius: 9px;
-    border: none;
-    background: transparent;
-    color: var(--text-mute);
-    cursor: pointer;
-    transition: background-color 0.16s ease, color 0.16s ease;
+    display: grid; place-items: center; width: 29px; height: 29px; flex-shrink: 0;
+    border-radius: 9px; border: none; background: transparent; color: var(--text-mute);
+    cursor: pointer; transition: background-color 0.16s ease, color 0.16s ease;
   }
   .icon-btn:hover { background: var(--hover); color: var(--text); }
   .icon-btn.on { color: var(--accent); background: var(--accent-soft); }
   .icon-btn.danger:hover { background: rgba(244, 63, 94, 0.14); color: #fb7185; }
   .icon-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
-
-  .mini-bar {
-    height: 3px;
-    border-radius: 999px;
-    background: var(--border);
-    overflow: hidden;
-  }
+  .mini-bar { height: 3px; border-radius: 999px; background: var(--border); overflow: hidden; }
   .mini-bar > span {
-    display: block;
-    height: 100%;
-    border-radius: 999px;
-    background: var(--accent);
+    display: block; height: 100%; border-radius: 999px; background: var(--accent);
     transition: width 0.35s ease;
   }
-
-  /* ---------- Modal ---------- */
   .modal-root {
-    position: fixed;
-    inset: 0;
-    z-index: 90;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 16px;
+    position: fixed; inset: 0; z-index: 90; display: flex; align-items: center;
+    justify-content: center; padding: 16px;
   }
   .modal-root.hidden { display: none; }
   .modal-backdrop {
-    position: absolute;
-    inset: 0;
-    background: rgba(2, 6, 23, 0.68);
-    backdrop-filter: blur(6px);
-    -webkit-backdrop-filter: blur(6px);
-    animation: fadeIn 0.18s ease;
+    position: absolute; inset: 0; background: rgba(2, 6, 23, 0.68);
+    backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); animation: fadeIn 0.18s ease;
   }
   .modal-panel {
-    position: relative;
-    width: 100%;
-    max-width: 560px;
-    max-height: 86vh;
-    overflow-y: auto;
-    padding: 26px;
-    animation: popIn 0.22s cubic-bezier(0.2, 0.9, 0.3, 1.2);
+    position: relative; width: 100%; max-width: 560px; max-height: 86vh;
+    overflow-y: auto; padding: 26px; animation: popIn 0.22s cubic-bezier(0.2, 0.9, 0.3, 1.2);
   }
   @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
   @keyframes popIn { from { opacity: 0; transform: translateY(12px) scale(0.97); } to { opacity: 1; transform: none; } }
-
-  /* ---------- Focus overlay ---------- */
   .focus-overlay {
-    position: fixed;
-    inset: 0;
-    z-index: 80;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 26px;
-    padding: 24px;
-    background:
-      radial-gradient(900px 700px at 50% 50%, var(--accent-soft), transparent 70%),
-      var(--bg-1);
+    position: fixed; inset: 0; z-index: 80; display: flex; flex-direction: column;
+    align-items: center; justify-content: center; gap: 26px; padding: 24px;
+    background: radial-gradient(900px 700px at 50% 50%, var(--accent-soft), transparent 70%), var(--bg-1);
     animation: fadeIn 0.25s ease;
   }
   .focus-overlay.hidden { display: none; }
-
-  /* ---------- Toast ---------- */
   #toastRoot {
-    position: fixed;
-    left: 50%;
-    bottom: 24px;
-    transform: translateX(-50%);
-    z-index: 120;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    align-items: center;
-    pointer-events: none;
+    position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%); z-index: 120;
+    display: flex; flex-direction: column; gap: 8px; align-items: center; pointer-events: none;
   }
   .toast {
-    padding: 11px 18px;
-    border-radius: 999px;
-    background: var(--surface-solid);
-    border: 1px solid var(--border-strong);
-    color: var(--text);
-    font-size: 13px;
-    font-weight: 500;
-    box-shadow: var(--shadow);
-    animation: toastIn 0.24s cubic-bezier(0.2, 0.9, 0.3, 1.2);
+    padding: 11px 18px; border-radius: 999px; background: var(--surface-solid);
+    border: 1px solid var(--border-strong); color: var(--text); font-size: 13px;
+    font-weight: 500; box-shadow: var(--shadow); animation: toastIn 0.24s cubic-bezier(0.2, 0.9, 0.3, 1.2);
   }
   @keyframes toastIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
   .toast.out { animation: toastOut 0.24s ease forwards; }
   @keyframes toastOut { to { opacity: 0; transform: translateY(8px); } }
-
-  /* ---------- Scrollbar ---------- */
   .scroll-area { scrollbar-width: thin; scrollbar-color: var(--border-strong) transparent; }
   .scroll-area::-webkit-scrollbar { width: 8px; }
   .scroll-area::-webkit-scrollbar-track { background: transparent; }
   .scroll-area::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 999px; }
   .scroll-area::-webkit-scrollbar-thumb:hover { background: var(--text-mute); }
-
-  /* ---------- Misc ---------- */
   .tabnum { font-variant-numeric: tabular-nums; }
-
   .hidden { display: none !important; }
-
   .sr-only {
-    position: absolute;
-    width: 1px; height: 1px;
-    padding: 0; margin: -1px;
-    overflow: hidden;
-    clip: rect(0, 0, 0, 0);
-    white-space: nowrap;
-    border: 0;
+    position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+    overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0;
   }
-
   .kbd {
-    display: inline-block;
-    padding: 2px 7px;
-    border-radius: 6px;
-    border: 1px solid var(--border-strong);
-    background: var(--surface-2);
-    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-    font-size: 11px;
-    color: var(--text-dim);
+    display: inline-block; padding: 2px 7px; border-radius: 6px;
+    border: 1px solid var(--border-strong); background: var(--surface-2);
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 11px; color: var(--text-dim);
   }
-
   .stat-tile {
-    border-radius: 16px;
-    border: 1px solid var(--border);
-    background: var(--surface-2);
-    padding: 14px;
+    border-radius: 16px; border: 1px solid var(--border);
+    background: var(--surface-2); padding: 14px;
   }
-
-  .bar-col {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 6px;
-    flex: 1;
-    min-width: 0;
-  }
+  .bar-col { display: flex; flex-direction: column; align-items: center; gap: 6px; flex: 1; min-width: 0; }
   .bar-track {
-    width: 100%;
-    height: 72px;
-    border-radius: 8px;
-    background: var(--surface-2);
-    border: 1px solid var(--border);
-    display: flex;
-    align-items: flex-end;
-    overflow: hidden;
+    width: 100%; height: 72px; border-radius: 8px; background: var(--surface-2);
+    border: 1px solid var(--border); display: flex; align-items: flex-end; overflow: hidden;
   }
   .bar-fill {
-    width: 100%;
-    background: var(--accent);
-    border-radius: 7px 7px 0 0;
-    transition: height 0.5s cubic-bezier(0.2, 0.9, 0.3, 1);
-    min-height: 2px;
+    width: 100%; background: var(--accent); border-radius: 7px 7px 0 0;
+    transition: height 0.5s cubic-bezier(0.2, 0.9, 0.3, 1); min-height: 2px;
   }
-
   .hist-row {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 12px;
-    padding: 9px 12px;
-    border-radius: 12px;
-    border: 1px solid var(--border);
-    background: var(--surface-2);
-    font-size: 12.5px;
+    display: flex; align-items: center; justify-content: space-between; gap: 12px;
+    padding: 9px 12px; border-radius: 12px; border: 1px solid var(--border);
+    background: var(--surface-2); font-size: 12.5px;
   }
-
-  .dot-mode {
-    width: 7px; height: 7px;
-    border-radius: 999px;
-    flex-shrink: 0;
-  }
-
+  .dot-mode { width: 7px; height: 7px; border-radius: 999px; flex-shrink: 0; }
   .chev { transition: transform 0.24s ease; }
   .chev.open { transform: rotate(180deg); }
-
-  .settings-panel {
-    display: grid;
-    grid-template-rows: 0fr;
-    transition: grid-template-rows 0.3s ease;
-  }
+  .settings-panel { display: grid; grid-template-rows: 0fr; transition: grid-template-rows 0.3s ease; }
   .settings-panel.open { grid-template-rows: 1fr; }
   .settings-panel > div { overflow: hidden; }
+
+  /* ============================================================
+     FLIGHT DECK
+     ============================================================ */
+  [data-deck="classic"] .flight-only { display: none !important; }
+  [data-deck="flight"] .classic-only { display: none !important; }
+
+  [data-deck="flight"] {
+    --fd-panel: rgba(10, 22, 40, 0.85);
+    --fd-border: rgba(120, 180, 255, 0.18);
+    --fd-border-2: rgba(120, 180, 255, 0.38);
+    --fd-text: #d6e8ff;
+    --fd-mute: rgba(150, 195, 255, 0.55);
+    --fd-amber: #fbbf24;
+    --fd-green: #5bd45b;
+  }
+  [data-deck="flight"] .app-bg {
+    background:
+      radial-gradient(1200px 700px at 15% -10%, rgba(251, 191, 36, 0.06), transparent 60%),
+      radial-gradient(900px 600px at 100% 0%, rgba(56, 189, 248, 0.08), transparent 55%),
+      linear-gradient(165deg, #04080f 0%, #07101d 100%);
+  }
+  [data-deck="flight"] .card {
+    background: linear-gradient(180deg, rgba(9, 18, 32, 0.92), rgba(5, 11, 20, 0.96));
+    border-color: var(--fd-border);
+    box-shadow: 0 24px 60px -30px rgba(0, 0, 0, 0.95), inset 0 1px 0 rgba(120, 180, 255, 0.06);
+  }
+  [data-deck="flight"] .card::before {
+    content: "";
+    position: absolute; inset: 0; border-radius: inherit; pointer-events: none;
+    background-image:
+      linear-gradient(rgba(120, 180, 255, 0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(120, 180, 255, 0.03) 1px, transparent 1px);
+    background-size: 28px 28px; opacity: 0.7;
+  }
+  [data-deck="flight"] .segmented { background: rgba(6, 14, 26, 0.75); border-color: var(--fd-border); }
+  [data-deck="flight"] .seg-btn { color: var(--fd-mute); }
+  [data-deck="flight"] .seg-btn:hover { color: var(--fd-text); }
+  [data-deck="flight"] .seg-btn.active { background: var(--accent); color: #050b14; }
+  [data-deck="flight"] .input { background: rgba(6, 14, 26, 0.75); border-color: var(--fd-border); color: var(--fd-text); }
+  [data-deck="flight"] .btn-ghost { border-color: var(--fd-border-2); color: var(--fd-mute); }
+  [data-deck="flight"] .btn-ghost:hover { background: rgba(120, 180, 255, 0.08); color: var(--fd-text); }
+
+  /* ---- Cockpit display ---- */
+  .pfd-wrap {
+    padding: 9px;
+    border-radius: 16px;
+    background: linear-gradient(180deg, #0a1420, #050b14);
+    border: 1px solid var(--fd-border);
+    box-shadow: inset 0 1px 0 rgba(120, 180, 255, 0.08), 0 10px 32px -14px rgba(0,0,0,.9);
+    transition: transform 0.05s linear;
+  }
+  .pfd-wrap.shaking { animation: fdShake 0.08s infinite; }
+  @keyframes fdShake {
+    0%, 100% { transform: translate(0, 0); }
+    25% { transform: translate(-1.2px, 0.8px); }
+    50% { transform: translate(0.9px, -1.1px); }
+    75% { transform: translate(-0.7px, -0.6px); }
+  }
+  .display-tabs {
+    display: flex; gap: 3px; margin-bottom: 7px;
+    padding: 3px; width: fit-content;
+    background: rgba(6, 14, 26, 0.75);
+    border: 1px solid var(--fd-border);
+    border-radius: 9px;
+  }
+  .display-tab {
+    padding: 4px 15px; border: none; background: transparent;
+    color: var(--fd-mute);
+    font-family: ui-monospace, monospace;
+    font-size: 10px; font-weight: 700; letter-spacing: 0.12em;
+    cursor: pointer; border-radius: 6px;
+    transition: all 0.15s;
+  }
+  .display-tab:hover { color: var(--fd-text); }
+  .display-tab.active { background: var(--accent); color: #050b14; }
+
+  .pfd-svg {
+    display: block; width: 100%;
+    aspect-ratio: 440 / 340;
+    border-radius: 10px; background: #050b14;
+  }
+  .nd-canvas {
+    display: block; width: 100%;
+    aspect-ratio: 440 / 340;
+    border-radius: 10px; background: #050b14;
+  }
+
+  .nd-controls {
+    display: flex; align-items: center; gap: 4px; margin-top: 8px;
+    padding: 3px 4px 3px 10px;
+    background: rgba(6, 14, 26, 0.75);
+    border: 1px solid var(--fd-border);
+    border-radius: 9px; width: fit-content;
+  }
+  .nd-range-label {
+    font-family: ui-monospace, monospace;
+    font-size: 9px; letter-spacing: 0.12em;
+    color: var(--fd-mute); margin-right: 4px;
+  }
+  .range-btn {
+    padding: 3px 10px; border: none; background: transparent;
+    color: var(--fd-mute); font-family: ui-monospace, monospace;
+    font-size: 10px; font-weight: 700; cursor: pointer; border-radius: 5px;
+    transition: all 0.15s;
+  }
+  .range-btn:hover { color: var(--fd-text); }
+  .range-btn.active { background: var(--fd-border-2); color: var(--fd-text); }
+
+  .fd-route {
+    display: grid; grid-template-columns: auto minmax(0, 1fr) auto;
+    align-items: center; gap: 12px;
+    padding: 10px 14px; border-radius: 14px;
+    background: var(--fd-panel); border: 1px solid var(--fd-border);
+    margin-top: 10px;
+  }
+  .fd-apt { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+  .fd-apt-right { align-items: flex-end; text-align: right; }
+  .fd-apt-code {
+    font-size: 16px; font-weight: 700; letter-spacing: 0.06em;
+    color: var(--fd-text); font-variant-numeric: tabular-nums; line-height: 1;
+  }
+  .fd-apt-city {
+    font-size: 9px; text-transform: uppercase; letter-spacing: 0.09em;
+    color: var(--fd-mute); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .fd-route-track { position: relative; height: 24px; display: flex; align-items: center; }
+  .fd-route-line {
+    position: absolute; left: 0; right: 0; top: 50%; height: 1px;
+    background: repeating-linear-gradient(90deg, var(--fd-border-2) 0 5px, transparent 5px 10px);
+  }
+  .fd-route-fill {
+    position: absolute; left: 0; top: 0; bottom: 0; width: 0%;
+    background: var(--accent); transition: width 0.3s linear;
+  }
+  .fd-route-plane {
+    position: absolute; top: 50%; left: 0;
+    transform: translate(-50%, -50%); color: var(--accent);
+    transition: left 0.3s linear; filter: drop-shadow(0 0 6px var(--accent));
+  }
+  .fd-flightno {
+    position: absolute; left: 50%; top: -6px; transform: translateX(-50%);
+    font-size: 9px; letter-spacing: 0.12em; color: var(--fd-mute);
+    background: var(--fd-panel); padding: 0 5px; white-space: nowrap;
+    font-family: ui-monospace, monospace;
+  }
+  .fd-stepper { display: flex; gap: 3px; margin-top: 10px; }
+  .fd-step { flex: 1; display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+  .fd-step-track {
+    height: 3px; border-radius: 999px; background: rgba(120, 180, 255, 0.12); overflow: hidden;
+  }
+  .fd-step-fill {
+    display: block; height: 100%; width: 0%; border-radius: 999px;
+    background: var(--accent); transition: width 0.3s linear;
+  }
+  .fd-step-label {
+    font-size: 7.5px; text-align: center; color: var(--fd-mute);
+    letter-spacing: 0.05em; text-transform: uppercase;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    font-family: ui-monospace, monospace;
+  }
+  .fd-step.active .fd-step-label { color: var(--accent); font-weight: 700; }
+  .fd-step.done .fd-step-label { color: var(--fd-text); }
+  .fd-step.done .fd-step-track { background: rgba(251, 191, 36, 0.35); }
+  .fd-sys {
+    display: grid; grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 6px; margin-top: 10px;
+  }
+  .fd-sys-item {
+    padding: 7px 9px; border-radius: 10px;
+    background: var(--fd-panel); border: 1px solid var(--fd-border);
+    display: flex; flex-direction: column; gap: 2px; min-width: 0;
+  }
+  .fd-sys-l {
+    font-size: 8px; letter-spacing: 0.14em; color: var(--fd-mute);
+    text-transform: uppercase; font-family: ui-monospace, monospace;
+  }
+  .fd-sys-v {
+    font-size: 13px; font-weight: 700; color: var(--fd-text);
+    font-family: ui-monospace, monospace; font-variant-numeric: tabular-nums;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 1.1;
+  }
+  .fd-radio {
+    display: flex; align-items: center; gap: 10px; margin-top: 10px;
+    padding: 9px 13px; border-radius: 12px;
+    background: var(--fd-panel); border: 1px solid var(--fd-border);
+    min-height: 38px;
+  }
+  .fd-radio-tag {
+    display: inline-flex; align-items: center; gap: 6px; flex-shrink: 0;
+    font-size: 9px; font-weight: 700; letter-spacing: 0.14em;
+    color: var(--fd-amber); text-transform: uppercase;
+    font-family: ui-monospace, monospace;
+  }
+  .fd-radio-dot {
+    width: 6px; height: 6px; border-radius: 999px; background: var(--fd-amber);
+    animation: fdBlink 1.6s ease-in-out infinite;
+  }
+  @keyframes fdBlink { 0%, 100% { opacity: 1; } 50% { opacity: 0.25; } }
+  .fd-radio-msg {
+    font-size: 11.5px; color: var(--fd-text);
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .fd-radio-msg.flash { animation: fdFade 0.4s ease; }
+  @keyframes fdFade { from { opacity: 0; transform: translateY(3px); } to { opacity: 1; transform: none; } }
 </style>
 </head>
 <body>
@@ -549,25 +491,17 @@
 <div class="app-bg">
   <div class="mx-auto max-w-6xl px-4 py-6 sm:px-6 md:py-10">
 
-    <!-- ============ HEADER ============ -->
     <header class="mb-6 flex items-center justify-between gap-4">
       <div class="flex items-center gap-3">
-        <div class="grid h-10 w-10 place-items-center rounded-2xl border"
-             style="border-color:var(--border);background:var(--surface-2);color:var(--accent)">
-          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor"
-               stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="12" cy="13" r="8"></circle>
-            <path d="M12 9v4l2.5 1.5"></path>
-            <path d="M9 2h6"></path>
-          </svg>
-        </div>
+        <div id="brandIcon" class="grid h-10 w-10 place-items-center rounded-2xl border"
+             style="border-color:var(--border);background:var(--surface-2);color:var(--accent)"></div>
         <div>
-          <h1 class="text-[17px] font-bold leading-tight tracking-tight">Pomodoro Focus</h1>
-          <p class="text-[11.5px] text-mute">Timer and task manager</p>
+          <h1 id="brandTitle" class="text-[17px] font-bold leading-tight tracking-tight">Pomodoro Focus</h1>
+          <p id="brandSub" class="text-[11.5px] text-mute">Timer and task manager</p>
         </div>
       </div>
-
       <div class="flex items-center gap-2">
+        <button id="deckBtn" class="btn btn-ghost btn-icon" title="Switch to Flight Deck" aria-label="Toggle theme mode"></button>
         <button id="notifyBtn" class="btn btn-ghost btn-icon" title="Notifications" aria-label="Notifications"></button>
         <button id="statsBtn" class="btn btn-ghost btn-icon" title="Statistics" aria-label="Statistics"></button>
         <button id="helpBtn" class="btn btn-ghost btn-icon" title="Keyboard shortcuts" aria-label="Keyboard shortcuts"></button>
@@ -575,34 +509,83 @@
       </div>
     </header>
 
-    <!-- ============ MAIN ============ -->
     <main class="grid gap-6 lg:grid-cols-5">
 
-      <!-- ---------- TIMER ---------- -->
       <section class="card p-5 sm:p-7 lg:col-span-3">
-
         <div class="segmented" id="modeTabs" role="tablist" aria-label="Timer mode">
           <button class="seg-btn" data-mode="work" role="tab">Focus</button>
           <button class="seg-btn" data-mode="short" role="tab">Short Break</button>
           <button class="seg-btn" data-mode="long" role="tab">Long Break</button>
         </div>
 
-        <!-- Ring -->
-        <div class="relative mx-auto mt-7 aspect-square w-full max-w-[286px]">
-          <div class="glow"></div>
-          <svg viewBox="0 0 280 280" class="ring-svg h-full w-full">
-            <circle class="ring-track" cx="140" cy="140" r="126" fill="none" stroke-width="13"></circle>
-            <circle id="ring" class="ring-progress" cx="140" cy="140" r="126" fill="none"
-                    stroke-width="13" stroke-linecap="round"></circle>
-          </svg>
-          <div class="absolute inset-0 flex flex-col items-center justify-center">
-            <div id="timeLabel" class="tabnum text-[56px] font-bold leading-none tracking-tight">25:00</div>
-            <div id="modeLabel" class="mt-2.5 text-[10.5px] font-bold uppercase tracking-[0.24em]"
-                 style="color:var(--accent)">Focus</div>
+        <div class="classic-only">
+          <div class="relative mx-auto mt-7 aspect-square w-full max-w-[286px]">
+            <div class="glow"></div>
+            <svg viewBox="0 0 280 280" class="ring-svg h-full w-full">
+              <circle class="ring-track" cx="140" cy="140" r="126" fill="none" stroke-width="13"></circle>
+              <circle id="ring" class="ring-progress" cx="140" cy="140" r="126" fill="none"
+                      stroke-width="13" stroke-linecap="round"></circle>
+            </svg>
+            <div class="absolute inset-0 flex flex-col items-center justify-center">
+              <div id="timeLabel" class="tabnum text-[56px] font-bold leading-none tracking-tight">25:00</div>
+              <div id="modeLabel" class="mt-2.5 text-[10.5px] font-bold uppercase tracking-[0.24em]"
+                   style="color:var(--accent)">Focus</div>
+            </div>
           </div>
         </div>
 
-        <!-- Cycle + sessions -->
+        <div class="flight-only mt-5">
+          <div class="pfd-wrap" id="pfdWrap">
+            <div class="display-tabs" role="tablist">
+              <button class="display-tab active" data-display="pfd" role="tab" aria-selected="true">PFD</button>
+              <button class="display-tab" data-display="nd" role="tab" aria-selected="false">ND</button>
+            </div>
+            <svg id="pfd" viewBox="0 0 440 340" class="pfd-svg" preserveAspectRatio="xMidYMid meet"></svg>
+            <canvas id="nd" width="880" height="680" class="nd-canvas hidden"></canvas>
+            <div class="nd-controls hidden" id="ndControls">
+              <span class="nd-range-label">RANGE NM</span>
+              <button class="range-btn" data-range="10">10</button>
+              <button class="range-btn" data-range="20">20</button>
+              <button class="range-btn active" data-range="40">40</button>
+              <button class="range-btn" data-range="80">80</button>
+            </div>
+          </div>
+
+          <div class="fd-route">
+            <div class="fd-apt">
+              <span class="fd-apt-code" id="fdDep">JFK</span>
+              <span class="fd-apt-city" id="fdDepCity">New York</span>
+            </div>
+            <div class="fd-route-track">
+              <div class="fd-route-line"><div class="fd-route-fill" id="fdRouteFill"></div></div>
+              <div class="fd-route-plane" id="fdRoutePlane">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+                  <path d="M12 2c-.8 0-1.5.7-1.5 1.5v5.2L3 12v2l7.5-2.2v5.4L8 19v2l4-1.2 4 1.2v-2l-2.5-1.8v-5.4L21 14v-2l-7.5-3.3V3.5C13.5 2.7 12.8 2 12 2z"/>
+                </svg>
+              </div>
+              <div class="fd-flightno" id="fdFlightNo">PF-271</div>
+            </div>
+            <div class="fd-apt fd-apt-right">
+              <span class="fd-apt-code" id="fdArr">LHR</span>
+              <span class="fd-apt-city" id="fdArrCity">London</span>
+            </div>
+          </div>
+
+          <div class="fd-stepper" id="fdStepper"></div>
+
+          <div class="fd-sys">
+            <div class="fd-sys-item"><span class="fd-sys-l">N1</span><span class="fd-sys-v" id="fdN1">--</span></div>
+            <div class="fd-sys-item"><span class="fd-sys-l">EGT</span><span class="fd-sys-v" id="fdEgt">--</span></div>
+            <div class="fd-sys-item"><span class="fd-sys-l">Fuel</span><span class="fd-sys-v" id="fdFuel">--</span></div>
+            <div class="fd-sys-item"><span class="fd-sys-l">Sqk</span><span class="fd-sys-v" id="fdSquawk">4721</span></div>
+          </div>
+
+          <div class="fd-radio">
+            <span class="fd-radio-tag"><span class="fd-radio-dot"></span>ATC</span>
+            <span class="fd-radio-msg" id="fdRadio">Awaiting clearance</span>
+          </div>
+        </div>
+
         <div class="mt-6 flex flex-wrap items-center justify-center gap-x-5 gap-y-2">
           <div class="flex items-center gap-2">
             <div id="cycleDots" class="flex items-center gap-1.5"></div>
@@ -613,7 +596,6 @@
           </div>
         </div>
 
-        <!-- Active task chip -->
         <div id="activeTaskWrap" class="mt-5 hidden">
           <div class="flex items-center gap-2.5 rounded-2xl border px-4 py-2.5"
                style="border-color:var(--border);background:var(--surface-2)">
@@ -629,7 +611,6 @@
           </div>
         </div>
 
-        <!-- Controls -->
         <div class="mt-6 flex flex-wrap items-center justify-center gap-2.5">
           <button id="startBtn" class="btn btn-primary min-w-[148px] px-8 py-3 text-[13.5px]">
             <span id="startIcon" class="grid place-items-center"></span>
@@ -640,13 +621,11 @@
           <button id="focusBtn" class="btn btn-ghost btn-icon" title="Focus mode (F)" aria-label="Focus mode"></button>
         </div>
 
-        <!-- Adjust -->
         <div class="mt-4 flex items-center justify-center gap-2">
           <button class="chip" data-adjust="-60">-1 min</button>
           <button class="chip" data-adjust="60">+1 min</button>
         </div>
 
-        <!-- Settings -->
         <div class="mt-6 border-t divider pt-4">
           <button id="settingsToggle"
                   class="flex w-full items-center justify-between rounded-xl px-1 py-2 text-[13px] font-semibold transition"
@@ -666,36 +645,31 @@
             <div>
               <div class="pt-3">
                 <div class="grid grid-cols-2 gap-3 sm:grid-cols-4">
-                  <label class="block">
-                    <span class="field-label">Focus</span>
-                    <input id="workInput" type="number" min="1" max="180" value="25" class="input tabnum text-center">
-                  </label>
-                  <label class="block">
-                    <span class="field-label">Short</span>
-                    <input id="shortInput" type="number" min="1" max="60" value="5" class="input tabnum text-center">
-                  </label>
-                  <label class="block">
-                    <span class="field-label">Long</span>
-                    <input id="longInput" type="number" min="1" max="90" value="15" class="input tabnum text-center">
-                  </label>
-                  <label class="block">
-                    <span class="field-label">Long every</span>
-                    <input id="everyInput" type="number" min="1" max="12" value="4" class="input tabnum text-center">
-                  </label>
+                  <label class="block"><span class="field-label">Focus</span>
+                    <input id="workInput" type="number" min="1" max="180" value="25" class="input tabnum text-center"></label>
+                  <label class="block"><span class="field-label">Short</span>
+                    <input id="shortInput" type="number" min="1" max="60" value="5" class="input tabnum text-center"></label>
+                  <label class="block"><span class="field-label">Long</span>
+                    <input id="longInput" type="number" min="1" max="90" value="15" class="input tabnum text-center"></label>
+                  <label class="block"><span class="field-label">Long every</span>
+                    <input id="everyInput" type="number" min="1" max="12" value="4" class="input tabnum text-center"></label>
                 </div>
-
                 <div class="mt-5 grid gap-x-6 gap-y-1 sm:grid-cols-2">
                   <div class="flex items-center justify-between gap-3 py-2">
+                    <span class="text-[12.5px] text-dim">Flight Deck theme</span>
+                    <button class="switch" role="switch" aria-checked="false" data-setting="deckFlight" aria-label="Flight Deck"></button>
+                  </div>
+                  <div class="flex items-center justify-between gap-3 py-2">
                     <span class="text-[12.5px] text-dim">Auto-start next session</span>
-                    <button class="switch" role="switch" aria-checked="false" data-setting="autoStartNext" aria-label="Auto-start next session"></button>
+                    <button class="switch" role="switch" aria-checked="false" data-setting="autoStartNext" aria-label="Auto-start"></button>
                   </div>
                   <div class="flex items-center justify-between gap-3 py-2">
                     <span class="text-[12.5px] text-dim">Pause when tab hidden</span>
-                    <button class="switch" role="switch" aria-checked="false" data-setting="autoPauseHidden" aria-label="Pause when tab hidden"></button>
+                    <button class="switch" role="switch" aria-checked="false" data-setting="autoPauseHidden" aria-label="Pause hidden"></button>
                   </div>
                   <div class="flex items-center justify-between gap-3 py-2">
                     <span class="text-[12.5px] text-dim">Sound alert</span>
-                    <button class="switch" role="switch" aria-checked="true" data-setting="sound" aria-label="Sound alert"></button>
+                    <button class="switch" role="switch" aria-checked="true" data-setting="sound" aria-label="Sound"></button>
                   </div>
                   <div class="flex items-center justify-between gap-3 py-2">
                     <span class="text-[12.5px] text-dim">Vibration</span>
@@ -716,45 +690,36 @@
         </div>
       </section>
 
-      <!-- ---------- TASKS ---------- -->
       <section class="card flex flex-col p-5 sm:p-7 lg:col-span-2">
-
         <div class="flex items-center justify-between gap-3">
           <h2 class="text-[15px] font-bold tracking-tight">Tasks</h2>
           <span id="taskCount" class="chip" style="cursor:default">0 active</span>
         </div>
-
         <form id="taskForm" class="mt-4 flex gap-2">
           <input id="taskInput" type="text" class="input" placeholder="Add a task..." autocomplete="off"
                  maxlength="180" aria-label="New task">
           <button type="submit" class="btn btn-primary shrink-0">Add</button>
         </form>
-
         <div class="mt-3 segmented" id="taskFilters" role="tablist" aria-label="Filter tasks">
           <button class="seg-btn" data-filter="all" role="tab">All</button>
           <button class="seg-btn" data-filter="active" role="tab">Active</button>
           <button class="seg-btn" data-filter="done" role="tab">Done</button>
         </div>
-
         <div class="relative mt-3">
           <span class="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2" style="color:var(--text-mute)">
             <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor"
                  stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <circle cx="11" cy="11" r="7"></circle>
-              <path d="M20 20l-3.6-3.6"></path>
+              <circle cx="11" cy="11" r="7"></circle><path d="M20 20l-3.6-3.6"></path>
             </svg>
           </span>
           <input id="taskSearch" type="text" class="input pl-10" placeholder="Search tasks..." autocomplete="off"
                  aria-label="Search tasks">
         </div>
-
         <ul id="taskList" class="scroll-area mt-3 min-h-[180px] flex-1 space-y-2 overflow-y-auto pr-1"
             style="max-height: 420px"></ul>
-
         <p id="emptyState" class="mt-6 text-center text-[12.5px] text-mute">
           No tasks yet. Add one above to get started.
         </p>
-
         <div class="mt-4 flex items-center justify-between gap-2 border-t divider pt-4">
           <div class="flex gap-2">
             <button id="exportTasksBtn" class="btn btn-ghost btn-sm">Export</button>
@@ -775,12 +740,15 @@
       <span class="mx-2 opacity-40">|</span>
       <span class="kbd">F</span> focus mode
       <span class="mx-2 opacity-40">|</span>
+      <span class="kbd">D</span> deck theme
+      <span class="mx-2 opacity-40">|</span>
+      <span class="kbd">V</span> swap PFD/ND
+      <span class="mx-2 opacity-40">|</span>
       <span class="kbd">N</span> new task
     </p>
   </div>
 </div>
 
-<!-- ============ FOCUS OVERLAY ============ -->
 <div id="focusOverlay" class="focus-overlay hidden">
   <div class="relative aspect-square w-[min(78vw,380px)]">
     <div class="glow"></div>
@@ -795,7 +763,6 @@
       <div id="taskFocus" class="mt-4 max-w-[75%] truncate text-[12.5px] text-mute"></div>
     </div>
   </div>
-
   <div class="flex items-center gap-3">
     <button id="focusStartBtn" class="btn btn-primary min-w-[150px] px-8 py-3">
       <span id="focusStartIcon" class="grid place-items-center"></span>
@@ -804,11 +771,9 @@
     <button id="focusResetBtn" class="btn btn-ghost btn-icon" aria-label="Reset timer"></button>
     <button id="focusSkipBtn" class="btn btn-ghost btn-icon" aria-label="Skip session"></button>
   </div>
-
   <button id="exitFocusBtn" class="btn btn-ghost btn-sm">Exit focus mode</button>
 </div>
 
-<!-- ============ STATS MODAL ============ -->
 <div id="statsModal" class="modal-root hidden" role="dialog" aria-modal="true" aria-labelledby="statsTitle">
   <div class="modal-backdrop" data-close></div>
   <div class="modal-panel card">
@@ -823,7 +788,6 @@
   </div>
 </div>
 
-<!-- ============ HELP MODAL ============ -->
 <div id="helpModal" class="modal-root hidden" role="dialog" aria-modal="true" aria-labelledby="helpTitle">
   <div class="modal-backdrop" data-close></div>
   <div class="modal-panel card">
@@ -838,10 +802,7 @@
   </div>
 </div>
 
-<!-- ============ TOASTS ============ -->
 <div id="toastRoot" aria-live="polite" aria-atomic="true"></div>
-
-<!-- ============ ARIA LIVE ============ -->
 <div id="ariaLive" class="sr-only" aria-live="polite" aria-atomic="true"></div>
 
 <script>
@@ -849,27 +810,28 @@
   'use strict';
 
   /* =========================================================
-     1. ICONS
+     ICONS
      ========================================================= */
   function icon(paths, size) {
     var s = size || 18;
     return '<svg viewBox="0 0 24 24" width="' + s + '" height="' + s + '" fill="none" ' +
-           'stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' +
-           paths + '</svg>';
+           'stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' + paths + '</svg>';
   }
-
   var ICONS = {
     play: '<svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M8 5.2v13.6a1 1 0 0 0 1.52.85l11.2-6.8a1 1 0 0 0 0-1.7L9.52 4.35A1 1 0 0 0 8 5.2z"/></svg>',
     pause: '<svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><rect x="6" y="4.5" width="4" height="15" rx="1.2"/><rect x="14" y="4.5" width="4" height="15" rx="1.2"/></svg>',
     reset: icon('<path d="M3 12a9 9 0 1 0 2.9-6.6"/><path d="M3 4.5v5h5"/>'),
     skip: icon('<path d="M5 4.5l9.5 7.5L5 19.5z"/><path d="M18.5 5v14"/>'),
     expand: icon('<path d="M8 3H5.5A2.5 2.5 0 0 0 3 5.5V8"/><path d="M16 3h2.5A2.5 2.5 0 0 1 21 5.5V8"/><path d="M8 21H5.5A2.5 2.5 0 0 1 3 18.5V16"/><path d="M16 21h2.5a2.5 2.5 0 0 0 2.5-2.5V16"/>'),
+    shrink: icon('<path d="M3 8h2.5A2.5 2.5 0 0 0 8 5.5V3"/><path d="M21 8h-2.5A2.5 2.5 0 0 1 16 5.5V3"/><path d="M3 16h2.5A2.5 2.5 0 0 1 8 18.5V21"/><path d="M21 16h-2.5a2.5 2.5 0 0 0-2.5 2.5V21"/>'),
     bell: icon('<path d="M18 8.5A6 6 0 0 0 6 8.5c0 6.5-2.5 8-2.5 8h17s-2.5-1.5-2.5-8"/><path d="M13.7 20.5a2 2 0 0 1-3.4 0"/>'),
     bellOff: icon('<path d="M13.7 20.5a2 2 0 0 1-3.4 0"/><path d="M18.2 13.4A15 15 0 0 1 18 8.5a6 6 0 0 0-9.5-4.9"/><path d="M6.2 6.2A6 6 0 0 0 6 8.5c0 6.5-2.5 8-2.5 8h13"/><path d="M2 2l20 20"/>'),
     chart: icon('<path d="M3 3v17.5h18"/><rect x="7" y="12" width="3" height="6" rx="1"/><rect x="12" y="8.5" width="3" height="9.5" rx="1"/><rect x="17" y="5" width="3" height="13" rx="1"/>'),
     help: icon('<circle cx="12" cy="12" r="9"/><path d="M9.3 9.2a2.8 2.8 0 0 1 5.5.9c0 1.9-2.8 2.4-2.8 3.9"/><path d="M12 17.2h.01"/>'),
     sun: icon('<circle cx="12" cy="12" r="4"/><path d="M12 2v2.2M12 19.8V22M4.2 4.2l1.6 1.6M18.2 18.2l1.6 1.6M2 12h2.2M19.8 12H22M4.2 19.8l1.6-1.6M18.2 5.8l1.6-1.6"/>'),
     moon: icon('<path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/>'),
+    plane: icon('<path d="M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.1-1.1.5l-.3.5c-.2.5-.1 1 .3 1.3L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.5 5.3c.3.4.8.5 1.3.3l.5-.2c.4-.3.6-.7.5-1.2z"/>'),
+    timer: icon('<circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 1.5"/><path d="M9 2h6"/>'),
     check: icon('<path d="M20 6L9 17l-5-5"/>', 13),
     x: icon('<path d="M18 6L6 18M6 6l12 12"/>', 15),
     edit: icon('<path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4z"/>', 15),
@@ -877,54 +839,37 @@
           '<circle cx="9" cy="6" r="1.5"/><circle cx="9" cy="12" r="1.5"/><circle cx="9" cy="18" r="1.5"/>' +
           '<circle cx="15" cy="6" r="1.5"/><circle cx="15" cy="12" r="1.5"/><circle cx="15" cy="18" r="1.5"/></svg>',
     target: icon('<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4.5"/><circle cx="12" cy="12" r="1" fill="currentColor" stroke="none"/>', 15),
-    chevron: icon('<path d="M6 9l6 6 6-6"/>', 15),
-    clock: icon('<circle cx="12" cy="12" r="9"/><path d="M12 7.5V12l3 2"/>', 15),
-    download: icon('<path d="M12 3v12"/><path d="M7.5 10.5L12 15l4.5-4.5"/><path d="M4 20.5h16"/>', 15),
-    upload: icon('<path d="M12 21V9"/><path d="M7.5 13.5L12 9l4.5 4.5"/><path d="M4 3.5h16"/>', 15),
-    trophy: icon('<path d="M7 4h10v5a5 5 0 0 1-10 0z"/><path d="M7 6H4.5a2.5 2.5 0 0 0 2.5 2.5"/><path d="M17 6h2.5A2.5 2.5 0 0 1 17 8.5"/><path d="M12 14v4"/><path d="M8.5 21h7"/>', 15)
+    chevron: icon('<path d="M6 9l6 6 6-6"/>', 15)
   };
 
   /* =========================================================
-     2. HELPERS
+     HELPERS
      ========================================================= */
   var $ = function (sel, root) { return (root || document).querySelector(sel); };
   var $$ = function (sel, root) { return Array.prototype.slice.call((root || document).querySelectorAll(sel)); };
-
   function clamp(n, min, max) { return Math.min(max, Math.max(min, n)); }
-
-  function uid() {
-    return Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
-  }
-
+  function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 8); }
   function fmt(seconds) {
     var t = Math.max(0, Math.ceil(seconds));
-    var m = Math.floor(t / 60);
-    var s = t % 60;
+    var m = Math.floor(t / 60); var s = t % 60;
     return String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0');
   }
-
   function fmtDuration(minutes) {
     var m = Math.round(minutes);
     if (m < 60) return m + 'm';
-    var h = Math.floor(m / 60);
-    var r = m % 60;
+    var h = Math.floor(m / 60), r = m % 60;
     return r ? h + 'h ' + r + 'm' : h + 'h';
   }
-
   function hexA(hex, a) {
     var h = String(hex).replace('#', '');
     if (h.length === 3) h = h.split('').map(function (c) { return c + c; }).join('');
     var n = parseInt(h, 16);
     return 'rgba(' + ((n >> 16) & 255) + ',' + ((n >> 8) & 255) + ',' + (n & 255) + ',' + a + ')';
   }
-
   function dayKey(d) {
     var dt = d ? new Date(d) : new Date();
-    return dt.getFullYear() + '-' +
-           String(dt.getMonth() + 1).padStart(2, '0') + '-' +
-           String(dt.getDate()).padStart(2, '0');
+    return dt.getFullYear() + '-' + String(dt.getMonth() + 1).padStart(2, '0') + '-' + String(dt.getDate()).padStart(2, '0');
   }
-
   function timeAgo(ts) {
     var diff = Math.floor((Date.now() - ts) / 1000);
     if (diff < 60) return 'just now';
@@ -934,13 +879,10 @@
     return d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) + ' ' +
            d.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
   }
-
   function escapeHtml(str) {
-    return String(str)
-      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
       .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
   }
-
   function load(key, fallback) {
     try {
       var raw = localStorage.getItem(key);
@@ -949,181 +891,274 @@
       return (v === null || v === undefined) ? fallback : v;
     } catch (e) { return fallback; }
   }
-
   function save(key, value) {
-    try { localStorage.setItem(key, JSON.stringify(value)); } catch (e) { /* storage unavailable */ }
+    try { localStorage.setItem(key, JSON.stringify(value)); } catch (e) {}
   }
 
   /* =========================================================
-     3. CONSTANTS
+     CONSTANTS
      ========================================================= */
   var STORE = {
-    settings: 'pomodoro.v2.settings',
-    tasks: 'pomodoro.v2.tasks',
-    session: 'pomodoro.v2.session',
-    stats: 'pomodoro.v2.stats',
-    history: 'pomodoro.v2.history',
-    cycle: 'pomodoro.v2.cycle'
+    settings: 'pomodoro.v4.settings',
+    tasks: 'pomodoro.v4.tasks',
+    session: 'pomodoro.v4.session',
+    stats: 'pomodoro.v4.stats',
+    history: 'pomodoro.v4.history',
+    cycle: 'pomodoro.v4.cycle',
+    route: 'pomodoro.v4.route'
   };
-
   var MODES = { work: 'Focus', short: 'Short Break', long: 'Long Break' };
+  var FLIGHT_MODE_LABELS = { work: 'Flight', short: 'Turnaround', long: 'Layover' };
   var ACCENT = { work: '#f43f5e', short: '#10b981', long: '#3b82f6' };
+  var FLIGHT_ACCENT = { work: '#fbbf24', short: '#34d399', long: '#38bdf8' };
   var RADIUS = 126;
   var CIRC = 2 * Math.PI * RADIUS;
   var TICK_MS = 200;
   var MAX_HISTORY = 300;
 
   var DEFAULTS = {
-    work: 25,
-    short: 5,
-    long: 15,
-    longEvery: 4,
-    autoStartNext: false,
-    autoPauseHidden: false,
-    sound: true,
-    vibrate: true,
-    notifications: false,
-    theme: 'dark',
-    reduceMotion: false,
-    highContrast: false
+    work: 25, short: 5, long: 15, longEvery: 4,
+    autoStartNext: false, autoPauseHidden: false,
+    sound: true, vibrate: true, notifications: false,
+    theme: 'dark', reduceMotion: false, highContrast: false,
+    deck: 'classic'
+  };
+
+  var AIRPORTS = [
+    ['JFK', 'New York'], ['LHR', 'London'], ['CDG', 'Paris'], ['HND', 'Tokyo'],
+    ['SIN', 'Singapore'], ['DXB', 'Dubai'], ['SYD', 'Sydney'], ['FRA', 'Frankfurt'],
+    ['AMS', 'Amsterdam'], ['LAX', 'Los Angeles'], ['HKG', 'Hong Kong'], ['ICN', 'Seoul'],
+    ['YYZ', 'Toronto'], ['GRU', 'Sao Paulo'], ['JNB', 'Johannesburg'], ['BOM', 'Mumbai'],
+    ['PEK', 'Beijing'], ['MAD', 'Madrid'], ['IST', 'Istanbul'], ['ZRH', 'Zurich'],
+    ['OSL', 'Oslo'], ['DUB', 'Dublin'], ['CPT', 'Cape Town'], ['MEX', 'Mexico City'],
+    ['VIE', 'Vienna'], ['HEL', 'Helsinki'], ['LIS', 'Lisbon'], ['ATH', 'Athens']
+  ];
+
+  var FIX_NAMES = [
+    'BOSOX', 'SNOWY', 'MERIT', 'PLUME', 'ROBUC', 'HAARP', 'BRISS', 'GEDIC',
+    'SEALL', 'CRONO', 'NANTK', 'SCUPP', 'KAYYS', 'HTO', 'JUPPP', 'ORWNN'
+  ];
+
+  /* Flight phases */
+  var PHASES = [
+    { id: 'preflight', label: 'Pre-flight', short: 'PRE', from: 0.00, to: 0.08,
+      altA: 0, altB: 0, spdA: 0, spdB: 0, pitchA: 0, pitchB: 0,
+      radio: [
+        'Cockpit preparation checklist',
+        'Requesting IFR clearance',
+        'Cleared as filed, climb via SID',
+        'Pushback and start approved',
+        'Before start checklist complete',
+        'Cabin crew, arm doors and cross-check'
+      ] },
+    { id: 'taxi', label: 'Taxi', short: 'TAX', from: 0.08, to: 0.18,
+      altA: 0, altB: 0, spdA: 0, spdB: 18, pitchA: 0, pitchB: 0,
+      radio: [
+        'Ground, request taxi to runway',
+        'Taxi via Alpha, hold short',
+        'Cleared to line up and wait',
+        'Before takeoff checklist complete',
+        'Takeoff clearance confirmed'
+      ] },
+    { id: 'takeoff', label: 'Takeoff', short: 'T/O', from: 0.18, to: 0.28,
+      altA: 0, altB: 3000, spdA: 18, spdB: 180, pitchA: 0, pitchB: 15,
+      radio: ['Cleared for takeoff'] },
+    { id: 'climb', label: 'Climb', short: 'CLB', from: 0.28, to: 0.48,
+      altA: 3000, altB: 36000, spdA: 180, spdB: 480, pitchA: 8, pitchB: 3,
+      radio: [
+        'Climbing flight level two four zero',
+        'Passing flight level one eight zero',
+        'Contact center on 132.4',
+        'Direct to waypoint, cleared as filed',
+        'Cruise checklist complete'
+      ] },
+    { id: 'cruise', label: 'Cruise', short: 'CRZ', from: 0.48, to: 0.75,
+      altA: 36000, altB: 36000, spdA: 480, spdB: 480, pitchA: 2, pitchB: 2,
+      radio: [
+        'Level flight level three six zero',
+        'Smooth ride at altitude',
+        'Position report, estimating next waypoint',
+        'Oceanic entry point reached',
+        'Fuel burn nominal, all systems normal'
+      ] },
+    { id: 'descent', label: 'Descent', short: 'DES', from: 0.75, to: 0.88,
+      altA: 36000, altB: 10000, spdA: 480, spdB: 280, pitchA: -2, pitchB: -3,
+      radio: [
+        'Request descent via arrival',
+        'Cleared to flight level two four zero',
+        'Contacting approach control',
+        'Descend via STAR',
+        'Approach checklist complete'
+      ] },
+    { id: 'approach', label: 'Approach', short: 'APP', from: 0.88, to: 0.96,
+      altA: 10000, altB: 200, spdA: 280, spdB: 145, pitchA: -2, pitchB: 0,
+      radio: [
+        'Cleared ILS approach',
+        'Localizer captured',
+        'Glideslope captured',
+        'Gear down, flaps thirty',
+        'One thousand feet, stabilized'
+      ] },
+    { id: 'landing', label: 'Landing', short: 'LDG', from: 0.96, to: 1.00,
+      altA: 200, altB: 0, spdA: 145, spdB: 0, pitchA: 0, pitchB: 0,
+      radio: [
+        'Minimums',
+        'Runway in sight',
+        'Touchdown, spoilers up',
+        'Taxi to gate via Bravo',
+        'Shutdown checklist complete'
+      ] }
+  ];
+
+  /* Takeoff callout sequence — fires at specific progress fractions */
+  var TAKEOFF_CALLOUTS = [
+    { at: 0.180, msg: 'Brake release, thrust set' },
+    { at: 0.192, msg: 'Eighty knots, cross-checked' },
+    { at: 0.208, msg: 'V one' },
+    { at: 0.220, msg: 'Rotate' },
+    { at: 0.238, msg: 'Positive rate, gear up' },
+    { at: 0.258, msg: 'Thrust reduction, climb thrust' }
+  ];
+
+  var BREAK_FLIGHT = {
+    short: { label: 'Turnaround', radio: [
+      'Ground crew on station', 'Refueling in progress', 'Cabin reset underway',
+      'Catering service complete', 'Pre-flight checks restarting'
+    ] },
+    long: { label: 'Layover', radio: [
+      'Aircraft at gate', 'Maintenance walkaround complete', 'Crew rest period',
+      'Cabin deep clean in progress', 'Flight plan filed for next leg'
+    ] }
   };
 
   /* =========================================================
-     4. STATE
+     STATE
      ========================================================= */
   var settings = Object.assign({}, DEFAULTS, load(STORE.settings, {}));
   settings.work = clamp(parseInt(settings.work, 10) || 25, 1, 180);
   settings.short = clamp(parseInt(settings.short, 10) || 5, 1, 60);
   settings.long = clamp(parseInt(settings.long, 10) || 15, 1, 90);
   settings.longEvery = clamp(parseInt(settings.longEvery, 10) || 4, 1, 12);
+  if (settings.deck !== 'flight') settings.deck = 'classic';
 
   var tasks = load(STORE.tasks, []);
   if (!Array.isArray(tasks)) tasks = [];
-  tasks = tasks.filter(function (t) { return t && typeof t.text === 'string'; }).map(function (t, i) {
+  tasks = tasks.filter(function (t) { return t && typeof t.text === 'string'; }).map(function (t) {
     return {
-      id: t.id || uid(),
-      text: t.text,
-      done: !!t.done,
+      id: t.id || uid(), text: t.text, done: !!t.done,
       estimate: clamp(parseInt(t.estimate, 10) || 1, 1, 20),
       pomodoros: Math.max(0, parseInt(t.pomodoros, 10) || 0),
-      createdAt: t.createdAt || Date.now() - (tasks.length - i) * 1000
+      createdAt: t.createdAt || Date.now()
     };
   });
 
   var stats = load(STORE.stats, { days: {} });
   if (!stats || typeof stats !== 'object' || !stats.days) stats = { days: {} };
-
   var history = load(STORE.history, []);
   if (!Array.isArray(history)) history = [];
-
   var cycle = Math.max(0, parseInt(load(STORE.cycle, 0), 10) || 0);
 
-  var runtime = {
-    mode: 'work',
-    remaining: settings.work * 60,
-    running: false,
-    endTime: 0,
-    activeTaskId: null
-  };
+  var flight = load(STORE.route, null);
+  if (!flight || !flight.dep || !flight.arr) {
+    flight = { dep: 'JFK', depCity: 'New York', arr: 'LHR', arrCity: 'London', number: 'PF-271', squawk: '4721' };
+  }
+  if (!flight.squawk) flight.squawk = String(Math.floor(Math.random() * 7000) + 1000);
 
-  var ui = {
-    filter: 'all',
-    search: '',
-    editingId: null,
-    dragId: null,
-    focusMode: false,
-    settingsOpen: false
+  var runtime = { mode: 'work', remaining: settings.work * 60, running: false, endTime: 0, activeTaskId: null };
+  var ui = { filter: 'all', search: '', editingId: null, dragId: null, focusMode: false, settingsOpen: false };
+
+  /* Flight sim state */
+  var flightSim = {
+    n1Current: 22,
+    egtCurrent: 380,
+    progress: 0,
+    totalNM: 3000,
+    routePoints: [],
+    traffic: [],
+    calloutsDone: {},
+    windDir: 280,
+    windSpd: 45,
+    ndRange: 40,
+    displayMode: 'pfd',
+    heading: 90,
+    bank: 0,
+    localP: 0,
+    phaseId: 'preflight',
+    needsShake: false
   };
 
   var intervalId = null;
   var lastShownSecond = -1;
   var pendingResumeCredit = false;
+  var pfdBuilt = false;
+  var ndInit = false;
+  var lastRadioMsg = '';
 
-  /* =========================================================
-     5. DOM REFS
-     ========================================================= */
-  var el = {
-    ring: $('#ring'),
-    ringFocus: $('#ringFocus'),
-    timeLabel: $('#timeLabel'),
-    timeFocus: $('#timeFocus'),
-    modeLabel: $('#modeLabel'),
-    modeFocus: $('#modeFocus'),
-    taskFocus: $('#taskFocus'),
-    startBtn: $('#startBtn'),
-    startIcon: $('#startIcon'),
-    startText: $('#startText'),
-    resetBtn: $('#resetBtn'),
-    skipBtn: $('#skipBtn'),
-    focusBtn: $('#focusBtn'),
-    focusStartBtn: $('#focusStartBtn'),
-    focusStartIcon: $('#focusStartIcon'),
-    focusStartText: $('#focusStartText'),
-    focusResetBtn: $('#focusResetBtn'),
-    focusSkipBtn: $('#focusSkipBtn'),
-    exitFocusBtn: $('#exitFocusBtn'),
-    focusOverlay: $('#focusOverlay'),
-    cycleDots: $('#cycleDots'),
-    cycleHint: $('#cycleHint'),
-    sessionCount: $('#sessionCount'),
-    activeTaskWrap: $('#activeTaskWrap'),
-    activeTaskText: $('#activeTaskText'),
-    clearActiveTask: $('#clearActiveTask'),
-    modeTabs: $('#modeTabs'),
-    settingsToggle: $('#settingsToggle'),
-    settingsPanel: $('#settingsPanel'),
-    settingsChev: $('#settingsChev'),
-    workInput: $('#workInput'),
-    shortInput: $('#shortInput'),
-    longInput: $('#longInput'),
-    everyInput: $('#everyInput'),
-    taskForm: $('#taskForm'),
-    taskInput: $('#taskInput'),
-    taskList: $('#taskList'),
-    taskCount: $('#taskCount'),
-    taskFilters: $('#taskFilters'),
-    taskSearch: $('#taskSearch'),
-    emptyState: $('#emptyState'),
-    clearDoneBtn: $('#clearDoneBtn'),
-    exportTasksBtn: $('#exportTasksBtn'),
-    importTasksBtn: $('#importTasksBtn'),
-    importFile: $('#importFile'),
-    notifyBtn: $('#notifyBtn'),
-    statsBtn: $('#statsBtn'),
-    helpBtn: $('#helpBtn'),
-    themeBtn: $('#themeBtn'),
-    statsModal: $('#statsModal'),
-    statsContent: $('#statsContent'),
-    helpModal: $('#helpModal'),
-    helpContent: $('#helpContent'),
-    toastRoot: $('#toastRoot'),
-    ariaLive: $('#ariaLive')
+  /* RAF */
+  var flightRafId = null;
+  var lastFrameTs = 0;
+
+  /* Engine audio */
+  var engineAudio = {
+    ctx: null, src: null, filter: null, gain: null, started: false
   };
 
   /* =========================================================
-     6. PERSISTENCE
+     DOM
+     ========================================================= */
+  var el = {
+    ring: $('#ring'), ringFocus: $('#ringFocus'),
+    timeLabel: $('#timeLabel'), timeFocus: $('#timeFocus'),
+    modeLabel: $('#modeLabel'), modeFocus: $('#modeFocus'), taskFocus: $('#taskFocus'),
+    startBtn: $('#startBtn'), startIcon: $('#startIcon'), startText: $('#startText'),
+    resetBtn: $('#resetBtn'), skipBtn: $('#skipBtn'), focusBtn: $('#focusBtn'),
+    focusStartBtn: $('#focusStartBtn'), focusStartIcon: $('#focusStartIcon'), focusStartText: $('#focusStartText'),
+    focusResetBtn: $('#focusResetBtn'), focusSkipBtn: $('#focusSkipBtn'), exitFocusBtn: $('#exitFocusBtn'),
+    focusOverlay: $('#focusOverlay'),
+    cycleDots: $('#cycleDots'), cycleHint: $('#cycleHint'), sessionCount: $('#sessionCount'),
+    activeTaskWrap: $('#activeTaskWrap'), activeTaskText: $('#activeTaskText'), clearActiveTask: $('#clearActiveTask'),
+    modeTabs: $('#modeTabs'),
+    settingsToggle: $('#settingsToggle'), settingsPanel: $('#settingsPanel'), settingsChev: $('#settingsChev'),
+    workInput: $('#workInput'), shortInput: $('#shortInput'), longInput: $('#longInput'), everyInput: $('#everyInput'),
+    taskForm: $('#taskForm'), taskInput: $('#taskInput'), taskList: $('#taskList'), taskCount: $('#taskCount'),
+    taskFilters: $('#taskFilters'), taskSearch: $('#taskSearch'), emptyState: $('#emptyState'),
+    clearDoneBtn: $('#clearDoneBtn'), exportTasksBtn: $('#exportTasksBtn'), importTasksBtn: $('#importTasksBtn'), importFile: $('#importFile'),
+    notifyBtn: $('#notifyBtn'), statsBtn: $('#statsBtn'), helpBtn: $('#helpBtn'), themeBtn: $('#themeBtn'), deckBtn: $('#deckBtn'),
+    statsModal: $('#statsModal'), statsContent: $('#statsContent'),
+    helpModal: $('#helpModal'), helpContent: $('#helpContent'),
+    toastRoot: $('#toastRoot'), ariaLive: $('#ariaLive'),
+    brandIcon: $('#brandIcon'), brandTitle: $('#brandTitle'), brandSub: $('#brandSub'),
+    pfd: $('#pfd'), nd: $('#nd'), pfdWrap: $('#pfdWrap'),
+    ndControls: $('#ndControls'),
+    fdDep: $('#fdDep'), fdDepCity: $('#fdDepCity'),
+    fdArr: $('#fdArr'), fdArrCity: $('#fdArrCity'),
+    fdFlightNo: $('#fdFlightNo'),
+    fdRouteFill: $('#fdRouteFill'), fdRoutePlane: $('#fdRoutePlane'),
+    fdStepper: $('#fdStepper'),
+    fdN1: $('#fdN1'), fdEgt: $('#fdEgt'), fdFuel: $('#fdFuel'), fdSquawk: $('#fdSquawk'),
+    fdRadio: $('#fdRadio')
+  };
+
+  /* =========================================================
+     PERSISTENCE
      ========================================================= */
   function persistSettings() { save(STORE.settings, settings); }
   function persistTasks() { save(STORE.tasks, tasks); }
   function persistStats() { save(STORE.stats, stats); }
   function persistHistory() { save(STORE.history, history); }
   function persistCycle() { save(STORE.cycle, cycle); }
-
+  function persistRoute() { save(STORE.route, flight); }
   function persistSession() {
     save(STORE.session, {
-      mode: runtime.mode,
-      remaining: runtime.remaining,
-      running: runtime.running,
-      endTime: runtime.endTime,
-      activeTaskId: runtime.activeTaskId
+      mode: runtime.mode, remaining: runtime.remaining, running: runtime.running,
+      endTime: runtime.endTime, activeTaskId: runtime.activeTaskId
     });
   }
 
   /* =========================================================
-     7. AUDIO / NOTIFICATIONS / TOAST
+     AUDIO / NOTIFICATIONS / TOAST
      ========================================================= */
   var audioCtx = null;
-
   function beep() {
     if (!settings.sound) return;
     try {
@@ -1132,8 +1167,7 @@
       if (!audioCtx) audioCtx = new Ctx();
       if (audioCtx.state === 'suspended') audioCtx.resume();
       var now = audioCtx.currentTime;
-      var notes = [880, 987.77, 1174.66];
-      notes.forEach(function (freq, i) {
+      [880, 987.77, 1174.66].forEach(function (freq, i) {
         var off = i * 0.19;
         var osc = audioCtx.createOscillator();
         var gain = audioCtx.createGain();
@@ -1142,42 +1176,30 @@
         gain.gain.setValueAtTime(0.0001, now + off);
         gain.gain.exponentialRampToValueAtTime(0.2, now + off + 0.02);
         gain.gain.exponentialRampToValueAtTime(0.0001, now + off + 0.3);
-        osc.connect(gain);
-        gain.connect(audioCtx.destination);
-        osc.start(now + off);
-        osc.stop(now + off + 0.34);
+        osc.connect(gain); gain.connect(audioCtx.destination);
+        osc.start(now + off); osc.stop(now + off + 0.34);
       });
-    } catch (e) { /* audio unavailable */ }
+    } catch (e) {}
   }
-
   function vibrate() {
     if (!settings.vibrate) return;
-    if (navigator.vibrate) {
-      try { navigator.vibrate([180, 90, 180]); } catch (e) { /* ignore */ }
-    }
+    if (navigator.vibrate) { try { navigator.vibrate([180, 90, 180]); } catch (e) {} }
   }
-
   function notify(title, body) {
     if (!settings.notifications) return;
     if (!('Notification' in window)) return;
     if (Notification.permission !== 'granted') return;
     try {
       var n = new Notification(title, {
-        body: body,
-        tag: 'pomodoro-focus',
-        renotify: true,
-        silent: !settings.sound,
-        icon: APP_ICON
+        body: body, tag: 'pomodoro-focus', renotify: true, silent: !settings.sound, icon: APP_ICON
       });
       setTimeout(function () { try { n.close(); } catch (e) {} }, 9000);
-    } catch (e) { /* notification failed */ }
+    } catch (e) {}
   }
-
   function announce(msg) {
     el.ariaLive.textContent = '';
     setTimeout(function () { el.ariaLive.textContent = msg; }, 60);
   }
-
   function toast(msg) {
     var node = document.createElement('div');
     node.className = 'toast';
@@ -1189,42 +1211,91 @@
     }, 2400);
   }
 
+  /* ---- Engine audio ---- */
+  function startEngineAudio() {
+    if (!settings.sound) return;
+    try {
+      var Ctx = window.AudioContext || window.webkitAudioContext;
+      if (!Ctx) return;
+      if (!engineAudio.ctx) engineAudio.ctx = new Ctx();
+      var ctx = engineAudio.ctx;
+      if (ctx.state === 'suspended') ctx.resume();
+      if (engineAudio.started) return;
+
+      var bufSize = 2 * ctx.sampleRate;
+      var buf = ctx.createBuffer(1, bufSize, ctx.sampleRate);
+      var data = buf.getChannelData(0);
+      /* Pink-ish noise (simple approximation) */
+      var b0 = 0, b1 = 0, b2 = 0;
+      for (var i = 0; i < bufSize; i++) {
+        var white = Math.random() * 2 - 1;
+        b0 = 0.99765 * b0 + white * 0.0990460;
+        b1 = 0.96300 * b1 + white * 0.2965164;
+        b2 = 0.57000 * b2 + white * 1.0526913;
+        data[i] = (b0 + b1 + b2 + white * 0.1848) * 0.20;
+      }
+      var src = ctx.createBufferSource();
+      src.buffer = buf; src.loop = true;
+
+      var filter = ctx.createBiquadFilter();
+      filter.type = 'lowpass';
+      filter.frequency.value = 180;
+      filter.Q.value = 0.8;
+
+      var gain = ctx.createGain();
+      gain.gain.value = 0;
+
+      src.connect(filter);
+      filter.connect(gain);
+      gain.connect(ctx.destination);
+      src.start();
+
+      engineAudio.src = src;
+      engineAudio.filter = filter;
+      engineAudio.gain = gain;
+      engineAudio.started = true;
+    } catch (e) {}
+  }
+  function updateEngineAudio(n1) {
+    if (!engineAudio.started || !engineAudio.ctx) return;
+    var t = clamp((n1 - 20) / 80, 0, 1);
+    var freq = 100 + t * 520;
+    var vol = 0.010 + t * 0.055;
+    try {
+      engineAudio.filter.frequency.setTargetAtTime(freq, engineAudio.ctx.currentTime, 0.1);
+      engineAudio.gain.gain.setTargetAtTime(vol, engineAudio.ctx.currentTime, 0.15);
+    } catch (e) {}
+  }
+  function silenceEngineAudio() {
+    if (!engineAudio.started || !engineAudio.ctx) return;
+    try { engineAudio.gain.gain.setTargetAtTime(0, engineAudio.ctx.currentTime, 0.2); } catch (e) {}
+  }
+
   /* =========================================================
-     8. APP ICON / MANIFEST / FAVICON
+     APP ICON
      ========================================================= */
   var ICON_SVG =
     '<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">' +
-    '<rect width="512" height="512" rx="116" fill="#0b1120"/>' +
-    '<circle cx="256" cy="256" r="142" fill="none" stroke="#334155" stroke-width="34"/>' +
-    '<path d="M256 114a142 142 0 0 1 100 242" fill="none" stroke="#f43f5e" stroke-width="34" stroke-linecap="round"/>' +
-    '<circle cx="256" cy="256" r="17" fill="#f43f5e"/>' +
+    '<rect width="512" height="512" rx="116" fill="#050b14"/>' +
+    '<circle cx="256" cy="256" r="142" fill="none" stroke="#2a4a6a" stroke-width="30"/>' +
+    '<path d="M256 114a142 142 0 0 1 100 242" fill="none" stroke="#fbbf24" stroke-width="30" stroke-linecap="round"/>' +
+    '<circle cx="256" cy="256" r="16" fill="#fbbf24"/>' +
     '</svg>';
-
   var APP_ICON = 'data:image/svg+xml;base64,' + btoa(ICON_SVG);
 
   function setupIconAndManifest() {
     try {
       var fav = document.createElement('link');
-      fav.rel = 'icon';
-      fav.type = 'image/svg+xml';
-      fav.href = APP_ICON;
+      fav.rel = 'icon'; fav.type = 'image/svg+xml'; fav.href = APP_ICON;
       document.head.appendChild(fav);
-
       var apple = document.createElement('link');
-      apple.rel = 'apple-touch-icon';
-      apple.href = APP_ICON;
+      apple.rel = 'apple-touch-icon'; apple.href = APP_ICON;
       document.head.appendChild(apple);
-
       var manifest = {
-        name: 'Pomodoro Focus',
-        short_name: 'Pomodoro',
+        name: 'Pomodoro Focus', short_name: 'Pomodoro',
         description: 'A focused Pomodoro timer and task manager.',
-        start_url: '.',
-        scope: '.',
-        display: 'standalone',
-        orientation: 'portrait-primary',
-        background_color: '#0b1120',
-        theme_color: '#0b1120',
+        start_url: '.', scope: '.', display: 'standalone',
+        background_color: '#050b14', theme_color: '#050b14',
         icons: [
           { src: APP_ICON, sizes: '512x512', type: 'image/svg+xml', purpose: 'any' },
           { src: APP_ICON, sizes: '512x512', type: 'image/svg+xml', purpose: 'maskable' }
@@ -1232,26 +1303,55 @@
       };
       var blob = new Blob([JSON.stringify(manifest)], { type: 'application/manifest+json' });
       var link = document.createElement('link');
-      link.rel = 'manifest';
-      link.href = URL.createObjectURL(blob);
+      link.rel = 'manifest'; link.href = URL.createObjectURL(blob);
       document.head.appendChild(link);
-    } catch (e) { /* manifest not supported */ }
+    } catch (e) {}
   }
 
   /* =========================================================
-     9. THEME / ACCESSIBILITY
+     THEME
      ========================================================= */
   function applyTheme() {
     var root = document.documentElement;
     root.setAttribute('data-theme', settings.theme);
     root.setAttribute('data-contrast', settings.highContrast ? 'high' : 'normal');
     root.setAttribute('data-motion', settings.reduceMotion ? 'reduced' : 'auto');
+    root.setAttribute('data-deck', settings.deck);
 
     var meta = document.querySelector('meta[name="theme-color"]');
-    if (meta) meta.setAttribute('content', settings.theme === 'light' ? '#eef2f7' : '#0b1120');
+    if (meta) meta.setAttribute('content', settings.deck === 'flight' ? '#050b14' : (settings.theme === 'light' ? '#eef2f7' : '#0b1120'));
 
     el.themeBtn.innerHTML = settings.theme === 'light' ? ICONS.moon : ICONS.sun;
     el.themeBtn.title = settings.theme === 'light' ? 'Switch to dark theme' : 'Switch to light theme';
+    el.deckBtn.innerHTML = settings.deck === 'flight' ? ICONS.timer : ICONS.plane;
+    el.deckBtn.title = settings.deck === 'flight' ? 'Switch to Classic timer' : 'Switch to Flight Deck';
+    el.deckBtn.classList.toggle('on', settings.deck === 'flight');
+    el.deckBtn.style.color = settings.deck === 'flight' ? 'var(--accent)' : '';
+
+    el.brandIcon.innerHTML = settings.deck === 'flight'
+      ? '<svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M12 2c-.8 0-1.5.7-1.5 1.5v5.2L3 12v2l7.5-2.2v5.4L8 19v2l4-1.2 4 1.2v-2l-2.5-1.8v-5.4L21 14v-2l-7.5-3.3V3.5C13.5 2.7 12.8 2 12 2z"/></svg>'
+      : '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="13" r="8"></circle><path d="M12 9v4l2.5 1.5"></path><path d="M9 2h6"></path></svg>';
+    el.brandTitle.textContent = settings.deck === 'flight' ? 'Flight Deck Focus' : 'Pomodoro Focus';
+    el.brandSub.textContent = settings.deck === 'flight' ? 'Every session is a flight' : 'Timer and task manager';
+
+    updateModeLabels();
+    syncSettingsUI();
+
+    if (settings.deck === 'flight') {
+      if (!pfdBuilt) buildPFD();
+      if (!ndInit) initND();
+      startFlightAnim();
+    } else {
+      stopFlightAnim();
+      silenceEngineAudio();
+    }
+  }
+
+  function updateModeLabels() {
+    var isFlight = settings.deck === 'flight';
+    $$('.seg-btn', el.modeTabs).forEach(function (b) {
+      b.textContent = isFlight ? FLIGHT_MODE_LABELS[b.dataset.mode] : MODES[b.dataset.mode];
+    });
   }
 
   function updateNotifyButton() {
@@ -1260,11 +1360,8 @@
     el.notifyBtn.innerHTML = on ? ICONS.bell : ICONS.bellOff;
     el.notifyBtn.classList.toggle('on', on);
     el.notifyBtn.style.color = on ? 'var(--accent)' : '';
-    el.notifyBtn.title = !('Notification' in window)
-      ? 'Notifications not supported'
-      : (granted
-          ? (on ? 'Notifications on - click to disable' : 'Notifications off - click to enable')
-          : 'Enable browser notifications');
+    el.notifyBtn.title = !('Notification' in window) ? 'Notifications not supported'
+      : (granted ? (on ? 'Notifications on' : 'Notifications off') : 'Enable notifications');
   }
 
   function syncSettingsUI() {
@@ -1272,54 +1369,943 @@
     el.shortInput.value = settings.short;
     el.longInput.value = settings.long;
     el.everyInput.value = settings.longEvery;
-
     $$('[data-setting]').forEach(function (btn) {
-      btn.setAttribute('aria-checked', String(!!settings[btn.dataset.setting]));
+      var key = btn.dataset.setting;
+      var val = key === 'deckFlight' ? (settings.deck === 'flight') : !!settings[key];
+      btn.setAttribute('aria-checked', String(val));
     });
   }
 
   /* =========================================================
-     10. TIMER CORE
+     ROUTE POINTS & TRAFFIC
+     ========================================================= */
+  function buildRoutePoints() {
+    var D = flightSim.totalNM;
+    var pts = [{ x: 0, y: 0, name: flight.dep, type: 'apt' }];
+    var n = 15;
+    for (var i = 1; i < n; i++) {
+      var t = i / n;
+      /* Deterministic-ish lateral meander so route stays consistent */
+      var seed = (flight.dep.charCodeAt(0) * 7 + flight.arr.charCodeAt(0) * 13 + i * 31) % 100;
+      var y = (seed / 100 - 0.5) * 70 + Math.sin(i * 1.9) * 25;
+      pts.push({ x: D * t, y: y, name: FIX_NAMES[(i + flight.dep.charCodeAt(1)) % FIX_NAMES.length], type: 'wp' });
+    }
+    pts.push({ x: D, y: 0, name: flight.arr, type: 'apt' });
+    return pts;
+  }
+
+  function getAircraftPos(progress) {
+    var pts = flightSim.routePoints;
+    if (!pts || pts.length < 2) return { x: 0, y: 0, hdg: 90 };
+
+    var cum = [0];
+    for (var i = 1; i < pts.length; i++) {
+      var dx = pts[i].x - pts[i-1].x;
+      var dy = pts[i].y - pts[i-1].y;
+      cum.push(cum[i-1] + Math.sqrt(dx*dx + dy*dy));
+    }
+    var totalDist = cum[cum.length - 1];
+    var target = progress * totalDist;
+
+    for (var i = 1; i < pts.length; i++) {
+      if (target <= cum[i]) {
+        var t = (target - cum[i-1]) / Math.max(0.0001, cum[i] - cum[i-1]);
+        var x = pts[i-1].x + (pts[i].x - pts[i-1].x) * t;
+        var y = pts[i-1].y + (pts[i].y - pts[i-1].y) * t;
+        var hdg = Math.atan2(pts[i].x - pts[i-1].x, pts[i].y - pts[i-1].y) * 180 / Math.PI;
+        if (hdg < 0) hdg += 360;
+        return { x: x, y: y, hdg: hdg };
+      }
+    }
+    return { x: pts[pts.length-1].x, y: pts[pts.length-1].y, hdg: 90 };
+  }
+
+  function spawnTraffic() {
+    flightSim.traffic = [];
+    var n = 3 + Math.floor(Math.random() * 3);
+    for (var i = 0; i < n; i++) {
+      flightSim.traffic.push({
+        x: (Math.random() - 0.5) * flightSim.ndRange * 1.6,
+        y: (Math.random() - 0.5) * flightSim.ndRange * 1.6,
+        vx: (Math.random() - 0.5) * 0.15,
+        vy: (Math.random() - 0.5) * 0.15,
+        alt: Math.round((Math.random() - 0.5) * 4000)
+      });
+    }
+  }
+
+  function updateTraffic(dt) {
+    /* Traffic positions are in world nm relative to aircraft — they drift in the world.
+       To keep them visually stable, we drift them and drop them when they get far. */
+    var range = flightSim.ndRange;
+    for (var i = 0; i < flightSim.traffic.length; i++) {
+      var t = flightSim.traffic[i];
+      t.x += t.vx * dt * 40;
+      t.y += t.vy * dt * 40;
+
+      /* If too far, respawn ahead */
+      if (Math.abs(t.x) > range * 2 || Math.abs(t.y) > range * 2) {
+        t.x = (Math.random() - 0.5) * range * 1.4;
+        t.y = (Math.random() - 0.5) * range * 1.4;
+        t.vx = (Math.random() - 0.5) * 0.15;
+        t.vy = (Math.random() - 0.5) * 0.15;
+        t.alt = Math.round((Math.random() - 0.5) * 4000);
+      }
+    }
+  }
+
+  /* =========================================================
+     PFD
+     ========================================================= */
+  function buildPFD() {
+    var svg = el.pfd;
+    if (!svg) return;
+
+    var h = '';
+    h += '<defs>';
+    h += '<linearGradient id="skyGrad" x1="0" y1="0" x2="0" y2="1">';
+    h += '<stop offset="0" stop-color="#031527"/><stop offset="0.55" stop-color="#12466f"/><stop offset="1" stop-color="#4aa8dc"/>';
+    h += '</linearGradient>';
+    h += '<linearGradient id="grndGrad" x1="0" y1="0" x2="0" y2="1">';
+    h += '<stop offset="0" stop-color="#b06a2b"/><stop offset="0.4" stop-color="#6b3a14"/><stop offset="1" stop-color="#2a1505"/>';
+    h += '</linearGradient>';
+    h += '<clipPath id="attClip"><rect x="100" y="40" width="240" height="240"/></clipPath>';
+    h += '<clipPath id="spdClip"><rect x="8" y="40" width="72" height="240"/></clipPath>';
+    h += '<clipPath id="altClip"><rect x="360" y="40" width="72" height="240"/></clipPath>';
+    h += '<clipPath id="hdgClip"><rect x="100" y="290" width="240" height="40"/></clipPath>';
+    h += '</defs>';
+
+    h += '<rect x="0" y="0" width="440" height="340" fill="#050b14" rx="6"/>';
+
+    /* FMA */
+    h += '<rect x="0" y="0" width="440" height="26" fill="#000"/>';
+    h += '<line x1="146.6" y1="4" x2="146.6" y2="22" stroke="#1a3a5a"/>';
+    h += '<line x1="293.3" y1="4" x2="293.3" y2="22" stroke="#1a3a5a"/>';
+    h += '<text id="fmaAt" x="73" y="18" text-anchor="middle" fill="#5bd45b" font-size="11" font-family="ui-monospace, monospace" font-weight="bold">A/T ARM</text>';
+    h += '<text id="fmaRoll" x="220" y="18" text-anchor="middle" fill="#5bd45b" font-size="11" font-family="ui-monospace, monospace" font-weight="bold">LNAV</text>';
+    h += '<text id="fmaPitch" x="366" y="18" text-anchor="middle" fill="#5bd45b" font-size="11" font-family="ui-monospace, monospace" font-weight="bold">VNAV</text>';
+
+    /* Speed tape */
+    h += '<rect x="8" y="40" width="80" height="240" fill="#0a1424" stroke="#2a4a6a" stroke-width="1"/>';
+    h += '<g clip-path="url(#spdClip)"><g id="pfdSpdScroll"></g></g>';
+    h += '<path d="M 78 145 L 122 145 L 122 175 L 78 175 Z" fill="#000" stroke="#fff" stroke-width="1.5"/>';
+    h += '<text id="pfdSpdVal" x="100" y="166" text-anchor="middle" fill="#fff" font-size="15" font-family="ui-monospace, monospace" font-weight="bold">0</text>';
+    h += '<text x="48" y="34" text-anchor="middle" fill="#6a9cc0" font-size="8" font-family="ui-monospace, monospace">IAS</text>';
+    h += '<text x="48" y="292" text-anchor="middle" fill="#6a9cc0" font-size="8" font-family="ui-monospace, monospace">KTS</text>';
+
+    /* Attitude */
+    h += '<rect x="100" y="40" width="240" height="240" fill="#000"/>';
+    h += '<g clip-path="url(#attClip)">';
+    h += '<g id="pfdAttTransform" transform="translate(220, 160)">';
+    h += '<g id="pfdAttInner">';
+    h += '<rect x="-400" y="-400" width="800" height="400" fill="url(#skyGrad)"/>';
+    h += '<rect x="-400" y="0" width="800" height="400" fill="url(#grndGrad)"/>';
+    h += '<line x1="-400" y1="0" x2="400" y2="0" stroke="#fff" stroke-width="1.6"/>';
+    h += '<g id="pfdLadder"></g>';
+    h += '</g></g></g>';
+    h += '<rect x="100" y="40" width="240" height="240" fill="none" stroke="#2a4a6a" stroke-width="1"/>';
+
+    h += '<g id="pfdBank"></g>';
+    h += '<g id="pfdSlip"></g>';
+    h += '<g id="pfdFD"></g>';
+
+    h += '<g id="pfdAircraft">';
+    h += '<line x1="140" y1="160" x2="200" y2="160" stroke="#ffd400" stroke-width="3"/>';
+    h += '<line x1="240" y1="160" x2="300" y2="160" stroke="#ffd400" stroke-width="3"/>';
+    h += '<circle cx="220" cy="160" r="3" fill="#ffd400"/>';
+    h += '<line x1="200" y1="160" x2="205" y2="168" stroke="#ffd400" stroke-width="3"/>';
+    h += '<line x1="240" y1="160" x2="235" y2="168" stroke="#ffd400" stroke-width="3"/>';
+    h += '</g>';
+
+    /* Wind indicator (top-right of attitude area) */
+    h += '<g id="pfdWindGroup" transform="translate(318, 55)">';
+    h += '<g id="pfdWindArrow">';
+    h += '<polygon points="0,-9 4,5 0,2 -4,5" fill="#5bd45b"/>';
+    h += '</g>';
+    h += '<text id="pfdWindTxt" x="10" y="3" fill="#5bd45b" font-size="9" font-family="ui-monospace, monospace" font-weight="bold">280/45</text>';
+    h += '</g>';
+
+    /* Altitude tape */
+    h += '<rect x="352" y="40" width="80" height="240" fill="#0a1424" stroke="#2a4a6a" stroke-width="1"/>';
+    h += '<g clip-path="url(#altClip)"><g id="pfdAltScroll"></g></g>';
+    h += '<path d="M 318 145 L 362 145 L 362 175 L 318 175 Z" fill="#000" stroke="#fff" stroke-width="1.5"/>';
+    h += '<text id="pfdAltVal" x="340" y="166" text-anchor="middle" fill="#fff" font-size="15" font-family="ui-monospace, monospace" font-weight="bold">0</text>';
+    h += '<text x="392" y="34" text-anchor="middle" fill="#6a9cc0" font-size="8" font-family="ui-monospace, monospace">ALT</text>';
+    h += '<text x="392" y="292" text-anchor="middle" fill="#6a9cc0" font-size="8" font-family="ui-monospace, monospace">FT</text>';
+
+    h += '<g id="pfdVsi"></g>';
+
+    /* Heading tape */
+    h += '<rect x="100" y="290" width="240" height="40" fill="#0a1424" stroke="#2a4a6a" stroke-width="1"/>';
+    h += '<g clip-path="url(#hdgClip)"><g id="pfdHdgScroll"></g></g>';
+    h += '<path d="M 197 290 L 197 330 L 243 330 L 243 290 Z" fill="#000" stroke="#fff" stroke-width="1.5"/>';
+    h += '<text id="pfdHdgVal" x="220" y="317" text-anchor="middle" fill="#fff" font-size="15" font-family="ui-monospace, monospace" font-weight="bold">000</text>';
+    h += '<polygon points="220,286 213,278 227,278" fill="#fff"/>';
+
+    h += '<g id="pfdBottomInfo"></g>';
+
+    svg.innerHTML = h;
+
+    el.pfdAttTransform = svg.querySelector('#pfdAttTransform');
+    el.pfdLadder = svg.querySelector('#pfdLadder');
+    el.pfdSpdScroll = svg.querySelector('#pfdSpdScroll');
+    el.pfdSpdVal = svg.querySelector('#pfdSpdVal');
+    el.pfdAltScroll = svg.querySelector('#pfdAltScroll');
+    el.pfdAltVal = svg.querySelector('#pfdAltVal');
+    el.pfdHdgScroll = svg.querySelector('#pfdHdgScroll');
+    el.pfdHdgVal = svg.querySelector('#pfdHdgVal');
+    el.pfdBank = svg.querySelector('#pfdBank');
+    el.pfdSlip = svg.querySelector('#pfdSlip');
+    el.pfdFD = svg.querySelector('#pfdFD');
+    el.pfdVsi = svg.querySelector('#pfdVsi');
+    el.pfdBottomInfo = svg.querySelector('#pfdBottomInfo');
+    el.fmaAt = svg.querySelector('#fmaAt');
+    el.fmaRoll = svg.querySelector('#fmaRoll');
+    el.fmaPitch = svg.querySelector('#fmaPitch');
+    el.pfdWindArrow = svg.querySelector('#pfdWindArrow');
+    el.pfdWindTxt = svg.querySelector('#pfdWindTxt');
+
+    buildPFDStatic(svg);
+    pfdBuilt = true;
+  }
+
+  function buildPFDStatic(svg) {
+    /* Pitch ladder */
+    var ladder = '';
+    var pxPerDeg = 5.5;
+    for (var d = -30; d <= 30; d += 5) {
+      if (d === 0) continue;
+      var y = -d * pxPerDeg;
+      var w = (d % 10 === 0) ? 130 : 65;
+      ladder += '<line x1="' + (-w / 2) + '" y1="' + y + '" x2="' + (w / 2) + '" y2="' + y + '" stroke="#fff" stroke-width="1.2"/>';
+      if (d % 10 === 0) {
+        ladder += '<text x="' + (-w / 2 - 5) + '" y="' + (y + 3.5) + '" text-anchor="end" fill="#fff" font-size="9" font-family="ui-monospace, monospace">' + Math.abs(d) + '</text>';
+        ladder += '<text x="' + (w / 2 + 5) + '" y="' + (y + 3.5) + '" text-anchor="start" fill="#fff" font-size="9" font-family="ui-monospace, monospace">' + Math.abs(d) + '</text>';
+      }
+    }
+    el.pfdLadder.innerHTML = ladder;
+
+    /* Speed tape */
+    var pxPerKt = 1.7;
+    var spdTicks = '';
+    for (var s = 40; s <= 480; s += 10) {
+      var yS = -s * pxPerKt;
+      if (s % 20 === 0) {
+        spdTicks += '<line x1="72" y1="' + yS + '" x2="80" y2="' + yS + '" stroke="#fff" stroke-width="1"/>';
+        spdTicks += '<text x="68" y="' + (yS + 4) + '" text-anchor="end" fill="#fff" font-size="12" font-family="ui-monospace, monospace">' + s + '</text>';
+      } else {
+        spdTicks += '<line x1="76" y1="' + yS + '" x2="80" y2="' + yS + '" stroke="#fff" stroke-width="0.6"/>';
+      }
+    }
+    el.pfdSpdScroll.innerHTML = spdTicks;
+    el.pfdSpdScroll._px = pxPerKt;
+
+    /* Altitude tape */
+    var pxPerFt = 0.05;
+    var altTicks = '';
+    for (var a = 0; a <= 45000; a += 500) {
+      var yA = -a * pxPerFt;
+      if (a % 1000 === 0) {
+        altTicks += '<line x1="0" y1="' + yA + '" x2="8" y2="' + yA + '" stroke="#fff" stroke-width="1"/>';
+        altTicks += '<text x="12" y="' + (yA + 4) + '" text-anchor="start" fill="#fff" font-size="12" font-family="ui-monospace, monospace">' + String(a).padStart(5, '0') + '</text>';
+      } else {
+        altTicks += '<line x1="0" y1="' + yA + '" x2="4" y2="' + yA + '" stroke="#fff" stroke-width="0.6"/>';
+      }
+    }
+    var bugY = -36000 * pxPerFt;
+    altTicks += '<polygon points="72,' + bugY + ' 62,' + (bugY - 5) + ' 62,' + (bugY + 5) + '" fill="#ff00ff"/>';
+    el.pfdAltScroll.innerHTML = altTicks;
+    el.pfdAltScroll._px = pxPerFt;
+
+    /* Heading tape */
+    var pxPerHdg = 4;
+    var hdgTicks = '';
+    for (var d2 = -360; d2 <= 720; d2 += 5) {
+      var x2 = d2 * pxPerHdg;
+      var mod = ((d2 % 360) + 360) % 360;
+      if (mod % 10 === 0) {
+        var label = mod === 0 ? '360' : String(mod).padStart(3, '0');
+        hdgTicks += '<line x1="' + x2 + '" y1="26" x2="' + x2 + '" y2="34" stroke="#fff" stroke-width="1"/>';
+        hdgTicks += '<text x="' + x2 + '" y="20" text-anchor="middle" fill="#fff" font-size="11" font-family="ui-monospace, monospace">' + label + '</text>';
+      } else {
+        hdgTicks += '<line x1="' + x2 + '" y1="30" x2="' + x2 + '" y2="34" stroke="#fff" stroke-width="0.6"/>';
+      }
+    }
+    el.pfdHdgScroll.innerHTML = hdgTicks;
+    el.pfdHdgScroll._px = pxPerHdg;
+
+    /* Bank scale */
+    var bankHtml = '';
+    var cx = 220, cy = 160, r = 120;
+    [-60, -45, -30, -20, -10, 0, 10, 20, 30, 45, 60].forEach(function (deg) {
+      var rad = (deg - 90) * Math.PI / 180;
+      var isMajor = (deg % 30 === 0);
+      var r2 = r + (isMajor ? 12 : 6);
+      var x1 = cx + Math.cos(rad) * r;
+      var y1 = cy + Math.sin(rad) * r;
+      var x2 = cx + Math.cos(rad) * r2;
+      var y2 = cy + Math.sin(rad) * r2;
+      bankHtml += '<line x1="' + x1 + '" y1="' + y1 + '" x2="' + x2 + '" y2="' + y2 + '" stroke="#fff" stroke-width="' + (isMajor ? 1.8 : 1) + '"/>';
+    });
+    bankHtml += '<polygon id="pfdBankPtr" points="220,40 213,52 227,52" fill="#ffd400" stroke="#000" stroke-width="0.5"/>';
+    el.pfdBank.innerHTML = bankHtml;
+    el.pfdBankPtr = svg.querySelector('#pfdBankPtr');
+
+    el.pfdSlip.innerHTML =
+      '<rect x="212" y="276" width="16" height="4" fill="none" stroke="#fff" stroke-width="1"/>' +
+      '<rect id="pfdSlipRect" x="217" y="277" width="6" height="2" fill="#ffd400"/>';
+    el.pfdSlipRect = svg.querySelector('#pfdSlipRect');
+
+    el.pfdFD.innerHTML =
+      '<line id="pfdFdH" x1="150" y1="160" x2="290" y2="160" stroke="#ff00ff" stroke-width="2"/>' +
+      '<line id="pfdFdV" x1="220" y1="100" x2="220" y2="220" stroke="#ff00ff" stroke-width="2"/>';
+    el.pfdFdH = svg.querySelector('#pfdFdH');
+    el.pfdFdV = svg.querySelector('#pfdFdV');
+
+    var vsiHtml = '';
+    [-2000, -1000, -500, 0, 500, 1000, 2000].forEach(function (v) {
+      var yV = 160 - (v / 2000) * 100;
+      var len = (v === 0) ? 12 : (v % 1000 === 0 ? 10 : 6);
+      vsiHtml += '<line x1="' + (352 - len) + '" y1="' + yV + '" x2="352" y2="' + yV + '" stroke="#6a9cc0" stroke-width="1"/>';
+    });
+    vsiHtml += '<text x="334" y="94" text-anchor="middle" fill="#6a9cc0" font-size="8" font-family="ui-monospace, monospace">2</text>';
+    vsiHtml += '<text x="334" y="234" text-anchor="middle" fill="#6a9cc0" font-size="8" font-family="ui-monospace, monospace">2</text>';
+    vsiHtml += '<text x="336" y="163" text-anchor="middle" fill="#6a9cc0" font-size="7" font-family="ui-monospace, monospace">VSI</text>';
+    vsiHtml += '<line id="pfdVsiNeedle" x1="352" y1="160" x2="334" y2="160" stroke="#ffd400" stroke-width="2.5" stroke-linecap="round"/>';
+    el.pfdVsi.innerHTML = vsiHtml;
+    el.pfdVsiNeedle = svg.querySelector('#pfdVsiNeedle');
+
+    el.pfdBottomInfo.innerHTML =
+      '<text id="pfdMach" x="140" y="335" text-anchor="middle" fill="#5bd45b" font-size="11" font-family="ui-monospace, monospace" font-weight="bold">M .00</text>' +
+      '<text id="pfdGs" x="220" y="335" text-anchor="middle" fill="#5bd45b" font-size="11" font-family="ui-monospace, monospace" font-weight="bold">GS 0</text>' +
+      '<text id="pfdDist" x="300" y="335" text-anchor="middle" fill="#5bd45b" font-size="11" font-family="ui-monospace, monospace" font-weight="bold">---</text>';
+    el.pfdMach = svg.querySelector('#pfdMach');
+    el.pfdGs = svg.querySelector('#pfdGs');
+    el.pfdDist = svg.querySelector('#pfdDist');
+  }
+
+  function updatePFD(v) {
+    if (!el.pfdAttTransform) return;
+
+    var pitchPx = v.pitch * 5.5;
+    el.pfdAttTransform.setAttribute('transform',
+      'translate(220, 160) rotate(' + v.bank.toFixed(2) + ') translate(0, ' + pitchPx.toFixed(2) + ')');
+
+    if (el.pfdBankPtr) {
+      el.pfdBankPtr.setAttribute('transform', 'rotate(' + v.bank.toFixed(2) + ' 220 160)');
+    }
+    if (el.pfdFdH) {
+      var fdy = 160 + v.fdPitch * 5.5;
+      el.pfdFdH.setAttribute('y1', fdy); el.pfdFdH.setAttribute('y2', fdy);
+    }
+    if (el.pfdFdV) {
+      var fdx = 220 + v.fdRoll * 5.5;
+      el.pfdFdV.setAttribute('x1', fdx); el.pfdFdV.setAttribute('x2', fdx);
+    }
+    if (el.pfdSpdScroll) {
+      var pxK = el.pfdSpdScroll._px;
+      el.pfdSpdScroll.setAttribute('transform', 'translate(0, ' + (160 + v.ias * pxK).toFixed(1) + ')');
+    }
+    if (el.pfdSpdVal) el.pfdSpdVal.textContent = Math.round(v.ias);
+
+    if (el.pfdAltScroll) {
+      var pxF = el.pfdAltScroll._px;
+      el.pfdAltScroll.setAttribute('transform', 'translate(0, ' + (160 + v.alt * pxF).toFixed(1) + ')');
+    }
+    if (el.pfdAltVal) el.pfdAltVal.textContent = String(Math.round(v.alt)).padStart(5, '0');
+
+    if (el.pfdVsiNeedle) {
+      var yN = clamp(160 - (v.vs / 2000) * 100, 60, 260);
+      el.pfdVsiNeedle.setAttribute('y1', yN);
+      el.pfdVsiNeedle.setAttribute('y2', yN);
+    }
+    if (el.pfdHdgScroll) {
+      var pxH = el.pfdHdgScroll._px;
+      var hdg = ((v.hdg % 360) + 360) % 360;
+      el.pfdHdgScroll.setAttribute('transform', 'translate(' + (220 - hdg * pxH).toFixed(1) + ', 0)');
+      if (el.pfdHdgVal) el.pfdHdgVal.textContent = String(Math.round(hdg)).padStart(3, '0');
+    }
+
+    if (el.fmaAt) el.fmaAt.textContent = v.fmaAt;
+    if (el.fmaRoll) el.fmaRoll.textContent = v.fmaRoll;
+    if (el.fmaPitch) el.fmaPitch.textContent = v.fmaPitch;
+
+    if (el.pfdMach) el.pfdMach.textContent = 'M ' + v.mach.toFixed(2);
+    if (el.pfdGs) el.pfdGs.textContent = 'GS ' + Math.round(v.gs);
+    if (el.pfdDist) el.pfdDist.textContent = v.nextWp || '---';
+
+    /* Wind indicator */
+    if (el.pfdWindArrow) {
+      var windRel = (flightSim.windDir + 180) - v.hdg;
+      el.pfdWindArrow.setAttribute('transform', 'rotate(' + windRel.toFixed(0) + ')');
+    }
+    if (el.pfdWindTxt) {
+      el.pfdWindTxt.textContent = String(Math.round(flightSim.windDir)).padStart(3, '0') + '/' + String(Math.round(flightSim.windSpd)).padStart(2, '0');
+    }
+  }
+
+  /* =========================================================
+     ND (Navigation Display)
+     ========================================================= */
+  function initND() {
+    if (!el.nd) return;
+    ndInit = true;
+  }
+
+  function renderND() {
+    if (!el.nd) return;
+    var canvas = el.nd;
+    var ctx = canvas.getContext('2d');
+    var W = canvas.width, H = canvas.height;
+    var cx = W / 2, cy = H / 2;
+    var R = Math.min(W, H) * 0.44;
+
+    ctx.clearRect(0, 0, W, H);
+    ctx.fillStyle = '#050b14';
+    ctx.fillRect(0, 0, W, H);
+
+    var range = flightSim.ndRange;
+    var scale = R / range;
+
+    var acPos = getAircraftPos(flightSim.progress);
+    var hdg = (runtime.mode === 'work') ? acPos.hdg : 273;
+    var hdgRad = hdg * Math.PI / 180;
+    var sinH = Math.sin(hdgRad);
+    var cosH = Math.cos(hdgRad);
+
+    function project(wx, wy) {
+      var dx = wx - acPos.x;
+      var dy = wy - acPos.y;
+      var forward = dx * sinH + dy * cosH;
+      var right = dx * cosH - dy * sinH;
+      return { x: cx + right * scale, y: cy - forward * scale };
+    }
+
+    /* Compass rose ticks */
+    ctx.strokeStyle = 'rgba(120, 180, 255, 0.35)';
+    ctx.lineWidth = 1;
+    for (var deg = 0; deg < 360; deg += 10) {
+      var screenDeg = deg - hdg;
+      var rad = (screenDeg - 90) * Math.PI / 180;
+      var isMajor = deg % 30 === 0;
+      var r1 = R + (isMajor ? -12 : -6);
+      var r2 = R;
+      ctx.beginPath();
+      ctx.moveTo(cx + Math.cos(rad) * r1, cy + Math.sin(rad) * r1);
+      ctx.lineTo(cx + Math.cos(rad) * r2, cy + Math.sin(rad) * r2);
+      ctx.stroke();
+      if (isMajor) {
+        ctx.fillStyle = 'rgba(120, 180, 255, 0.75)';
+        ctx.font = 'bold 13px ui-monospace, monospace';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        var label = deg === 0 ? 'N' : (deg === 90 ? 'E' : (deg === 180 ? 'S' : (deg === 270 ? 'W' : String(deg / 10))));
+        var lx = cx + Math.cos(rad) * (r1 - 15);
+        var ly = cy + Math.sin(rad) * (r1 - 15);
+        ctx.fillText(label, lx, ly);
+      }
+    }
+
+    /* Range rings */
+    ctx.strokeStyle = 'rgba(120, 180, 255, 0.22)';
+    ctx.lineWidth = 1.5;
+    [0.25, 0.5, 0.75, 1].forEach(function (frac) {
+      ctx.beginPath();
+      ctx.arc(cx, cy, R * frac, 0, Math.PI * 2);
+      ctx.stroke();
+    });
+
+    /* Range ring labels (top-right of each ring) */
+    ctx.fillStyle = 'rgba(120, 180, 255, 0.55)';
+    ctx.font = 'bold 12px ui-monospace, monospace';
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'middle';
+    [1, 2, 3, 4].forEach(function (i) {
+      var nm = (range / 4) * i;
+      ctx.fillText(String(Math.round(nm)), cx + R * (i/4) + 5, cy - 5);
+    });
+
+    /* Route line */
+    if (flightSim.routePoints.length >= 2) {
+      var pts = flightSim.routePoints;
+
+      /* Draw segments that intersect the display area */
+      ctx.strokeStyle = '#ff00ff';
+      ctx.lineWidth = 3;
+      ctx.lineJoin = 'round';
+      ctx.lineCap = 'round';
+      ctx.beginPath();
+      var started = false;
+      for (var i = 0; i < pts.length; i++) {
+        var p = project(pts[i].x, pts[i].y);
+        /* Cull points well outside the canvas */
+        if (p.x < -200 || p.x > W + 200 || p.y < -200 || p.y > H + 200) {
+          if (started) { ctx.stroke(); ctx.beginPath(); started = false; }
+          continue;
+        }
+        if (!started) { ctx.moveTo(p.x, p.y); started = true; }
+        else ctx.lineTo(p.x, p.y);
+      }
+      if (started) ctx.stroke();
+
+      /* Waypoint markers */
+      for (var j = 0; j < pts.length; j++) {
+        var wpt = pts[j];
+        var pr = project(wpt.x, wpt.y);
+        if (pr.x < -40 || pr.x > W + 40 || pr.y < -40 || pr.y > H + 40) continue;
+
+        if (wpt.type === 'apt') {
+          /* Airport: circle with a dot */
+          ctx.strokeStyle = '#fff';
+          ctx.lineWidth = 2;
+          ctx.beginPath();
+          ctx.arc(pr.x, pr.y, 9, 0, Math.PI * 2);
+          ctx.stroke();
+          ctx.fillStyle = '#fff';
+          ctx.beginPath();
+          ctx.arc(pr.x, pr.y, 3, 0, Math.PI * 2);
+          ctx.fill();
+        } else {
+          /* Waypoint: diamond */
+          ctx.strokeStyle = '#fff';
+          ctx.lineWidth = 1.8;
+          ctx.beginPath();
+          ctx.moveTo(pr.x, pr.y - 8);
+          ctx.lineTo(pr.x + 8, pr.y);
+          ctx.lineTo(pr.x, pr.y + 8);
+          ctx.lineTo(pr.x - 8, pr.y);
+          ctx.closePath();
+          ctx.stroke();
+        }
+
+        /* Label */
+        if (wpt.name) {
+          ctx.fillStyle = '#fff';
+          ctx.font = 'bold 11px ui-monospace, monospace';
+          ctx.textAlign = 'left';
+          ctx.textBaseline = 'middle';
+          ctx.fillText(wpt.name, pr.x + 12, pr.y);
+        }
+      }
+    }
+
+    /* TCAS traffic */
+    ctx.strokeStyle = '#fff';
+    ctx.lineWidth = 2;
+    for (var k = 0; k < flightSim.traffic.length; k++) {
+      var t = flightSim.traffic[k];
+      var tp = project(acPos.x + t.x, acPos.y + t.y);
+      if (tp.x < -20 || tp.x > W + 20 || tp.y < -20 || tp.y > H + 20) continue;
+      ctx.beginPath();
+      ctx.moveTo(tp.x, tp.y - 8);
+      ctx.lineTo(tp.x + 8, tp.y);
+      ctx.lineTo(tp.x, tp.y + 8);
+      ctx.lineTo(tp.x - 8, tp.y);
+      ctx.closePath();
+      ctx.stroke();
+
+      /* Altitude delta text */
+      if (t.alt !== 0) {
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
+        ctx.font = '9px ui-monospace, monospace';
+        ctx.textAlign = 'left';
+        ctx.textBaseline = 'middle';
+        var sign = t.alt > 0 ? '+' : '';
+        ctx.fillText(sign + String(Math.round(t.alt / 100)), tp.x + 11, tp.y);
+      }
+    }
+
+    /* Aircraft symbol (fixed at center) */
+    ctx.strokeStyle = '#ffd400';
+    ctx.lineWidth = 3;
+    ctx.lineCap = 'round';
+    ctx.beginPath();
+    ctx.moveTo(cx - 42, cy); ctx.lineTo(cx - 20, cy);
+    ctx.moveTo(cx + 20, cy); ctx.lineTo(cx + 42, cy);
+    ctx.moveTo(cx, cy - 14); ctx.lineTo(cx, cy + 14);
+    ctx.moveTo(cx - 42, cy); ctx.lineTo(cx - 42, cy + 7);
+    ctx.moveTo(cx + 42, cy); ctx.lineTo(cx + 42, cy + 7);
+    ctx.stroke();
+
+    /* Center dot */
+    ctx.fillStyle = '#ffd400';
+    ctx.beginPath();
+    ctx.arc(cx, cy, 2.5, 0, Math.PI * 2);
+    ctx.fill();
+
+    /* Wind arrow top-left */
+    var windRel = (flightSim.windDir + 180) - hdg;
+    var windRad = (windRel - 90) * Math.PI / 180;
+    var waX = 60, waY = 60;
+    ctx.save();
+    ctx.translate(waX, waY);
+    ctx.rotate(windRad + Math.PI / 2);
+    ctx.fillStyle = '#5bd45b';
+    ctx.beginPath();
+    ctx.moveTo(0, -14);
+    ctx.lineTo(6, 8);
+    ctx.lineTo(0, 3);
+    ctx.lineTo(-6, 8);
+    ctx.closePath();
+    ctx.fill();
+    ctx.restore();
+    ctx.fillStyle = '#5bd45b';
+    ctx.font = 'bold 13px ui-monospace, monospace';
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(
+      String(Math.round(flightSim.windDir)).padStart(3, '0') + '/' + String(Math.round(flightSim.windSpd)).padStart(2, '0'),
+      waX + 14, waY
+    );
+
+    /* Top-right: range and mode */
+    ctx.fillStyle = 'rgba(120, 180, 255, 0.75)';
+    ctx.font = 'bold 13px ui-monospace, monospace';
+    ctx.textAlign = 'right';
+    ctx.textBaseline = 'middle';
+    ctx.fillText('RNG ' + range + ' NM', W - 20, 40);
+
+    /* Top-left: mode */
+    ctx.textAlign = 'left';
+    var modeLabel = runtime.mode === 'work' ? 'MAP' : 'PLAN';
+    ctx.fillStyle = 'rgba(120, 180, 255, 0.75)';
+    ctx.fillText(modeLabel, 20, 40);
+
+    /* Bottom: next waypoint and ETA */
+    var nextWp = null;
+    var nextDist = Infinity;
+    if (flightSim.routePoints.length >= 2) {
+      for (var m = 0; m < flightSim.routePoints.length; m++) {
+        var rp = flightSim.routePoints[m];
+        var dxr = rp.x - acPos.x;
+        var dyr = rp.y - acPos.y;
+        var d = Math.sqrt(dxr*dxr + dyr*dyr);
+        /* Determine if waypoint is ahead (positive forward component) */
+        var fwd = dxr * sinH + dyr * cosH;
+        if (fwd > 0 && d < nextDist) {
+          nextDist = d;
+          nextWp = rp;
+        }
+      }
+    }
+    ctx.fillStyle = '#fff';
+    ctx.font = 'bold 13px ui-monospace, monospace';
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'bottom';
+    if (nextWp) {
+      ctx.fillText('NEXT ' + (nextWp.name || '---') + '  ' + Math.round(nextDist) + ' NM', 20, H - 20);
+    } else {
+      ctx.fillText('ARRIVED', 20, H - 20);
+    }
+
+    /* Update bottom-right with progress % */
+    ctx.textAlign = 'right';
+    ctx.fillStyle = 'rgba(120, 180, 255, 0.75)';
+    ctx.fillText(Math.round(flightSim.progress * 100) + '%', W - 20, H - 20);
+  }
+
+  /* =========================================================
+     FLIGHT VALUES
+     ========================================================= */
+  function phaseAt(p) {
+    for (var i = 0; i < PHASES.length; i++) {
+      if (p < PHASES[i].to || i === PHASES.length - 1) return PHASES[i];
+    }
+    return PHASES[PHASES.length - 1];
+  }
+
+  function getTakeoffCallout(p) {
+    var msg = null;
+    for (var i = 0; i < TAKEOFF_CALLOUTS.length; i++) {
+      if (p >= TAKEOFF_CALLOUTS[i].at) msg = TAKEOFF_CALLOUTS[i].msg;
+    }
+    return msg;
+  }
+
+  function getTargetN1ForPhase(phase, localP) {
+    switch (phase.id) {
+      case 'preflight': return 22;
+      case 'taxi': return 24 + localP * 6;
+      case 'takeoff': return 92 + Math.sin(localP * Math.PI) * 4;
+      case 'climb': return 90 - localP * 10;
+      case 'cruise': return 78;
+      case 'descent': return 60 - localP * 10;
+      case 'approach': return 50 + Math.sin(localP * Math.PI * 2) * 3;
+      case 'landing': return 30;
+      default: return 22;
+    }
+  }
+
+  function computeFlightValues(p, isWork) {
+    if (!isWork) {
+      var bp = BREAK_FLIGHT[runtime.mode];
+      var elapsed = totalFor(runtime.mode) - runtime.remaining;
+      var idx = Math.floor(elapsed / 8) % bp.radio.length;
+      return {
+        ias: 0, alt: 0, vs: 0, hdg: 273, pitch: 0, bank: 0, slip: 0,
+        mach: 0, gs: 0, windDir: flightSim.windDir, windSpd: flightSim.windSpd,
+        fdPitch: 0, fdRoll: 0,
+        fmaAt: 'A/T ARM', fmaRoll: '---', fmaPitch: '---',
+        n1: flightSim.n1Current, egt: flightSim.egtCurrent, fuel: '100%',
+        radio: bp.radio[idx], nextWp: '---'
+      };
+    }
+
+    var phase = phaseAt(p);
+    var localP = clamp((p - phase.from) / (phase.to - phase.from), 0, 1);
+    var smooth = localP * localP * (3 - 2 * localP);
+
+    var alt = phase.altA + (phase.altB - phase.altA) * smooth;
+    var ias = phase.spdA + (phase.spdB - phase.spdA) * smooth;
+    var pitch = phase.pitchA + (phase.pitchB - phase.pitchA) * smooth;
+
+    /* VS from altitude delta over phase */
+    var phaseMinutes = (phase.to - phase.from) * settings.work;
+    var vs = 0;
+    if (phaseMinutes > 0 && phase.altB !== phase.altA) {
+      vs = (phase.altB - phase.altA) / phaseMinutes;
+    }
+
+    /* Heading from route */
+    var acPos = getAircraftPos(p);
+    var hdg = acPos.hdg;
+
+    /* Bank from local heading change */
+    var hAhead = getAircraftPos(Math.min(1, p + 0.003)).hdg;
+    var hBehind = getAircraftPos(Math.max(0, p - 0.003)).hdg;
+    var turnDelta = hAhead - hBehind;
+    while (turnDelta > 180) turnDelta -= 360;
+    while (turnDelta < -180) turnDelta += 360;
+    var bank = clamp(turnDelta * 12, -22, 22);
+
+    /* Mach and GS */
+    var mach = Math.min(0.85, ias / 600);
+    var gs = ias + 20 + Math.sin(p * 8) * 4;
+
+    /* N1 current (updated by RAF loop); pull from flightSim */
+    var n1 = flightSim.n1Current;
+    var egt = flightSim.egtCurrent;
+    var fuelPct = Math.max(6, 100 - p * 55);
+
+    /* FMA */
+    var fmaAt = 'A/T ARM', fmaRoll = 'HDG SEL', fmaPitch = 'ALT HOLD';
+    if (phase.id === 'preflight' || phase.id === 'taxi') { fmaAt = 'A/T ARM'; fmaRoll = 'HDG SEL'; fmaPitch = 'ALT HOLD'; }
+    else if (phase.id === 'takeoff') { fmaAt = 'THR REF'; fmaRoll = 'HDG SEL'; fmaPitch = 'TO/GA'; }
+    else if (phase.id === 'climb') { fmaAt = 'THR REF'; fmaRoll = 'LNAV'; fmaPitch = 'VNAV SPD'; }
+    else if (phase.id === 'cruise') { fmaAt = 'SPD'; fmaRoll = 'LNAV'; fmaPitch = 'VNAV PTH'; }
+    else if (phase.id === 'descent') { fmaAt = 'SPD'; fmaRoll = 'LNAV'; fmaPitch = 'VNAV PTH'; }
+    else if (phase.id === 'approach') { fmaAt = 'SPD'; fmaRoll = 'LOC'; fmaPitch = 'G/S'; }
+    else if (phase.id === 'landing') { fmaAt = 'SPD'; fmaRoll = 'LOC'; fmaPitch = p > 0.99 ? 'FLARE' : 'G/S'; }
+
+    /* Radio: takeoff uses callouts, others use round-robin */
+    var radioMsg;
+    if (phase.id === 'takeoff') {
+      radioMsg = getTakeoffCallout(p) || 'Cleared for takeoff';
+    } else {
+      var elapsedTotal = totalFor(runtime.mode) - runtime.remaining;
+      var ri = Math.floor(elapsedTotal / 7) % phase.radio.length;
+      radioMsg = phase.radio[ri];
+    }
+
+    /* Next waypoint name */
+    var nextWp = '---';
+    var nDist = Infinity;
+    if (flightSim.routePoints.length >= 2) {
+      var sinH = Math.sin(hdg * Math.PI / 180);
+      var cosH = Math.cos(hdg * Math.PI / 180);
+      for (var i = 0; i < flightSim.routePoints.length; i++) {
+        var rp = flightSim.routePoints[i];
+        var dxr = rp.x - acPos.x;
+        var dyr = rp.y - acPos.y;
+        var fwd = dxr * sinH + dyr * cosH;
+        var dist = Math.sqrt(dxr*dxr + dyr*dyr);
+        if (fwd > 0 && dist < nDist) { nDist = dist; nextWp = rp.name + ' ' + Math.round(dist) + 'NM'; }
+      }
+    }
+
+    return {
+      ias: ias, alt: alt, vs: vs, hdg: hdg, pitch: pitch, bank: bank, slip: 0,
+      mach: mach, gs: gs, windDir: flightSim.windDir, windSpd: flightSim.windSpd,
+      fdPitch: 0, fdRoll: 0,
+      fmaAt: fmaAt, fmaRoll: fmaRoll, fmaPitch: fmaPitch,
+      n1: n1, egt: egt, fuel: Math.round(fuelPct) + '%',
+      radio: radioMsg, nextWp: nextWp
+    };
+  }
+
+  /* =========================================================
+     FLIGHT SIM ANIMATION LOOP
+     ========================================================= */
+  function startFlightAnim() {
+    if (flightRafId !== null) return;
+    if (settings.deck !== 'flight') return;
+    lastFrameTs = performance.now();
+    flightRafId = requestAnimationFrame(flightFrame);
+  }
+
+  function stopFlightAnim() {
+    if (flightRafId !== null) {
+      cancelAnimationFrame(flightRafId);
+      flightRafId = null;
+    }
+  }
+
+  function updateSpoolLag(dt) {
+    var targetN1 = 22;
+    if (runtime.running && runtime.mode === 'work') {
+      var phase = phaseAt(flightSim.progress);
+      var lp = clamp((flightSim.progress - phase.from) / (phase.to - phase.from), 0, 1);
+      targetN1 = getTargetN1ForPhase(phase, lp);
+    }
+    /* Exponential approach with time constant ~1.6s */
+    var alpha = 1 - Math.exp(-dt / 1.6);
+    flightSim.n1Current += (targetN1 - flightSim.n1Current) * alpha;
+    flightSim.n1Current = clamp(flightSim.n1Current, 20, 102);
+
+    var targetEgt = 380 + (flightSim.n1Current - 20) * 6.5;
+    var alphaE = 1 - Math.exp(-dt / 3.2);
+    flightSim.egtCurrent += (targetEgt - flightSim.egtCurrent) * alphaE;
+  }
+
+  function updateShake() {
+    if (!el.pfdWrap) return;
+    var shake = false;
+    if (runtime.running && runtime.mode === 'work' && settings.deck === 'flight' && !settings.reduceMotion) {
+      var p = flightSim.progress;
+      if ((p > 0.19 && p < 0.30) || (p > 0.955 && p < 0.995)) shake = true;
+    }
+    el.pfdWrap.classList.toggle('shaking', shake);
+  }
+
+  function updateRadio(msg) {
+    if (!msg || msg === lastRadioMsg) return;
+    lastRadioMsg = msg;
+    el.fdRadio.textContent = msg;
+    el.fdRadio.classList.remove('flash');
+    void el.fdRadio.offsetWidth;
+    el.fdRadio.classList.add('flash');
+  }
+
+  function updateFlightReadouts(v) {
+    if (el.fdN1) el.fdN1.textContent = v.n1.toFixed(1) + '%';
+    if (el.fdEgt) el.fdEgt.textContent = Math.round(v.egt) + '\u00B0C';
+    if (el.fdFuel) el.fdFuel.textContent = v.fuel;
+  }
+
+  function renderStepper(p, isWork) {
+    var html = '';
+    if (!isWork) {
+      var bp = BREAK_FLIGHT[runtime.mode];
+      var pct = clamp(p * 100, 0, 100);
+      html += '<div class="fd-step active">' +
+              '<div class="fd-step-track"><span class="fd-step-fill" style="width:' + pct + '%"></span></div>' +
+              '<div class="fd-step-label">' + bp.label + '</div></div>';
+      el.fdStepper.innerHTML = html;
+      return;
+    }
+    PHASES.forEach(function (ph, i) {
+      var isActive = p >= ph.from && (p < ph.to || i === PHASES.length - 1);
+      var isDone = p >= ph.to;
+      var localPct;
+      if (isDone) localPct = 100;
+      else if (isActive) localPct = clamp(((p - ph.from) / (ph.to - ph.from)) * 100, 0, 100);
+      else localPct = 0;
+      html += '<div class="fd-step' + (isActive ? ' active' : '') + (isDone ? ' done' : '') + '">' +
+              '<div class="fd-step-track"><span class="fd-step-fill" style="width:' + localPct.toFixed(1) + '%"></span></div>' +
+              '<div class="fd-step-label">' + ph.short + '</div></div>';
+    });
+    el.fdStepper.innerHTML = html;
+  }
+
+  function flightFrame(ts) {
+    flightRafId = null;
+    if (settings.deck !== 'flight') return;
+
+    var dt = Math.min(0.1, (ts - lastFrameTs) / 1000);
+    lastFrameTs = ts;
+
+    /* Update progress from runtime state */
+    var total = totalFor(runtime.mode);
+    flightSim.progress = total > 0 ? clamp(1 - runtime.remaining / total, 0, 1) : 0;
+
+    /* Spool lag always runs */
+    updateSpoolLag(dt);
+
+    /* Update traffic */
+    if (runtime.running) updateTraffic(dt);
+
+    /* Update heading and bank from route */
+    if (runtime.mode === 'work' && flightSim.routePoints.length >= 2) {
+      var acPos = getAircraftPos(flightSim.progress);
+      flightSim.heading = acPos.hdg;
+      var hAhead = getAircraftPos(Math.min(1, flightSim.progress + 0.003)).hdg;
+      var hBehind = getAircraftPos(Math.max(0, flightSim.progress - 0.003)).hdg;
+      var td = hAhead - hBehind;
+      while (td > 180) td -= 360;
+      while (td < -180) td += 360;
+      var targetBank = clamp(td * 12, -22, 22);
+      flightSim.bank += (targetBank - flightSim.bank) * (1 - Math.exp(-dt / 0.4));
+    } else {
+      flightSim.heading = 273;
+      flightSim.bank += (0 - flightSim.bank) * (1 - Math.exp(-dt / 0.4));
+    }
+
+    /* Update engine audio */
+    updateEngineAudio(flightSim.n1Current);
+
+    /* Compute flight values and render */
+    var v = computeFlightValues(flightSim.progress, runtime.mode === 'work');
+
+    if (flightSim.displayMode === 'pfd') {
+      updatePFD(v);
+    } else {
+      renderND();
+    }
+
+    updateFlightReadouts(v);
+    updateRadio(v.radio);
+    renderStepper(flightSim.progress, runtime.mode === 'work');
+    updateShake();
+
+    /* Route strip */
+    var pct = clamp(flightSim.progress * 100, 0, 100);
+    el.fdRouteFill.style.width = pct + '%';
+    el.fdRoutePlane.style.left = pct + '%';
+
+    /* Continue loop */
+    if (settings.deck === 'flight') {
+      flightRafId = requestAnimationFrame(flightFrame);
+    }
+  }
+
+  /* =========================================================
+     TIMER CORE
      ========================================================= */
   function totalFor(mode) {
     var mins = mode === 'work' ? settings.work : mode === 'short' ? settings.short : settings.long;
     return mins * 60;
   }
-
   function activeTask() {
     if (!runtime.activeTaskId) return null;
-    for (var i = 0; i < tasks.length; i++) {
-      if (tasks[i].id === runtime.activeTaskId) return tasks[i];
-    }
+    for (var i = 0; i < tasks.length; i++) if (tasks[i].id === runtime.activeTaskId) return tasks[i];
     return null;
   }
-
   function setAccent() {
-    var accent = ACCENT[runtime.mode];
-    var root = document.documentElement;
-    root.style.setProperty('--accent', accent);
-    root.style.setProperty('--accent-soft', hexA(accent, 0.16));
+    var accent = settings.deck === 'flight' ? FLIGHT_ACCENT[runtime.mode] : ACCENT[runtime.mode];
+    document.documentElement.style.setProperty('--accent', accent);
+    document.documentElement.style.setProperty('--accent-soft', hexA(accent, 0.16));
   }
-
   function renderCycle() {
     var n = settings.longEvery;
     var filled = Math.min(cycle, n);
     var html = '';
-    for (var i = 0; i < n; i++) {
-      html += '<span class="cycle-dot' + (i < filled ? ' on' : '') + '"></span>';
-    }
+    for (var i = 0; i < n; i++) html += '<span class="cycle-dot' + (i < filled ? ' on' : '') + '"></span>';
     el.cycleDots.innerHTML = html;
-
     var left = Math.max(0, n - filled);
-    if (runtime.mode === 'long') {
-      el.cycleHint.textContent = 'long break time';
-    } else if (left === 0) {
-      el.cycleHint.textContent = 'next break is long';
-    } else {
-      el.cycleHint.textContent = left + ' until long break';
-    }
+    if (runtime.mode === 'long') el.cycleHint.textContent = 'long break time';
+    else if (left === 0) el.cycleHint.textContent = 'next break is long';
+    else el.cycleHint.textContent = left + ' until long break';
   }
-
   function renderActiveTask() {
     var t = activeTask();
     if (t) {
@@ -1331,18 +2317,15 @@
       el.taskFocus.textContent = '';
     }
   }
-
   function render() {
     var total = totalFor(runtime.mode);
     var frac = total > 0 ? clamp(runtime.remaining / total, 0, 1) : 0;
-    var offset = CIRC * (1 - frac);
 
     setAccent();
-
     el.ring.style.strokeDasharray = String(CIRC);
-    el.ring.style.strokeDashoffset = String(offset);
+    el.ring.style.strokeDashoffset = String(CIRC * (1 - frac));
     el.ringFocus.style.strokeDasharray = String(CIRC);
-    el.ringFocus.style.strokeDashoffset = String(offset);
+    el.ringFocus.style.strokeDashoffset = String(CIRC * (1 - frac));
 
     var secs = Math.ceil(runtime.remaining);
     if (secs !== lastShownSecond) {
@@ -1350,18 +2333,15 @@
       var txt = fmt(secs);
       el.timeLabel.textContent = txt;
       el.timeFocus.textContent = txt;
-      document.title = txt + ' - ' + MODES[runtime.mode];
+      document.title = txt + ' - ' + (settings.deck === 'flight' ? FLIGHT_MODE_LABELS[runtime.mode] : MODES[runtime.mode]);
     }
 
-    var modeName = MODES[runtime.mode];
+    var modeName = settings.deck === 'flight' ? FLIGHT_MODE_LABELS[runtime.mode] : MODES[runtime.mode];
     el.modeLabel.textContent = modeName;
     el.modeFocus.textContent = modeName;
 
     var startIcon = runtime.running ? ICONS.pause : ICONS.play;
-    var startText = runtime.running
-      ? 'Pause'
-      : (runtime.remaining < total - 0.5 ? 'Resume' : 'Start');
-
+    var startText = runtime.running ? 'Pause' : (runtime.remaining < total - 0.5 ? 'Resume' : 'Start');
     el.startIcon.innerHTML = startIcon;
     el.startText.textContent = startText;
     el.focusStartIcon.innerHTML = startIcon;
@@ -1369,7 +2349,7 @@
 
     el.resetBtn.innerHTML = ICONS.reset;
     el.skipBtn.innerHTML = ICONS.skip;
-    el.focusBtn.innerHTML = ICONS.expand;
+    el.focusBtn.innerHTML = ui.focusMode ? ICONS.shrink : ICONS.expand;
     el.focusResetBtn.innerHTML = ICONS.reset;
     el.focusSkipBtn.innerHTML = ICONS.skip;
 
@@ -1386,20 +2366,12 @@
     renderActiveTask();
     updateTaskCount();
   }
-
-  function stopClock() {
-    if (intervalId) { clearInterval(intervalId); intervalId = null; }
-  }
-
+  function stopClock() { if (intervalId) { clearInterval(intervalId); intervalId = null; } }
   function tick() {
     runtime.remaining = Math.max(0, (runtime.endTime - Date.now()) / 1000);
-    if (runtime.remaining <= 0.05) {
-      finishSession(false);
-      return;
-    }
+    if (runtime.remaining <= 0.05) { finishSession(false); return; }
     render();
   }
-
   function start() {
     if (runtime.running) return;
     if (runtime.remaining <= 0.1) runtime.remaining = totalFor(runtime.mode);
@@ -1407,10 +2379,13 @@
     runtime.endTime = Date.now() + runtime.remaining * 1000;
     stopClock();
     intervalId = setInterval(tick, TICK_MS);
+    if (settings.deck === 'flight') {
+      startEngineAudio();
+      startFlightAnim();
+    }
     persistSession();
     render();
   }
-
   function pause() {
     if (!runtime.running) return;
     runtime.running = false;
@@ -1419,121 +2394,93 @@
     persistSession();
     render();
   }
-
-  function toggle() {
-    if (runtime.running) pause(); else start();
-  }
-
+  function toggle() { if (runtime.running) pause(); else start(); }
   function reset() {
     stopClock();
     runtime.running = false;
     runtime.remaining = totalFor(runtime.mode);
+    if (runtime.mode === 'work' && settings.deck === 'flight') newFlightRoute();
     persistSession();
     render();
   }
-
   function setMode(mode, autoStart) {
     if (!MODES[mode]) mode = 'work';
-    if (runtime.mode === 'long' && mode === 'work') {
-      cycle = 0;
-      persistCycle();
-    }
+    if (runtime.mode === 'long' && mode === 'work') { cycle = 0; persistCycle(); }
     stopClock();
     runtime.mode = mode;
     runtime.remaining = totalFor(mode);
     runtime.running = false;
+    if (mode === 'work' && settings.deck === 'flight') newFlightRoute();
     persistSession();
     render();
     if (autoStart) start();
   }
-
   function nextMode(finished) {
     if (finished !== 'work') return 'work';
     return cycle >= settings.longEvery ? 'long' : 'short';
   }
-
   function creditSession(mode) {
     var mins = totalFor(mode) / 60;
     var key = dayKey();
-
     if (!stats.days[key]) stats.days[key] = { focusMinutes: 0, sessions: 0, tasksDone: 0 };
-
     if (mode === 'work') {
       stats.days[key].focusMinutes += mins;
       stats.days[key].sessions += 1;
       cycle += 1;
       persistCycle();
-
       var t = activeTask();
-      if (t) {
-        t.pomodoros = (t.pomodoros || 0) + 1;
-        persistTasks();
-      }
+      if (t) { t.pomodoros = (t.pomodoros || 0) + 1; persistTasks(); }
     }
-
+    var taskText = '';
+    var at = activeTask();
+    if (at) taskText = at.text;
     history.unshift({
-      ts: Date.now(),
-      mode: mode,
-      minutes: mins,
-      taskText: t_textSafe()
+      ts: Date.now(), mode: mode, minutes: mins, taskText: taskText,
+      route: settings.deck === 'flight' ? (flight.dep + '-' + flight.arr) : ''
     });
     if (history.length > MAX_HISTORY) history.length = MAX_HISTORY;
-
-    persistStats();
-    persistHistory();
+    persistStats(); persistHistory();
   }
-
-  function t_textSafe() {
-    var t = activeTask();
-    return t ? t.text : '';
-  }
-
   function finishSession(fromReload) {
     stopClock();
     var finished = runtime.mode;
-
     runtime.running = false;
     runtime.remaining = 0;
     render();
-
     creditSession(finished);
-
     var next = nextMode(finished);
-
+    silenceEngineAudio();
     if (!fromReload) {
-      beep();
-      vibrate();
-
+      beep(); vibrate();
       var title, body;
-      if (finished === 'work') {
-        title = 'Focus session complete';
-        body = next === 'long'
-          ? 'Great work. Time for a long break.'
-          : 'Nice. Take a short break.';
+      if (settings.deck === 'flight') {
+        if (finished === 'work') {
+          title = 'Flight complete - welcome to ' + flight.arr;
+          body = next === 'long' ? 'Layover time. Rest the aircraft.' : 'Turnaround started. Short break.';
+        } else {
+          title = 'Ground service complete';
+          body = 'Ready for the next flight.';
+        }
       } else {
-        title = 'Break complete';
-        body = 'Ready to focus again?';
+        if (finished === 'work') {
+          title = 'Focus session complete';
+          body = next === 'long' ? 'Great work. Time for a long break.' : 'Nice. Take a short break.';
+        } else {
+          title = 'Break complete';
+          body = 'Ready to focus again?';
+        }
       }
       notify(title, body);
       announce(title + '. ' + body);
     }
-
     var doAuto = !fromReload && settings.autoStartNext;
-
-    setTimeout(function () {
-      setMode(next, doAuto);
-    }, fromReload ? 0 : 850);
+    setTimeout(function () { setMode(next, doAuto); }, fromReload ? 0 : 850);
   }
-
   function skip() {
     stopClock();
     runtime.running = false;
-    var next = runtime.mode === 'work'
-      ? (cycle + 1 >= settings.longEvery ? 'short' : 'short')
-      : 'work';
-    setMode(next, false);
+    setMode(runtime.mode === 'work' ? 'short' : 'work', false);
   }
-
   function adjust(seconds) {
     var total = totalFor(runtime.mode);
     var next = clamp(runtime.remaining + seconds, 5, total);
@@ -1545,50 +2492,86 @@
   }
 
   /* =========================================================
-     11. STATS
+     ROUTE
+     ========================================================= */
+  function newFlightRoute() {
+    var a = AIRPORTS[Math.floor(Math.random() * AIRPORTS.length)];
+    var b = a; var guard = 0;
+    while (b[0] === a[0] && guard < 30) {
+      b = AIRPORTS[Math.floor(Math.random() * AIRPORTS.length)];
+      guard++;
+    }
+    flight = {
+      dep: a[0], depCity: a[1], arr: b[0], arrCity: b[1],
+      number: 'PF-' + String(Math.floor(Math.random() * 900) + 100),
+      squawk: String(Math.floor(Math.random() * 7000) + 1000)
+    };
+    persistRoute();
+    renderRoute();
+    resetFlightSim();
+  }
+
+  function renderRoute() {
+    if (!el.fdDep) return;
+    el.fdDep.textContent = flight.dep;
+    el.fdDepCity.textContent = flight.depCity;
+    el.fdArr.textContent = flight.arr;
+    el.fdArrCity.textContent = flight.arrCity;
+    el.fdFlightNo.textContent = flight.number;
+    if (el.fdSquawk) el.fdSquawk.textContent = flight.squawk;
+  }
+
+  function resetFlightSim() {
+    flightSim.n1Current = 22;
+    flightSim.egtCurrent = 380;
+    flightSim.progress = 0;
+    flightSim.totalNM = 800 + Math.random() * 4200;
+    flightSim.routePoints = buildRoutePoints();
+    flightSim.calloutsDone = {};
+    flightSim.windDir = 200 + Math.random() * 160;
+    flightSim.windSpd = 20 + Math.random() * 60;
+    flightSim.heading = 90;
+    flightSim.bank = 0;
+    spawnTraffic();
+    lastRadioMsg = '';
+  }
+
+  /* =========================================================
+     STATS
      ========================================================= */
   function todayStats() {
     var key = dayKey();
     if (!stats.days[key]) stats.days[key] = { focusMinutes: 0, sessions: 0, tasksDone: 0 };
     return stats.days[key];
   }
-
   function computeStreak() {
-    var streak = 0;
-    var d = new Date();
+    var streak = 0; var d = new Date();
     for (var i = 0; i < 365; i++) {
       var key = dayKey(d);
       var day = stats.days[key];
-      if (day && day.sessions > 0) {
-        streak++;
-        d.setDate(d.getDate() - 1);
-      } else if (i === 0) {
-        d.setDate(d.getDate() - 1);
-      } else {
-        break;
-      }
+      if (day && day.sessions > 0) { streak++; d.setDate(d.getDate() - 1); }
+      else if (i === 0) { d.setDate(d.getDate() - 1); }
+      else break;
     }
     return streak;
   }
-
   function last7Days() {
-    var out = [];
-    var d = new Date();
-    d.setDate(d.getDate() - 6);
+    var out = []; var d = new Date(); d.setDate(d.getDate() - 6);
     for (var i = 0; i < 7; i++) {
       var key = dayKey(d);
       var day = stats.days[key] || { focusMinutes: 0, sessions: 0 };
       out.push({
-        key: key,
-        label: d.toLocaleDateString(undefined, { weekday: 'short' }).slice(0, 2),
-        minutes: day.focusMinutes || 0,
-        sessions: day.sessions || 0
+        key: key, label: d.toLocaleDateString(undefined, { weekday: 'short' }).slice(0, 2),
+        minutes: day.focusMinutes || 0, sessions: day.sessions || 0
       });
       d.setDate(d.getDate() + 1);
     }
     return out;
   }
-
+  function statTile(label, value) {
+    return '<div class="stat-tile"><div class="text-[10px] font-bold uppercase tracking-wider text-mute">' + label + '</div>' +
+           '<div class="mt-1.5 text-[19px] font-bold tabnum tracking-tight">' + value + '</div></div>';
+  }
   function renderStats() {
     var t = todayStats();
     var streak = computeStreak();
@@ -1596,56 +2579,44 @@
     var maxMin = Math.max.apply(null, week.map(function (d) { return d.minutes; }).concat([1]));
     var totalWeek = week.reduce(function (a, d) { return a + d.minutes; }, 0);
     var totalSessions = week.reduce(function (a, d) { return a + d.sessions; }, 0);
+    var isFlight = settings.deck === 'flight';
 
     var html = '';
-
     html += '<div class="grid grid-cols-2 gap-3 sm:grid-cols-4">';
-    html += statTile('Focus today', fmtDuration(t.focusMinutes));
-    html += statTile('Sessions today', String(t.sessions));
+    html += statTile(isFlight ? 'Airborne today' : 'Focus today', fmtDuration(t.focusMinutes));
+    html += statTile(isFlight ? 'Flights today' : 'Sessions today', String(t.sessions));
     html += statTile('Tasks done', String(t.tasksDone));
     html += statTile('Day streak', streak + (streak === 1 ? ' day' : ' days'));
     html += '</div>';
 
-    html += '<div class="mt-6">';
-    html += '<div class="flex items-baseline justify-between">';
+    html += '<div class="mt-6"><div class="flex items-baseline justify-between">';
     html += '<h3 class="text-[13px] font-bold tracking-tight">Last 7 days</h3>';
     html += '<span class="text-[11.5px] text-mute">' + fmtDuration(totalWeek) + ' &middot; ' + totalSessions + ' sessions</span>';
-    html += '</div>';
-    html += '<div class="mt-3 flex items-end gap-2">';
+    html += '</div><div class="mt-3 flex items-end gap-2">';
     week.forEach(function (d) {
       var pct = Math.round((d.minutes / maxMin) * 100);
-      html += '<div class="bar-col">';
-      html += '<div class="bar-track" title="' + fmtDuration(d.minutes) + ' on ' + d.key + '">';
-      html += '<div class="bar-fill" style="height:' + (d.minutes > 0 ? Math.max(pct, 4) : 0) + '%"></div>';
-      html += '</div>';
-      html += '<span class="text-[10px] text-mute">' + d.label + '</span>';
-      html += '</div>';
+      html += '<div class="bar-col"><div class="bar-track" title="' + fmtDuration(d.minutes) + ' on ' + d.key + '">' +
+              '<div class="bar-fill" style="height:' + (d.minutes > 0 ? Math.max(pct, 4) : 0) + '%"></div></div>' +
+              '<span class="text-[10px] text-mute">' + d.label + '</span></div>';
     });
-    html += '</div>';
-    html += '</div>';
+    html += '</div></div>';
 
-    html += '<div class="mt-6">';
-    html += '<div class="flex items-center justify-between gap-3">';
-    html += '<h3 class="text-[13px] font-bold tracking-tight">Recent sessions</h3>';
-    html += '<button id="exportCsvBtn" class="btn btn-ghost btn-sm">Export CSV</button>';
-    html += '</div>';
+    html += '<div class="mt-6"><div class="flex items-center justify-between gap-3">';
+    html += '<h3 class="text-[13px] font-bold tracking-tight">' + (isFlight ? 'Flight log' : 'Recent sessions') + '</h3>';
+    html += '<button id="exportCsvBtn" class="btn btn-ghost btn-sm">Export CSV</button></div>';
 
     if (history.length === 0) {
       html += '<p class="mt-3 text-[12.5px] text-mute">No sessions recorded yet.</p>';
     } else {
       html += '<div class="mt-3 space-y-2">';
       history.slice(0, 15).forEach(function (h) {
-        var color = ACCENT[h.mode] || ACCENT.work;
-        html += '<div class="hist-row">';
-        html += '<div class="flex min-w-0 items-center gap-2.5">';
+        var color = (settings.deck === 'flight' ? FLIGHT_ACCENT : ACCENT)[h.mode] || ACCENT.work;
+        html += '<div class="hist-row"><div class="flex min-w-0 items-center gap-2.5">';
         html += '<span class="dot-mode" style="background:' + color + '"></span>';
-        html += '<span class="truncate font-medium">' + (MODES[h.mode] || h.mode) + '</span>';
-        if (h.taskText) {
-          html += '<span class="truncate text-mute">&middot; ' + escapeHtml(h.taskText) + '</span>';
-        }
-        html += '</div>';
-        html += '<span class="shrink-0 text-mute">' + timeAgo(h.ts) + '</span>';
-        html += '</div>';
+        html += '<span class="truncate font-medium">' + (isFlight ? FLIGHT_MODE_LABELS[h.mode] : MODES[h.mode]) + '</span>';
+        if (h.route) html += '<span class="shrink-0 text-mute" style="font-variant-numeric:tabular-nums">' + escapeHtml(h.route) + '</span>';
+        if (h.taskText) html += '<span class="truncate text-mute">&middot; ' + escapeHtml(h.taskText) + '</span>';
+        html += '</div><span class="shrink-0 text-mute">' + timeAgo(h.ts) + '</span></div>';
       });
       html += '</div>';
     }
@@ -1656,70 +2627,42 @@
     html += '</div>';
 
     el.statsContent.innerHTML = html;
-
     var csvBtn = $('#exportCsvBtn');
     if (csvBtn) csvBtn.addEventListener('click', exportHistoryCSV);
-
     var resetBtn = $('#resetStatsBtn');
-    if (resetBtn) {
-      resetBtn.addEventListener('click', function () {
-        if (!confirm('Reset all statistics and session history? This cannot be undone.')) return;
-        stats = { days: {} };
-        history = [];
-        cycle = 0;
-        persistStats();
-        persistHistory();
-        persistCycle();
-        renderStats();
-        render();
-        toast('Statistics reset');
-      });
-    }
+    if (resetBtn) resetBtn.addEventListener('click', function () {
+      if (!confirm('Reset all statistics and session history? This cannot be undone.')) return;
+      stats = { days: {} }; history = []; cycle = 0;
+      persistStats(); persistHistory(); persistCycle();
+      renderStats(); render();
+      toast('Statistics reset');
+    });
   }
-
-  function statTile(label, value) {
-    return '<div class="stat-tile">' +
-           '<div class="text-[10px] font-bold uppercase tracking-wider text-mute">' + label + '</div>' +
-           '<div class="mt-1.5 text-[19px] font-bold tabnum tracking-tight">' + value + '</div>' +
-           '</div>';
-  }
-
   function download(filename, content, mime) {
     try {
       var blob = new Blob([content], { type: mime || 'text/plain;charset=utf-8' });
       var url = URL.createObjectURL(blob);
       var a = document.createElement('a');
-      a.href = url;
-      a.download = filename;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
+      a.href = url; a.download = filename;
+      document.body.appendChild(a); a.click(); document.body.removeChild(a);
       setTimeout(function () { URL.revokeObjectURL(url); }, 1500);
     } catch (e) { toast('Download failed'); }
   }
-
   function exportHistoryCSV() {
     if (!history.length) { toast('No sessions to export'); return; }
-    var rows = [['timestamp', 'mode', 'minutes', 'task']];
+    var rows = [['timestamp', 'mode', 'minutes', 'route', 'task']];
     history.forEach(function (h) {
-      rows.push([
-        new Date(h.ts).toISOString(),
-        h.mode,
-        h.minutes,
-        h.taskText || ''
-      ]);
+      rows.push([new Date(h.ts).toISOString(), h.mode, h.minutes, h.route || '', h.taskText || '']);
     });
     var csv = rows.map(function (r) {
-      return r.map(function (c) {
-        return '"' + String(c).replace(/"/g, '""') + '"';
-      }).join(',');
+      return r.map(function (c) { return '"' + String(c).replace(/"/g, '""') + '"'; }).join(',');
     }).join('\n');
     download('pomodoro-history.csv', csv, 'text/csv;charset=utf-8');
     toast('History exported');
   }
 
   /* =========================================================
-     12. TASKS
+     TASKS
      ========================================================= */
   function visibleTasks() {
     var q = ui.search.trim().toLowerCase();
@@ -1730,57 +2673,34 @@
       return true;
     });
   }
-
-  function canDrag() {
-    return ui.filter === 'all' && !ui.search.trim();
-  }
-
+  function canDrag() { return ui.filter === 'all' && !ui.search.trim(); }
   function updateTaskCount() {
     var active = tasks.filter(function (t) { return !t.done; }).length;
     el.taskCount.textContent = active + ' active';
   }
-
   function renderTasks() {
     var list = visibleTasks();
     var draggable = canDrag();
-
     el.taskList.innerHTML = '';
-
     var doneCount = tasks.filter(function (t) { return t.done; }).length;
     el.emptyState.classList.toggle('hidden', list.length > 0);
     el.clearDoneBtn.classList.toggle('hidden', doneCount === 0);
-
     if (list.length === 0) {
-      if (tasks.length === 0) {
-        el.emptyState.textContent = 'No tasks yet. Add one above to get started.';
-      } else if (ui.search.trim()) {
-        el.emptyState.textContent = 'No tasks match your search.';
-      } else {
-        el.emptyState.textContent = ui.filter === 'done'
-          ? 'No completed tasks yet.'
-          : 'No active tasks. Nice work.';
-      }
+      if (tasks.length === 0) el.emptyState.textContent = 'No tasks yet. Add one above to get started.';
+      else if (ui.search.trim()) el.emptyState.textContent = 'No tasks match your search.';
+      else el.emptyState.textContent = ui.filter === 'done' ? 'No completed tasks yet.' : 'No active tasks. Nice work.';
     }
-
-    list.forEach(function (task) {
-      el.taskList.appendChild(buildTaskNode(task, draggable));
-    });
-
+    list.forEach(function (task) { el.taskList.appendChild(buildTaskNode(task, draggable)); });
     updateTaskCount();
   }
-
   function buildTaskNode(task, draggable) {
     var li = document.createElement('li');
     li.className = 'task';
     li.dataset.id = task.id;
     li.draggable = !!draggable;
     if (task.id === runtime.activeTaskId) li.classList.add('is-active');
+    if (ui.editingId === task.id) return buildTaskEditor(li, task);
 
-    if (ui.editingId === task.id) {
-      return buildTaskEditor(li, task);
-    }
-
-    /* drag handle */
     var handle = document.createElement('span');
     handle.className = 'drag-handle';
     handle.innerHTML = ICONS.grip;
@@ -1788,7 +2708,6 @@
     if (!draggable) handle.style.opacity = '0.25';
     li.appendChild(handle);
 
-    /* checkbox */
     var check = document.createElement('button');
     check.type = 'button';
     check.className = 'check' + (task.done ? ' done' : '');
@@ -1797,10 +2716,8 @@
     check.innerHTML = ICONS.check;
     li.appendChild(check);
 
-    /* body */
     var body = document.createElement('div');
     body.className = 'min-w-0 flex-1';
-
     var text = document.createElement('div');
     text.className = 'break-words text-[13px] leading-snug';
     text.style.color = task.done ? 'var(--text-mute)' : 'var(--text)';
@@ -1808,32 +2725,23 @@
     text.textContent = task.text;
     body.appendChild(text);
 
-    /* meta */
     var meta = document.createElement('div');
     meta.className = 'mt-1.5 flex items-center gap-2.5';
-
     var est = document.createElement('span');
     est.className = 'tabnum text-[10.5px] text-mute';
     est.textContent = task.pomodoros + ' / ' + task.estimate;
     meta.appendChild(est);
-
     var bar = document.createElement('div');
-    bar.className = 'mini-bar';
-    bar.style.width = '58px';
+    bar.className = 'mini-bar'; bar.style.width = '58px';
     var fill = document.createElement('span');
-    var pct = clamp((task.pomodoros / task.estimate) * 100, 0, 100);
-    fill.style.width = pct + '%';
+    fill.style.width = clamp((task.pomodoros / task.estimate) * 100, 0, 100) + '%';
     if (task.done) fill.style.background = 'var(--done)';
-    bar.appendChild(fill);
-    meta.appendChild(bar);
-
+    bar.appendChild(fill); meta.appendChild(bar);
     body.appendChild(meta);
     li.appendChild(body);
 
-    /* actions */
     var actions = document.createElement('div');
     actions.className = 'flex shrink-0 items-center gap-0.5';
-
     var targetBtn = document.createElement('button');
     targetBtn.type = 'button';
     targetBtn.className = 'icon-btn' + (task.id === runtime.activeTaskId ? ' on' : '');
@@ -1842,7 +2750,6 @@
     targetBtn.title = task.id === runtime.activeTaskId ? 'Unlink from timer' : 'Link to timer';
     targetBtn.setAttribute('aria-label', targetBtn.title);
     actions.appendChild(targetBtn);
-
     var editBtn = document.createElement('button');
     editBtn.type = 'button';
     editBtn.className = 'icon-btn';
@@ -1851,7 +2758,6 @@
     editBtn.title = 'Edit task';
     editBtn.setAttribute('aria-label', 'Edit task');
     actions.appendChild(editBtn);
-
     var delBtn = document.createElement('button');
     delBtn.type = 'button';
     delBtn.className = 'icon-btn danger';
@@ -1860,220 +2766,126 @@
     delBtn.title = 'Delete task';
     delBtn.setAttribute('aria-label', 'Delete task');
     actions.appendChild(delBtn);
-
     li.appendChild(actions);
     return li;
   }
-
   function buildTaskEditor(li, task) {
     li.draggable = false;
     li.style.flexDirection = 'column';
     li.style.alignItems = 'stretch';
     li.style.gap = '10px';
-
     var input = document.createElement('input');
-    input.type = 'text';
-    input.className = 'input';
-    input.value = task.text;
+    input.type = 'text'; input.className = 'input'; input.value = task.text;
     input.maxLength = 180;
     input.setAttribute('aria-label', 'Edit task text');
-
     var row = document.createElement('div');
     row.className = 'flex items-center gap-2';
-
     var estLabel = document.createElement('span');
     estLabel.className = 'text-[11px] text-mute';
     estLabel.textContent = 'Sessions needed';
-
     var estInput = document.createElement('input');
-    estInput.type = 'number';
-    estInput.min = '1';
-    estInput.max = '20';
+    estInput.type = 'number'; estInput.min = '1'; estInput.max = '20';
     estInput.className = 'input tabnum text-center';
-    estInput.style.width = '72px';
-    estInput.style.padding = '8px 10px';
+    estInput.style.width = '72px'; estInput.style.padding = '8px 10px';
     estInput.value = task.estimate;
     estInput.setAttribute('aria-label', 'Estimated sessions');
-
-    var spacer = document.createElement('div');
-    spacer.className = 'flex-1';
-
+    var spacer = document.createElement('div'); spacer.className = 'flex-1';
     var cancelBtn = document.createElement('button');
-    cancelBtn.type = 'button';
-    cancelBtn.className = 'btn btn-ghost btn-sm';
-    cancelBtn.textContent = 'Cancel';
-    cancelBtn.dataset.act = 'cancel-edit';
-
+    cancelBtn.type = 'button'; cancelBtn.className = 'btn btn-ghost btn-sm';
+    cancelBtn.textContent = 'Cancel'; cancelBtn.dataset.act = 'cancel-edit';
     var saveBtn = document.createElement('button');
-    saveBtn.type = 'button';
-    saveBtn.className = 'btn btn-primary btn-sm';
-    saveBtn.textContent = 'Save';
-    saveBtn.dataset.act = 'save-edit';
-
-    row.appendChild(estLabel);
-    row.appendChild(estInput);
-    row.appendChild(spacer);
-    row.appendChild(cancelBtn);
-    row.appendChild(saveBtn);
-
-    li.appendChild(input);
-    li.appendChild(row);
-
+    saveBtn.type = 'button'; saveBtn.className = 'btn btn-primary btn-sm';
+    saveBtn.textContent = 'Save'; saveBtn.dataset.act = 'save-edit';
+    row.appendChild(estLabel); row.appendChild(estInput); row.appendChild(spacer);
+    row.appendChild(cancelBtn); row.appendChild(saveBtn);
+    li.appendChild(input); li.appendChild(row);
     setTimeout(function () { input.focus(); input.select(); }, 0);
-
     li.addEventListener('keydown', function (e) {
-      if (e.key === 'Enter') {
-        e.preventDefault();
-        commitEdit(task.id, input.value, estInput.value);
-      } else if (e.key === 'Escape') {
-        e.preventDefault();
-        ui.editingId = null;
-        renderTasks();
-      }
+      if (e.key === 'Enter') { e.preventDefault(); commitEdit(task.id, input.value, estInput.value); }
+      else if (e.key === 'Escape') { e.preventDefault(); ui.editingId = null; renderTasks(); }
     });
-
     li._commitEdit = function () { commitEdit(task.id, input.value, estInput.value); };
     return li;
   }
-
   function commitEdit(id, text, estimate) {
     var t = null;
     for (var i = 0; i < tasks.length; i++) if (tasks[i].id === id) t = tasks[i];
     if (!t) { ui.editingId = null; renderTasks(); return; }
-
     var clean = String(text).trim();
     if (clean) t.text = clean;
     t.estimate = clamp(parseInt(estimate, 10) || 1, 1, 20);
-
-    ui.editingId = null;
-    persistTasks();
-    renderTasks();
-    render();
+    ui.editingId = null; persistTasks(); renderTasks(); render();
   }
-
   function addTask(text) {
     var clean = String(text).trim();
     if (!clean) return;
-    tasks.unshift({
-      id: uid(),
-      text: clean,
-      done: false,
-      estimate: 1,
-      pomodoros: 0,
-      createdAt: Date.now()
-    });
-    persistTasks();
-    renderTasks();
+    tasks.unshift({ id: uid(), text: clean, done: false, estimate: 1, pomodoros: 0, createdAt: Date.now() });
+    persistTasks(); renderTasks();
   }
-
   function toggleTask(id) {
     var t = null;
     for (var i = 0; i < tasks.length; i++) if (tasks[i].id === id) t = tasks[i];
     if (!t) return;
-
     t.done = !t.done;
-
-    if (t.done) {
-      var day = todayStats();
-      day.tasksDone += 1;
-      persistStats();
-    } else {
-      var day2 = todayStats();
-      day2.tasksDone = Math.max(0, day2.tasksDone - 1);
-      persistStats();
-    }
-
-    if (t.done && runtime.activeTaskId === id) {
-      runtime.activeTaskId = null;
-      persistSession();
-    }
-
-    persistTasks();
-    renderTasks();
-    render();
+    var day = todayStats();
+    day.tasksDone = t.done ? day.tasksDone + 1 : Math.max(0, day.tasksDone - 1);
+    persistStats();
+    if (t.done && runtime.activeTaskId === id) { runtime.activeTaskId = null; persistSession(); }
+    persistTasks(); renderTasks(); render();
   }
-
   function deleteTask(id) {
     tasks = tasks.filter(function (t) { return t.id !== id; });
-    if (runtime.activeTaskId === id) {
-      runtime.activeTaskId = null;
-      persistSession();
-    }
-    persistTasks();
-    renderTasks();
-    render();
+    if (runtime.activeTaskId === id) { runtime.activeTaskId = null; persistSession(); }
+    persistTasks(); renderTasks(); render();
   }
-
   function setActiveTask(id) {
-    if (runtime.activeTaskId === id) {
-      runtime.activeTaskId = null;
-      toast('Task unlinked from timer');
-    } else {
-      runtime.activeTaskId = id;
-      var t = activeTask();
-      if (t) toast('Now working on: ' + t.text);
-    }
-    persistSession();
-    renderTasks();
-    render();
+    if (runtime.activeTaskId === id) { runtime.activeTaskId = null; toast('Task unlinked from timer'); }
+    else { runtime.activeTaskId = id; var t = activeTask(); if (t) toast('Now working on: ' + t.text); }
+    persistSession(); renderTasks(); render();
   }
 
   /* =========================================================
-     13. DRAG AND DROP
+     DRAG & DROP
      ========================================================= */
   function onDragStart(e) {
     var li = e.target.closest ? e.target.closest('li[data-id]') : null;
     if (!li || !canDrag()) { e.preventDefault(); return; }
     ui.dragId = li.dataset.id;
     li.classList.add('is-dragging');
-    try {
-      e.dataTransfer.effectAllowed = 'move';
-      e.dataTransfer.setData('text/plain', ui.dragId);
-    } catch (err) { /* ignore */ }
+    try { e.dataTransfer.effectAllowed = 'move'; e.dataTransfer.setData('text/plain', ui.dragId); } catch (err) {}
   }
-
   function onDragOver(e) {
     if (!ui.dragId) return;
     e.preventDefault();
     try { e.dataTransfer.dropEffect = 'move'; } catch (err) {}
-
     var overLi = e.target.closest ? e.target.closest('li[data-id]') : null;
     if (!overLi) return;
-
     var dragLi = el.taskList.querySelector('li[data-id="' + ui.dragId + '"]');
     if (!dragLi || overLi === dragLi) return;
-
     var rect = overLi.getBoundingClientRect();
     var after = e.clientY > rect.top + rect.height / 2;
     el.taskList.insertBefore(dragLi, after ? overLi.nextSibling : overLi);
   }
-
   function onDragEnd() {
     if (!ui.dragId) return;
-
     var order = $$('li[data-id]', el.taskList).map(function (li) { return li.dataset.id; });
     var dragged = el.taskList.querySelector('li[data-id="' + ui.dragId + '"]');
     if (dragged) dragged.classList.remove('is-dragging');
-
     if (order.length) {
       var map = {};
       tasks.forEach(function (t) { map[t.id] = t; });
-
-      var reordered = order.map(function (id) { return map[id]; }).filter(Boolean);
       var visible = {};
       order.forEach(function (id) { visible[id] = true; });
-      var hidden = tasks.filter(function (t) { return !visible[t.id]; });
-
-      tasks = reordered.concat(hidden);
+      tasks = order.map(function (id) { return map[id]; }).filter(Boolean)
+        .concat(tasks.filter(function (t) { return !visible[t.id]; }));
       persistTasks();
     }
-
     ui.dragId = null;
     renderTasks();
   }
 
   /* =========================================================
-     14. MODALS / FOCUS MODE
+     MODALS / FOCUS
      ========================================================= */
   function openModal(node) {
     node.classList.remove('hidden');
@@ -2081,85 +2893,99 @@
     var focusable = node.querySelector('button, input, [tabindex]');
     if (focusable) setTimeout(function () { focusable.focus(); }, 40);
   }
-
   function closeModal(node) {
     node.classList.add('hidden');
     if (el.statsModal.classList.contains('hidden') && el.helpModal.classList.contains('hidden')) {
       document.body.style.overflow = '';
     }
   }
-
-  function closeAllModals() {
-    closeModal(el.statsModal);
-    closeModal(el.helpModal);
-  }
-
   function enterFocusMode() {
     ui.focusMode = true;
     el.focusOverlay.classList.remove('hidden');
     document.body.style.overflow = 'hidden';
-    el.focusBtn.innerHTML = ICONS.shrink;
     render();
   }
-
   function exitFocusMode() {
     ui.focusMode = false;
     el.focusOverlay.classList.add('hidden');
     document.body.style.overflow = '';
-    el.focusBtn.innerHTML = ICONS.expand;
+    render();
   }
-
-  function toggleFocusMode() {
-    if (ui.focusMode) exitFocusMode(); else enterFocusMode();
-  }
-
+  function toggleFocusMode() { if (ui.focusMode) exitFocusMode(); else enterFocusMode(); }
   function renderHelp() {
     var rows = [
       ['Space', 'Start or pause the timer'],
       ['R', 'Reset the current session'],
       ['S', 'Skip to the next session'],
       ['F', 'Toggle focus mode'],
+      ['D', 'Switch between Classic and Flight Deck'],
+      ['V', 'Swap between PFD and ND'],
       ['N', 'Jump to the new task field'],
       ['1 / 2 / 3', 'Switch to Focus, Short Break, or Long Break'],
       ['T', 'Toggle light and dark theme'],
       ['?', 'Open this shortcuts panel'],
       ['Esc', 'Close panels and exit focus mode']
     ];
-
     var html = '<div class="space-y-2">';
     rows.forEach(function (r) {
       html += '<div class="flex items-center justify-between gap-4 rounded-xl border px-3.5 py-2.5" ' +
               'style="border-color:var(--border);background:var(--surface-2)">' +
               '<span class="text-[12.5px] text-dim">' + r[1] + '</span>' +
-              '<span class="kbd shrink-0">' + r[0] + '</span>' +
-              '</div>';
+              '<span class="kbd shrink-0">' + r[0] + '</span></div>';
     });
     html += '</div>';
-
     html += '<div class="mt-5 rounded-xl border px-4 py-3" style="border-color:var(--border);background:var(--surface-2)">' +
-            '<p class="text-[12px] text-mute">Shortcuts are ignored while you are typing in a text field.</p>' +
-            '</div>';
-
+            '<p class="text-[12px] text-mute">Shortcuts are ignored while you are typing in a text field.</p></div>';
+    if (settings.deck === 'flight') {
+      html += '<div class="mt-4 rounded-xl border px-4 py-3" style="border-color:var(--border);background:var(--surface-2)">' +
+              '<p class="text-[12px] text-mute">Flight Deck: focus sessions fly ' + flight.dep + ' to ' + flight.arr +
+              '. Press V or click the ND tab to see the navigation display. Engine spool, wind, and TCAS traffic all update in real time.</p></div>';
+    }
     el.helpContent.innerHTML = html;
   }
 
   /* =========================================================
-     15. EVENTS
+     DISPLAY TOGGLE
+     ========================================================= */
+  function setDisplayMode(mode) {
+    flightSim.displayMode = mode;
+    var isND = mode === 'nd';
+    el.pfd.classList.toggle('hidden', isND);
+    el.nd.classList.toggle('hidden', !isND);
+    el.ndControls.classList.toggle('hidden', !isND);
+    $$('.display-tab').forEach(function (b) {
+      var on = b.dataset.display === mode;
+      b.classList.toggle('active', on);
+      b.setAttribute('aria-selected', String(on));
+    });
+  }
+
+  function setNDRange(r) {
+    flightSim.ndRange = r;
+    $$('.range-btn').forEach(function (b) {
+      b.classList.toggle('active', parseInt(b.dataset.range, 10) === r);
+    });
+  }
+
+  /* =========================================================
+     EVENTS
      ========================================================= */
   function bindEvents() {
-
-    /* --- Timer controls --- */
-    el.startBtn.addEventListener('click', toggle);
+    el.startBtn.addEventListener('click', function () {
+      if (settings.sound && settings.deck === 'flight') startEngineAudio();
+      toggle();
+    });
     el.resetBtn.addEventListener('click', reset);
     el.skipBtn.addEventListener('click', skip);
     el.focusBtn.addEventListener('click', toggleFocusMode);
-
-    el.focusStartBtn.addEventListener('click', toggle);
+    el.focusStartBtn.addEventListener('click', function () {
+      if (settings.sound && settings.deck === 'flight') startEngineAudio();
+      toggle();
+    });
     el.focusResetBtn.addEventListener('click', reset);
     el.focusSkipBtn.addEventListener('click', skip);
     el.exitFocusBtn.addEventListener('click', exitFocusMode);
 
-    /* --- Mode tabs --- */
     el.modeTabs.addEventListener('click', function (e) {
       var btn = e.target.closest('.seg-btn');
       if (!btn) return;
@@ -2168,14 +2994,10 @@
       setMode(mode, false);
     });
 
-    /* --- Adjust buttons --- */
     $$('[data-adjust]').forEach(function (btn) {
-      btn.addEventListener('click', function () {
-        adjust(parseInt(btn.dataset.adjust, 10));
-      });
+      btn.addEventListener('click', function () { adjust(parseInt(btn.dataset.adjust, 10)); });
     });
 
-    /* --- Settings toggle --- */
     el.settingsToggle.addEventListener('click', function () {
       ui.settingsOpen = !ui.settingsOpen;
       el.settingsPanel.classList.toggle('open', ui.settingsOpen);
@@ -2183,54 +3005,75 @@
       el.settingsChev.innerHTML = ICONS.chevron;
     });
 
-    /* --- Duration inputs --- */
     function readDurations() {
       var prevTotal = totalFor(runtime.mode);
-
       settings.work = clamp(parseInt(el.workInput.value, 10) || 25, 1, 180);
       settings.short = clamp(parseInt(el.shortInput.value, 10) || 5, 1, 60);
       settings.long = clamp(parseInt(el.longInput.value, 10) || 15, 1, 90);
       settings.longEvery = clamp(parseInt(el.everyInput.value, 10) || 4, 1, 12);
-
       el.workInput.value = settings.work;
       el.shortInput.value = settings.short;
       el.longInput.value = settings.long;
       el.everyInput.value = settings.longEvery;
-
       var newTotal = totalFor(runtime.mode);
-
       if (!runtime.running) {
-        if (Math.abs(runtime.remaining - prevTotal) < 0.6) {
-          runtime.remaining = newTotal;
-        } else {
-          runtime.remaining = Math.min(runtime.remaining, newTotal);
-        }
+        if (Math.abs(runtime.remaining - prevTotal) < 0.6) runtime.remaining = newTotal;
+        else runtime.remaining = Math.min(runtime.remaining, newTotal);
       }
-
-      persistSettings();
-      persistSession();
-      render();
+      persistSettings(); persistSession(); render();
     }
-
     [el.workInput, el.shortInput, el.longInput, el.everyInput].forEach(function (input) {
       input.addEventListener('change', readDurations);
       input.addEventListener('blur', readDurations);
     });
 
-    /* --- Settings switches --- */
     $$('[data-setting]').forEach(function (btn) {
       btn.addEventListener('click', function () {
         var key = btn.dataset.setting;
+        if (key === 'deckFlight') {
+          settings.deck = settings.deck === 'flight' ? 'classic' : 'flight';
+          persistSettings(); applyTheme();
+          if (settings.deck === 'flight') {
+            if (!flightSim.routePoints.length) resetFlightSim();
+            renderRoute();
+          }
+          render();
+          toast(settings.deck === 'flight' ? 'Flight Deck engaged' : 'Classic timer restored');
+          return;
+        }
         settings[key] = !settings[key];
         btn.setAttribute('aria-checked', String(settings[key]));
-        persistSettings();
-        applyTheme();
-        if (key === 'sound' && settings.sound) beep();
+        persistSettings(); applyTheme();
+        if (key === 'sound') {
+          if (settings.sound && settings.deck === 'flight') startEngineAudio();
+          else silenceEngineAudio();
+          if (settings.sound) beep();
+        }
         if (key === 'vibrate' && settings.vibrate) vibrate();
       });
     });
 
-    /* --- Task form --- */
+    el.deckBtn.addEventListener('click', function () {
+      settings.deck = settings.deck === 'flight' ? 'classic' : 'flight';
+      persistSettings(); applyTheme();
+      if (settings.deck === 'flight') {
+        if (!flightSim.routePoints.length) resetFlightSim();
+        renderRoute();
+      }
+      render();
+      toast(settings.deck === 'flight' ? 'Flight Deck engaged' : 'Classic timer restored');
+    });
+
+    /* Display tabs */
+    $$('.display-tab').forEach(function (b) {
+      b.addEventListener('click', function () { setDisplayMode(b.dataset.display); });
+    });
+
+    /* Range selector */
+    $$('.range-btn').forEach(function (b) {
+      b.addEventListener('click', function () { setNDRange(parseInt(b.dataset.range, 10)); });
+    });
+
     el.taskForm.addEventListener('submit', function (e) {
       e.preventDefault();
       addTask(el.taskInput.value);
@@ -2238,16 +3081,13 @@
       el.taskInput.focus();
     });
 
-    /* --- Task list interactions --- */
     el.taskList.addEventListener('click', function (e) {
       var btn = e.target.closest('button[data-act]');
       if (!btn) return;
-
       var li = btn.closest('li[data-id]');
       if (!li) return;
       var id = li.dataset.id;
       var act = btn.dataset.act;
-
       if (act === 'toggle') toggleTask(id);
       else if (act === 'delete') deleteTask(id);
       else if (act === 'active') setActiveTask(id);
@@ -2256,13 +3096,11 @@
       else if (act === 'save-edit') { if (li._commitEdit) li._commitEdit(); }
     });
 
-    /* --- Drag and drop --- */
     el.taskList.addEventListener('dragstart', onDragStart);
     el.taskList.addEventListener('dragover', onDragOver);
     el.taskList.addEventListener('drop', function (e) { e.preventDefault(); });
     el.taskList.addEventListener('dragend', onDragEnd);
 
-    /* --- Filters --- */
     el.taskFilters.addEventListener('click', function (e) {
       var btn = e.target.closest('.seg-btn');
       if (!btn) return;
@@ -2275,40 +3113,25 @@
       renderTasks();
     });
 
-    /* --- Search --- */
     el.taskSearch.addEventListener('input', function () {
       ui.search = el.taskSearch.value;
       renderTasks();
     });
 
-    /* --- Clear done --- */
     el.clearDoneBtn.addEventListener('click', function () {
       var removed = tasks.filter(function (t) { return t.done; }).length;
       tasks = tasks.filter(function (t) { return !t.done; });
-      persistTasks();
-      renderTasks();
+      persistTasks(); renderTasks();
       toast(removed + (removed === 1 ? ' task cleared' : ' tasks cleared'));
     });
 
-    /* --- Active task clear --- */
     el.clearActiveTask.addEventListener('click', function () {
-      runtime.activeTaskId = null;
-      persistSession();
-      renderTasks();
-      render();
+      runtime.activeTaskId = null; persistSession(); renderTasks(); render();
     });
 
-    el.clearActiveTask.innerHTML = ICONS.x;
-
-    /* --- Export / Import --- */
     el.exportTasksBtn.addEventListener('click', function () {
       if (!tasks.length) { toast('No tasks to export'); return; }
-      var payload = {
-        app: 'pomodoro-focus',
-        version: 2,
-        exportedAt: new Date().toISOString(),
-        tasks: tasks
-      };
+      var payload = { app: 'pomodoro-focus', version: 4, exportedAt: new Date().toISOString(), tasks: tasks };
       download('pomodoro-tasks.json', JSON.stringify(payload, null, 2), 'application/json');
       toast('Tasks exported');
     });
@@ -2318,17 +3141,14 @@
     el.importFile.addEventListener('change', function () {
       var file = el.importFile.files && el.importFile.files[0];
       if (!file) return;
-
       var reader = new FileReader();
       reader.onload = function () {
         try {
           var parsed = JSON.parse(String(reader.result));
           var incoming = Array.isArray(parsed) ? parsed : (parsed && parsed.tasks);
-          if (!Array.isArray(incoming)) throw new Error('bad format');
-
+          if (!Array.isArray(incoming)) throw new Error('bad');
           var existing = {};
           tasks.forEach(function (t) { existing[t.text.toLowerCase() + '|' + t.done] = true; });
-
           var added = 0;
           incoming.forEach(function (raw) {
             if (!raw || typeof raw.text !== 'string' || !raw.text.trim()) return;
@@ -2336,69 +3156,45 @@
             if (existing[key]) return;
             existing[key] = true;
             tasks.push({
-              id: uid(),
-              text: raw.text.trim().slice(0, 180),
-              done: !!raw.done,
+              id: uid(), text: raw.text.trim().slice(0, 180), done: !!raw.done,
               estimate: clamp(parseInt(raw.estimate, 10) || 1, 1, 20),
               pomodoros: Math.max(0, parseInt(raw.pomodoros, 10) || 0),
               createdAt: raw.createdAt || Date.now()
             });
             added++;
           });
-
-          persistTasks();
-          renderTasks();
+          persistTasks(); renderTasks();
           toast(added ? added + ' tasks imported' : 'No new tasks found');
-        } catch (err) {
-          toast('Could not read that file');
-        }
+        } catch (err) { toast('Could not read that file'); }
         el.importFile.value = '';
       };
       reader.readAsText(file);
     });
 
-    /* --- Header buttons --- */
     el.themeBtn.addEventListener('click', function () {
       settings.theme = settings.theme === 'light' ? 'dark' : 'light';
-      persistSettings();
-      applyTheme();
+      persistSettings(); applyTheme();
     });
 
     el.notifyBtn.addEventListener('click', function () {
-      if (!('Notification' in window)) {
-        toast('Notifications are not supported here');
-        return;
-      }
+      if (!('Notification' in window)) { toast('Notifications are not supported here'); return; }
       if (Notification.permission === 'granted') {
         settings.notifications = !settings.notifications;
-        persistSettings();
-        updateNotifyButton();
+        persistSettings(); updateNotifyButton();
         toast(settings.notifications ? 'Notifications enabled' : 'Notifications disabled');
         return;
       }
-      if (Notification.permission === 'denied') {
-        toast('Notifications are blocked in your browser settings');
-        return;
-      }
+      if (Notification.permission === 'denied') { toast('Notifications are blocked in your browser settings'); return; }
       Notification.requestPermission().then(function (p) {
         settings.notifications = (p === 'granted');
-        persistSettings();
-        updateNotifyButton();
+        persistSettings(); updateNotifyButton();
         toast(p === 'granted' ? 'Notifications enabled' : 'Notifications not enabled');
       });
     });
 
-    el.statsBtn.addEventListener('click', function () {
-      renderStats();
-      openModal(el.statsModal);
-    });
+    el.statsBtn.addEventListener('click', function () { renderStats(); openModal(el.statsModal); });
+    el.helpBtn.addEventListener('click', function () { renderHelp(); openModal(el.helpModal); });
 
-    el.helpBtn.addEventListener('click', function () {
-      renderHelp();
-      openModal(el.helpModal);
-    });
-
-    /* --- Modal close --- */
     $$('[data-close]').forEach(function (node) {
       node.addEventListener('click', function () {
         var root = node.closest('.modal-root');
@@ -2406,7 +3202,6 @@
       });
     });
 
-    /* --- Visibility change (auto-pause) --- */
     document.addEventListener('visibilitychange', function () {
       if (document.hidden && settings.autoPauseHidden && runtime.running) {
         pause();
@@ -2414,75 +3209,72 @@
       }
     });
 
-    /* --- Keyboard shortcuts --- */
     document.addEventListener('keydown', function (e) {
       var tag = (e.target.tagName || '').toLowerCase();
       var typing = tag === 'input' || tag === 'textarea' || tag === 'select' || e.target.isContentEditable;
-
       if (e.key === 'Escape') {
         if (!el.statsModal.classList.contains('hidden')) { closeModal(el.statsModal); return; }
         if (!el.helpModal.classList.contains('hidden')) { closeModal(el.helpModal); return; }
         if (ui.focusMode) { exitFocusMode(); return; }
         if (ui.editingId) { ui.editingId = null; renderTasks(); return; }
       }
-
       if (typing) return;
-
       var key = e.key;
-
-      if (e.code === 'Space' || key === ' ') {
-        e.preventDefault();
-        toggle();
-        return;
-      }
-
+      if (e.code === 'Space' || key === ' ') { e.preventDefault(); toggle(); return; }
       if (key === 'r' || key === 'R') { e.preventDefault(); reset(); return; }
       if (key === 's' || key === 'S') { e.preventDefault(); skip(); return; }
       if (key === 'f' || key === 'F') { e.preventDefault(); toggleFocusMode(); return; }
+      if (key === 'd' || key === 'D') {
+        e.preventDefault();
+        settings.deck = settings.deck === 'flight' ? 'classic' : 'flight';
+        persistSettings(); applyTheme();
+        if (settings.deck === 'flight') {
+          if (!flightSim.routePoints.length) resetFlightSim();
+          renderRoute();
+        }
+        render();
+        toast(settings.deck === 'flight' ? 'Flight Deck engaged' : 'Classic timer restored');
+        return;
+      }
+      if (key === 'v' || key === 'V') {
+        if (settings.deck === 'flight') {
+          e.preventDefault();
+          setDisplayMode(flightSim.displayMode === 'pfd' ? 'nd' : 'pfd');
+        }
+        return;
+      }
       if (key === 't' || key === 'T') {
         e.preventDefault();
         settings.theme = settings.theme === 'light' ? 'dark' : 'light';
-        persistSettings();
-        applyTheme();
+        persistSettings(); applyTheme();
         return;
       }
       if (key === 'n' || key === 'N') {
         e.preventDefault();
-        el.taskInput.focus();
-        el.taskInput.select();
+        el.taskInput.focus(); el.taskInput.select();
         return;
       }
-      if (key === '?') {
-        e.preventDefault();
-        renderHelp();
-        openModal(el.helpModal);
-        return;
-      }
+      if (key === '?') { e.preventDefault(); renderHelp(); openModal(el.helpModal); return; }
       if (key === '1') { setMode('work', false); return; }
       if (key === '2') { setMode('short', false); return; }
       if (key === '3') { setMode('long', false); return; }
     });
 
-    /* --- Save on unload --- */
     window.addEventListener('beforeunload', function () {
-      persistSession();
-      persistSettings();
-      persistTasks();
+      persistSession(); persistSettings(); persistTasks();
     });
   }
 
   /* =========================================================
-     16. INIT
+     INIT
      ========================================================= */
   function restoreSession() {
     var saved = load(STORE.session, null);
     if (!saved || typeof saved !== 'object') return;
-
     if (MODES[saved.mode]) runtime.mode = saved.mode;
     if (saved.activeTaskId && tasks.some(function (t) { return t.id === saved.activeTaskId; })) {
       runtime.activeTaskId = saved.activeTaskId;
     }
-
     if (saved.running && typeof saved.endTime === 'number') {
       var rem = (saved.endTime - Date.now()) / 1000;
       if (rem > 0.5) {
@@ -2496,7 +3288,6 @@
       }
       return;
     }
-
     if (typeof saved.remaining === 'number' && saved.remaining > 0) {
       runtime.remaining = Math.min(saved.remaining, totalFor(runtime.mode));
     } else {
@@ -2507,7 +3298,6 @@
   function init() {
     setupIconAndManifest();
     applyTheme();
-    syncSettingsUI();
     updateNotifyButton();
 
     el.ring.style.strokeDasharray = String(CIRC);
@@ -2518,14 +3308,29 @@
     el.settingsChev.innerHTML = ICONS.chevron;
     el.clearActiveTask.innerHTML = ICONS.x;
 
-    /* default filter */
     ui.filter = 'all';
     $$('.seg-btn', el.taskFilters).forEach(function (b) {
       b.classList.toggle('active', b.dataset.filter === 'all');
     });
 
-    restoreSession();
+    /* Initialize flight sim route */
+    flightSim.totalNM = 800 + Math.random() * 4200;
+    flightSim.routePoints = buildRoutePoints();
+    flightSim.windDir = 200 + Math.random() * 160;
+    flightSim.windSpd = 20 + Math.random() * 60;
+    spawnTraffic();
+    renderRoute();
 
+    if (settings.deck === 'flight') {
+      buildPFD();
+      initND();
+      startFlightAnim();
+    }
+
+    setDisplayMode('pfd');
+    setNDRange(40);
+
+    restoreSession();
     bindEvents();
     renderTasks();
     render();
@@ -2533,6 +3338,7 @@
     if (runtime.running) {
       stopClock();
       intervalId = setInterval(tick, TICK_MS);
+      if (settings.deck === 'flight') startEngineAudio();
     }
 
     if (pendingResumeCredit) {
