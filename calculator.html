@@ -1,0 +1,1132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Scientific Calculator</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.8.0/math.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg-0: #070b16;
+    --bg-1: #0d1424;
+    --bg-2: #131c30;
+    --line: rgba(255,255,255,.07);
+  }
+  * { box-sizing: border-box; }
+
+  body {
+    font-family: 'Inter', system-ui, sans-serif;
+    background:
+      radial-gradient(1100px 600px at 12% -10%, rgba(99,102,241,.20), transparent 60%),
+      radial-gradient(900px 500px at 100% 0%, rgba(236,72,153,.14), transparent 55%),
+      linear-gradient(160deg, #070b16 0%, #0b1120 45%, #070b16 100%);
+    background-attachment: fixed;
+  }
+
+  .mono { font-family: 'Fira Code', ui-monospace, monospace; }
+
+  /* ---------- Panels ---------- */
+  .panel {
+    background: linear-gradient(180deg, rgba(23,32,52,.82), rgba(15,22,38,.78));
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+    border: 1px solid var(--line);
+    box-shadow: 0 18px 45px -22px rgba(0,0,0,.9), inset 0 1px 0 rgba(255,255,255,.04);
+  }
+
+  /* ---------- Keypad ---------- */
+  .key {
+    display: flex; align-items: center; justify-content: center;
+    min-height: 2.9rem;
+    border-radius: .8rem;
+    font-size: .8rem;
+    font-weight: 500;
+    letter-spacing: .01em;
+    color: #e2e8f0;
+    background: rgba(30,41,59,.75);
+    border: 1px solid rgba(255,255,255,.06);
+    transition: transform .07s ease, background-color .15s ease, border-color .15s ease, box-shadow .15s ease;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+    cursor: pointer;
+  }
+  .key:hover { background: rgba(51,65,85,.85); border-color: rgba(255,255,255,.13); }
+  .key:active { transform: scale(.94); }
+
+  .key-num  { background: rgba(15,23,42,.9); color:#f8fafc; font-weight:600; font-size:1.02rem; }
+  .key-num:hover { background: rgba(30,41,59,1); }
+
+  .key-op   { background: rgba(49,46,129,.45); color:#c7d2fe; font-weight:600; font-size:1.02rem; border-color: rgba(99,102,241,.22); }
+  .key-op:hover { background: rgba(67,56,202,.55); }
+
+  .key-fn   { background: rgba(30,41,59,.6); color:#a5b4fc; }
+  .key-fn:hover { background: rgba(51,65,85,.8); }
+
+  .key-const{ background: rgba(76,29,149,.35); color:#d8b4fe; border-color: rgba(168,85,247,.22); }
+  .key-const:hover { background: rgba(88,28,135,.5); }
+
+  .key-danger { background: rgba(127,29,29,.45); color:#fecaca; border-color: rgba(244,63,94,.25); }
+  .key-danger:hover { background: rgba(153,27,27,.6); }
+
+  .key-eq {
+    background: linear-gradient(135deg,#6366f1,#8b5cf6);
+    color:#fff; font-weight:700; font-size:1.15rem;
+    border-color: rgba(165,180,252,.35);
+    box-shadow: 0 8px 22px -8px rgba(99,102,241,.85);
+  }
+  .key-eq:hover { background: linear-gradient(135deg,#818cf8,#a78bfa); }
+
+  .key-toggle-on {
+    background: rgba(99,102,241,.85) !important;
+    color: #fff !important;
+    border-color: rgba(165,180,252,.5) !important;
+  }
+
+  /* ---------- Tabs ---------- */
+  .tab-btn {
+    position: relative;
+    white-space: nowrap;
+    transition: all .18s ease;
+  }
+  .tab-btn.active {
+    background: linear-gradient(135deg, rgba(99,102,241,.95), rgba(139,92,246,.95));
+    color: #fff;
+    box-shadow: 0 6px 18px -8px rgba(99,102,241,.9);
+  }
+
+  /* ---------- Display ---------- */
+  #main-display::placeholder { color: rgba(148,163,184,.35); }
+
+  /* ---------- Scrollbars ---------- */
+  ::-webkit-scrollbar { width: 7px; height: 7px; }
+  ::-webkit-scrollbar-track { background: rgba(15,23,42,.5); border-radius: 4px; }
+  ::-webkit-scrollbar-thumb { background: rgba(99,102,241,.42); border-radius: 4px; }
+  ::-webkit-scrollbar-thumb:hover { background: rgba(99,102,241,.75); }
+  .no-scrollbar::-webkit-scrollbar { display: none; }
+
+  .mat-cell {
+    background: rgba(2,6,23,.85);
+    border: 1px solid rgba(255,255,255,.09);
+    border-radius: .5rem;
+    padding: .4rem;
+    text-align: center;
+    font-size: .78rem;
+    color: #fff;
+    outline: none;
+    transition: border-color .15s, box-shadow .15s;
+    width: 100%;
+    min-width: 0;
+  }
+  .mat-cell:focus { border-color: #ec4899; box-shadow: 0 0 0 3px rgba(236,72,153,.15); }
+
+  input[type=number]::-webkit-outer-spin-button,
+  input[type=number]::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+  input[type=number] { -moz-appearance: textfield; }
+
+  @keyframes fadeUp { from { opacity:0; transform: translateY(4px);} to {opacity:1; transform:none;} }
+  .fade-up { animation: fadeUp .18s ease-out; }
+
+  @media (max-width: 420px) {
+    .key { min-height: 2.55rem; font-size: .72rem; border-radius: .65rem; }
+    .key-num { font-size: .92rem; }
+    .key-op  { font-size: .92rem; }
+    .key-eq  { font-size: 1rem; }
+  }
+</style>
+</head>
+<body class="min-h-screen text-slate-100 flex flex-col p-2 sm:p-4 md:p-6">
+
+<!-- ══════════════ HEADER ══════════════ -->
+<header class="max-w-7xl mx-auto w-full mb-4 flex flex-col lg:flex-row justify-between items-center gap-3">
+  <div class="flex items-center gap-3">
+    <div class="w-11 h-11 rounded-2xl bg-gradient-to-br from-indigo-500 to-fuchsia-600 flex items-center justify-center shadow-lg shadow-indigo-600/30 text-white font-bold text-lg mono select-none">
+      ƒx
+    </div>
+    <div>
+      <h1 class="text-xl sm:text-2xl font-bold bg-gradient-to-r from-indigo-300 via-purple-200 to-pink-300 bg-clip-text text-transparent leading-tight">
+        calulator
+      </h1>
+      <p class="text-[11px] sm:text-xs text-slate-400">Scientific · Calculus · Programmer · Statistics · Matrix</p>
+    </div>
+  </div>
+
+  <nav class="flex bg-slate-900/70 p-1 rounded-xl border border-slate-800 text-xs sm:text-sm overflow-x-auto no-scrollbar max-w-full">
+    <button data-tab="scientific" class="tab-btn active px-3 py-1.5 rounded-lg font-medium text-slate-400">Scientific</button>
+    <button data-tab="calculus"   class="tab-btn px-3 py-1.5 rounded-lg font-medium text-slate-400">Calculus</button>
+    <button data-tab="programmer" class="tab-btn px-3 py-1.5 rounded-lg font-medium text-slate-400">Programmer</button>
+    <button data-tab="stats"      class="tab-btn px-3 py-1.5 rounded-lg font-medium text-slate-400">Statistics</button>
+    <button data-tab="matrix"     class="tab-btn px-3 py-1.5 rounded-lg font-medium text-slate-400">Matrix</button>
+  </nav>
+</header>
+
+<!-- ══════════════ MAIN ══════════════ -->
+<main class="max-w-7xl mx-auto w-full flex-1 grid grid-cols-1 lg:grid-cols-12 gap-4 items-start">
+
+  <!-- ───────── LEFT COLUMN ───────── -->
+  <div class="lg:col-span-8 flex flex-col gap-4">
+
+    <!-- Display -->
+    <section class="panel rounded-2xl p-4 relative overflow-hidden">
+      <div class="flex justify-between items-center text-[11px] mono text-slate-400 mb-2 pb-2 border-b border-slate-800/80">
+        <div class="flex items-center gap-1.5">
+          <span id="angle-badge"  class="px-2 py-0.5 rounded-md bg-indigo-950/80 text-indigo-300 font-semibold border border-indigo-800/50">DEG</span>
+          <span id="memory-badge" class="hidden px-2 py-0.5 rounded-md bg-amber-950/80 text-amber-300 border border-amber-800/50">M</span>
+          <span id="base-badge"   class="hidden px-2 py-0.5 rounded-md bg-emerald-950/80 text-emerald-300 border border-emerald-800/50">DEC</span>
+        </div>
+        <div id="live-preview" class="text-indigo-300 font-semibold truncate max-w-[45%]"></div>
+      </div>
+
+      <div id="expr-history" class="text-right text-slate-500 mono text-xs sm:text-sm h-5 overflow-x-auto whitespace-nowrap no-scrollbar">0</div>
+
+      <div class="flex items-center justify-between gap-3 mt-1">
+        <span id="eval-error" class="text-[11px] text-rose-400 mono hidden shrink-0">Error</span>
+        <input id="main-display" type="text" inputmode="text" autocomplete="off" spellcheck="false"
+               class="w-full bg-transparent text-right mono text-2xl sm:text-4xl font-bold text-white focus:outline-none tracking-wide min-w-0"
+               value="0" placeholder="0">
+      </div>
+    </section>
+
+    <!-- ───── SCIENTIFIC ───── -->
+    <section id="view-scientific" class="mode-view space-y-3">
+
+      <!-- Toolbar -->
+      <div class="flex flex-wrap gap-2 justify-between items-center">
+        <div class="flex bg-slate-900/70 p-1 rounded-xl border border-slate-800 text-[11px] sm:text-xs">
+          <button data-angle="DEG"  class="angle-btn px-3 py-1 rounded-lg font-semibold bg-indigo-600 text-white">DEG</button>
+          <button data-angle="RAD"  class="angle-btn px-3 py-1 rounded-lg font-medium text-slate-400 hover:text-white">RAD</button>
+          <button data-angle="GRAD" class="angle-btn px-3 py-1 rounded-lg font-medium text-slate-400 hover:text-white">GRAD</button>
+        </div>
+
+        <div class="flex flex-wrap gap-1.5 text-[11px] sm:text-xs">
+          <button id="btn-2nd" class="px-2.5 py-1.5 rounded-lg bg-slate-800/80 text-slate-300 border border-slate-700 hover:bg-slate-700 transition">2nd</button>
+          <button id="btn-hyp" class="px-2.5 py-1.5 rounded-lg bg-slate-800/80 text-slate-300 border border-slate-700 hover:bg-slate-700 transition">hyp</button>
+          <button onclick="memoryClear()"  class="px-2.5 py-1.5 rounded-lg bg-amber-950/40 text-amber-300 border border-amber-900/50 hover:bg-amber-900/40 transition">MC</button>
+          <button onclick="memoryRecall()" class="px-2.5 py-1.5 rounded-lg bg-amber-950/40 text-amber-300 border border-amber-900/50 hover:bg-amber-900/40 transition">MR</button>
+          <button onclick="memoryAdd()"    class="px-2.5 py-1.5 rounded-lg bg-amber-950/40 text-amber-300 border border-amber-900/50 hover:bg-amber-900/40 transition">M+</button>
+          <button onclick="memorySub()"    class="px-2.5 py-1.5 rounded-lg bg-amber-950/40 text-amber-300 border border-amber-900/50 hover:bg-amber-900/40 transition">M−</button>
+        </div>
+      </div>
+
+      <!-- 5 × 8 Keypad -->
+      <div class="grid grid-cols-5 gap-1.5 sm:gap-2">
+
+        <!-- Row 1 -->
+        <button id="trig-1" data-fn="sin" onclick="appendFunc(this.dataset.fn)" class="key key-fn">sin</button>
+        <button id="trig-2" data-fn="cos" onclick="appendFunc(this.dataset.fn)" class="key key-fn">cos</button>
+        <button id="trig-3" data-fn="tan" onclick="appendFunc(this.dataset.fn)" class="key key-fn">tan</button>
+        <button onclick="appendFunc('ln')"    class="key key-fn">ln</button>
+        <button onclick="appendFunc('log10')" class="key key-fn">log</button>
+
+        <!-- Row 2 -->
+        <button onclick="applyPostfix('^2')" class="key key-fn">x²</button>
+        <button onclick="applyPostfix('^3')" class="key key-fn">x³</button>
+        <button onclick="appendOp('^')"      class="key key-fn">xʸ</button>
+        <button onclick="appendFunc('sqrt')" class="key key-fn">√x</button>
+        <button onclick="appendFunc('cbrt')" class="key key-fn">∛x</button>
+
+        <!-- Row 3 -->
+        <button onclick="appendSymbol('(')" class="key key-fn">(</button>
+        <button onclick="appendSymbol(')')" class="key key-fn">)</button>
+        <button onclick="appendSymbol('π')" class="key key-const">π</button>
+        <button onclick="appendSymbol('e')" class="key key-const">e</button>
+        <button onclick="appendSymbol('ϕ')" class="key key-const">ϕ</button>
+
+        <!-- Row 4 -->
+        <button onclick="applyPostfix('!')"   class="key key-fn">n!</button>
+        <button onclick="appendFunc('abs')"   class="key key-fn">|x|</button>
+        <button onclick="appendOp('mod')"     class="key key-fn">mod</button>
+        <button onclick="appendFunc('exp')"   class="key key-fn">eˣ</button>
+        <button onclick="applyReciprocal()"   class="key key-fn">1/x</button>
+
+        <!-- Row 5 -->
+        <button onclick="appendNum('7')" class="key key-num">7</button>
+        <button onclick="appendNum('8')" class="key key-num">8</button>
+        <button onclick="appendNum('9')" class="key key-num">9</button>
+        <button onclick="appendOp('/')"  class="key key-op">÷</button>
+        <button onclick="clearAll()"     class="key key-danger">AC</button>
+
+        <!-- Row 6 -->
+        <button onclick="appendNum('4')" class="key key-num">4</button>
+        <button onclick="appendNum('5')" class="key key-num">5</button>
+        <button onclick="appendNum('6')" class="key key-num">6</button>
+        <button onclick="appendOp('*')"  class="key key-op">×</button>
+        <button onclick="deleteLast()"   class="key key-danger">DEL</button>
+
+        <!-- Row 7 -->
+        <button onclick="appendNum('1')" class="key key-num">1</button>
+        <button onclick="appendNum('2')" class="key key-num">2</button>
+        <button onclick="appendNum('3')" class="key key-num">3</button>
+        <button onclick="appendOp('-')"  class="key key-op">−</button>
+        <button onclick="toggleSign()"   class="key key-fn">±</button>
+
+        <!-- Row 8 -->
+        <button onclick="appendNum('0')" class="key key-num">0</button>
+        <button onclick="appendNum('.')" class="key key-num">.</button>
+        <button onclick="calculateResult()" class="key key-eq col-span-2">=</button>
+        <button onclick="appendOp('+')"  class="key key-op">+</button>
+      </div>
+    </section>
+
+    <!-- ───── CALCULUS ───── -->
+    <section id="view-calculus" class="mode-view hidden panel rounded-2xl p-4 space-y-4">
+      <h3 class="font-semibold text-indigo-300 border-b border-slate-800 pb-2 text-sm sm:text-base">Numerical Calculus &amp; Grapher</h3>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="space-y-3 bg-slate-900/50 p-3 rounded-xl border border-slate-800">
+          <div>
+            <label class="block text-[11px] text-slate-400 mb-1">Function f(x)</label>
+            <input id="calc-fx" type="text" value="x^3 - 3*x + 2"
+                   class="w-full bg-slate-950 border border-slate-700 rounded-lg p-2 text-sm mono text-white focus:border-indigo-500 focus:outline-none">
+          </div>
+
+          <div class="pt-2 border-t border-slate-800">
+            <span class="text-[11px] font-semibold text-purple-300">Derivative — central difference</span>
+            <div class="flex gap-2 items-center mt-1.5 flex-wrap">
+              <span class="text-[11px] text-slate-400">at x =</span>
+              <input id="calc-x0" type="number" value="2" step="any"
+                     class="w-24 bg-slate-950 border border-slate-700 rounded-lg p-1.5 text-xs text-white focus:outline-none focus:border-purple-500">
+              <button onclick="computeDerivative()"
+                      class="px-3 py-1.5 bg-purple-600 hover:bg-purple-500 text-white rounded-lg text-xs font-semibold transition">Evaluate</button>
+            </div>
+            <div id="derivative-out" class="text-xs mono text-indigo-300 mt-2">Result: —</div>
+          </div>
+
+          <div class="pt-2 border-t border-slate-800">
+            <span class="text-[11px] font-semibold text-emerald-300">Definite Integral — Simpson's rule</span>
+            <div class="flex flex-wrap gap-2 items-center mt-1.5">
+              <span class="text-[11px] text-slate-400">a =</span>
+              <input id="calc-a" type="number" value="0" step="any"
+                     class="w-20 bg-slate-950 border border-slate-700 rounded-lg p-1.5 text-xs text-white focus:outline-none focus:border-emerald-500">
+              <span class="text-[11px] text-slate-400">b =</span>
+              <input id="calc-b" type="number" value="3" step="any"
+                     class="w-20 bg-slate-950 border border-slate-700 rounded-lg p-1.5 text-xs text-white focus:outline-none focus:border-emerald-500">
+              <button onclick="computeIntegral()"
+                      class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-xs font-semibold transition">Evaluate</button>
+            </div>
+            <div id="integral-out" class="text-xs mono text-emerald-300 mt-2">Result: —</div>
+          </div>
+        </div>
+
+        <div class="flex flex-col gap-2 bg-slate-900/50 p-3 rounded-xl border border-slate-800">
+          <div class="flex justify-between items-center">
+            <h4 class="text-[11px] font-semibold text-slate-300">Plot</h4>
+            <button onclick="renderGraph()"
+                    class="px-3 py-1 bg-indigo-600 hover:bg-indigo-500 text-white text-xs rounded-lg transition">Plot f(x)</button>
+          </div>
+          <div class="w-full h-52 bg-slate-950 rounded-lg overflow-hidden border border-slate-800 relative">
+            <canvas id="graphCanvas"></canvas>
+          </div>
+          <div class="flex justify-between text-[10px] text-slate-400">
+            <span class="text-indigo-400">— f(x)</span>
+            <span class="text-purple-400">--- f′(x)</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ───── PROGRAMMER ───── -->
+    <section id="view-programmer" class="mode-view hidden panel rounded-2xl p-4 space-y-4">
+      <h3 class="font-semibold text-emerald-300 border-b border-slate-800 pb-2 text-sm sm:text-base">Programmer &amp; Bitwise Calculator</h3>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs mono">
+        <div class="bg-slate-900/70 p-2.5 rounded-xl border border-slate-800 flex justify-between items-center gap-2">
+          <span class="text-emerald-400 font-bold shrink-0">HEX</span>
+          <span id="hex-display" class="text-white text-sm truncate">0</span>
+        </div>
+        <div class="bg-slate-900/70 p-2.5 rounded-xl border border-slate-800 flex justify-between items-center gap-2">
+          <span class="text-indigo-400 font-bold shrink-0">DEC</span>
+          <span id="dec-display" class="text-white text-sm truncate">0</span>
+        </div>
+        <div class="bg-slate-900/70 p-2.5 rounded-xl border border-slate-800 flex justify-between items-center gap-2">
+          <span class="text-amber-400 font-bold shrink-0">OCT</span>
+          <span id="oct-display" class="text-white text-sm truncate">0</span>
+        </div>
+        <div class="bg-slate-900/70 p-2.5 rounded-xl border border-slate-800 flex justify-between items-center gap-2">
+          <span class="text-cyan-400 font-bold shrink-0">BIN</span>
+          <span id="bin-display" class="text-white text-sm break-all text-right">0</span>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-4 sm:grid-cols-6 gap-2">
+        <button onclick="appendOp('&')"    class="key key-fn">AND</button>
+        <button onclick="appendOp('|')"    class="key key-fn">OR</button>
+        <button onclick="appendOp('xor')"  class="key key-fn">XOR</button>
+        <button onclick="appendFunc('bitNot')" class="key key-fn">NOT</button>
+        <button onclick="appendOp('<<')"   class="key key-fn">LSH</button>
+        <button onclick="appendOp('>>')"   class="key key-fn">RSH</button>
+      </div>
+
+      <div class="grid grid-cols-6 gap-2">
+        <button onclick="appendSymbol('0x')" class="key key-const">0x</button>
+        <button onclick="appendSymbol('0b')" class="key key-const">0b</button>
+        <button onclick="appendSymbol('A')" class="key key-const">A</button>
+        <button onclick="appendSymbol('B')" class="key key-const">B</button>
+        <button onclick="appendSymbol('C')" class="key key-const">C</button>
+        <button onclick="appendSymbol('D')" class="key key-const">D</button>
+        <button onclick="appendSymbol('E')" class="key key-const">E</button>
+        <button onclick="appendSymbol('F')" class="key key-const">F</button>
+        <button onclick="convertCurrentBase('HEX')" class="key key-fn col-span-2">To Hex</button>
+        <button onclick="convertCurrentBase('BIN')" class="key key-fn col-span-2">To Bin</button>
+      </div>
+
+      <p class="text-[11px] text-slate-500 leading-relaxed">
+        Tip: hex literals use the <code class="text-emerald-300">0x</code> prefix (e.g. <code class="text-emerald-300">0xFF &amp; 0x0F</code>), binary uses <code class="text-cyan-300">0b</code>.
+      </p>
+    </section>
+
+    <!-- ───── STATISTICS ───── -->
+    <section id="view-stats" class="mode-view hidden panel rounded-2xl p-4 space-y-4">
+      <h3 class="font-semibold text-amber-300 border-b border-slate-800 pb-2 text-sm sm:text-base">Statistics &amp; Probability</h3>
+
+      <div>
+        <label class="block text-[11px] text-slate-400 mb-1">Data set — comma or space separated</label>
+        <input id="stats-input" type="text" value="12, 15, 18, 22, 25, 30, 35"
+               class="w-full bg-slate-950 border border-slate-700 rounded-lg p-2 text-sm mono text-white focus:outline-none focus:border-amber-500">
+      </div>
+
+      <button onclick="calculateStatistics()"
+              class="w-full py-2.5 bg-amber-600 hover:bg-amber-500 text-slate-950 font-bold rounded-xl transition shadow-lg shadow-amber-900/30">
+        Calculate Statistics
+      </button>
+
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs mono">
+        <div class="bg-slate-900/70 p-2.5 rounded-lg border border-slate-800"><span class="text-slate-400 text-[10px] block">Mean</span><span id="stat-mean" class="text-amber-300 font-bold">—</span></div>
+        <div class="bg-slate-900/70 p-2.5 rounded-lg border border-slate-800"><span class="text-slate-400 text-[10px] block">Median</span><span id="stat-median" class="text-amber-300 font-bold">—</span></div>
+        <div class="bg-slate-900/70 p-2.5 rounded-lg border border-slate-800"><span class="text-slate-400 text-[10px] block">Std Dev (σ)</span><span id="stat-std" class="text-amber-300 font-bold">—</span></div>
+        <div class="bg-slate-900/70 p-2.5 rounded-lg border border-slate-800"><span class="text-slate-400 text-[10px] block">Variance</span><span id="stat-var" class="text-amber-300 font-bold">—</span></div>
+        <div class="bg-slate-900/70 p-2.5 rounded-lg border border-slate-800"><span class="text-slate-400 text-[10px] block">Min</span><span id="stat-min" class="text-amber-300 font-bold">—</span></div>
+        <div class="bg-slate-900/70 p-2.5 rounded-lg border border-slate-800"><span class="text-slate-400 text-[10px] block">Max</span><span id="stat-max" class="text-amber-300 font-bold">—</span></div>
+        <div class="bg-slate-900/70 p-2.5 rounded-lg border border-slate-800"><span class="text-slate-400 text-[10px] block">Sum</span><span id="stat-sum" class="text-amber-300 font-bold">—</span></div>
+        <div class="bg-slate-900/70 p-2.5 rounded-lg border border-slate-800"><span class="text-slate-400 text-[10px] block">Count</span><span id="stat-count" class="text-amber-300 font-bold">—</span></div>
+      </div>
+
+      <div class="pt-3 border-t border-slate-800 grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div class="bg-slate-900/50 p-3 rounded-xl border border-slate-800 space-y-2">
+          <span class="text-[11px] font-semibold text-amber-300">Permutations (nPr)</span>
+          <div class="flex gap-2">
+            <input id="perm-n" type="number" placeholder="n" class="w-full bg-slate-950 border border-slate-700 rounded-lg p-1.5 text-xs text-white focus:outline-none focus:border-amber-500">
+            <input id="perm-r" type="number" placeholder="r" class="w-full bg-slate-950 border border-slate-700 rounded-lg p-1.5 text-xs text-white focus:outline-none focus:border-amber-500">
+            <button onclick="calcPermutation()" class="px-3 bg-slate-800 hover:bg-slate-700 text-white rounded-lg text-xs font-bold transition">=</button>
+          </div>
+          <div id="perm-out" class="text-xs mono text-slate-300">Result: —</div>
+        </div>
+
+        <div class="bg-slate-900/50 p-3 rounded-xl border border-slate-800 space-y-2">
+          <span class="text-[11px] font-semibold text-amber-300">Combinations (nCr)</span>
+          <div class="flex gap-2">
+            <input id="comb-n" type="number" placeholder="n" class="w-full bg-slate-950 border border-slate-700 rounded-lg p-1.5 text-xs text-white focus:outline-none focus:border-amber-500">
+            <input id="comb-r" type="number" placeholder="r" class="w-full bg-slate-950 border border-slate-700 rounded-lg p-1.5 text-xs text-white focus:outline-none focus:border-amber-500">
+            <button onclick="calcCombination()" class="px-3 bg-slate-800 hover:bg-slate-700 text-white rounded-lg text-xs font-bold transition">=</button>
+          </div>
+          <div id="comb-out" class="text-xs mono text-slate-300">Result: —</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ───── MATRIX ───── -->
+    <section id="view-matrix" class="mode-view hidden panel rounded-2xl p-4 space-y-4">
+      <h3 class="font-semibold text-pink-300 border-b border-slate-800 pb-2 text-sm sm:text-base">Matrix Calculator</h3>
+
+      <div class="flex gap-2">
+        <button data-dim="2" class="dim-btn px-3 py-1.5 bg-pink-600 text-white text-xs font-bold rounded-lg transition">2 × 2</button>
+        <button data-dim="3" class="dim-btn px-3 py-1.5 bg-slate-800 text-slate-400 text-xs font-bold rounded-lg transition">3 × 3</button>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="bg-slate-900/50 p-3 rounded-xl border border-slate-800 space-y-2">
+          <span class="text-[11px] font-semibold text-pink-300">Matrix A</span>
+          <div id="matrix-a" class="grid gap-1.5 mono"></div>
+        </div>
+        <div class="bg-slate-900/50 p-3 rounded-xl border border-slate-800 space-y-2">
+          <span class="text-[11px] font-semibold text-pink-300">Matrix B</span>
+          <div id="matrix-b" class="grid gap-1.5 mono"></div>
+        </div>
+      </div>
+
+      <div class="flex flex-wrap gap-2">
+        <button onclick="calcMatrixOp('detA')"    class="key key-fn px-3">det(A)</button>
+        <button onclick="calcMatrixOp('invA')"    class="key key-fn px-3">inv(A)</button>
+        <button onclick="calcMatrixOp('transA')"  class="key key-fn px-3">Aᵀ</button>
+        <button onclick="calcMatrixOp('add')"     class="key key-fn px-3">A + B</button>
+        <button onclick="calcMatrixOp('sub')"     class="key key-fn px-3">A − B</button>
+        <button onclick="calcMatrixOp('mult')"    class="key key-fn px-3">A × B</button>
+      </div>
+
+      <div class="bg-slate-950 p-3 rounded-xl border border-slate-800">
+        <span class="text-[11px] text-slate-400 block mb-1.5">Result</span>
+        <div id="matrix-result" class="mono text-sm text-pink-300 whitespace-pre-wrap break-words">Run an operation…</div>
+      </div>
+    </section>
+
+  </div>
+
+  <!-- ───────── RIGHT COLUMN ───────── -->
+  <aside class="lg:col-span-4 space-y-4">
+    <div class="panel rounded-2xl p-4 flex flex-col h-[340px]">
+      <div class="flex justify-between items-center mb-2 pb-2 border-b border-slate-800">
+        <h3 class="font-semibold text-xs text-slate-200 flex items-center gap-2">
+          <svg class="w-4 h-4 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+          </svg>
+          History
+        </h3>
+        <button onclick="clearHistoryLog()" class="text-[11px] text-rose-400 hover:text-rose-300 transition">Clear</button>
+      </div>
+      <div id="history-list" class="flex-1 overflow-y-auto space-y-2 text-xs mono pr-1">
+        <div class="text-slate-500 italic text-center py-8">No calculations yet</div>
+      </div>
+    </div>
+
+    <div class="panel rounded-2xl p-4 space-y-2 text-[11px] text-slate-400 leading-relaxed">
+      <h4 class="font-semibold text-xs text-slate-300 border-b border-slate-800 pb-1.5">Shortcuts &amp; Tips</h4>
+      <p>• Type directly into the display, or use your keyboard (<code class="text-indigo-300">+ − * / ^ ( )</code>).</p>
+      <p>• <kbd class="px-1.5 py-0.5 bg-slate-800 rounded border border-slate-700 text-slate-200">Enter</kbd> evaluates · <kbd class="px-1.5 py-0.5 bg-slate-800 rounded border border-slate-700 text-slate-200">Esc</kbd> clears · <kbd class="px-1.5 py-0.5 bg-slate-800 rounded border border-slate-700 text-slate-200">Backspace</kbd> deletes.</p>
+      <p>• <span class="text-slate-200">2nd</span> switches to inverse trig, <span class="text-slate-200">hyp</span> to hyperbolic.</p>
+      <p>• Use <code class="text-emerald-300">ans</code> to reference the previous result.</p>
+      <p>• In Calculus, try <code class="text-emerald-300">sin(x) + x^2</code> then Plot.</p>
+    </div>
+  </aside>
+
+</main>
+
+<footer class="max-w-7xl mx-auto w-full text-center text-[11px] text-slate-600 mt-5 py-3 border-t border-slate-900">
+  OmniCalc · Powered by MathJS &amp; Chart.js
+</footer>
+
+<script>
+/* ══════════════════════════════════════════════════════════
+   STATE
+   ══════════════════════════════════════════════════════════ */
+let currentDisplay = '0';
+let angleUnit      = 'DEG';
+let memoryValue    = 0;
+let historyLog     = [];
+let isInverse      = false;
+let isHyp          = false;
+let chartInstance  = null;
+let matrixDim      = 2;
+let lastAnswer     = 0;
+
+const mainDisplay = document.getElementById('main-display');
+const exprHistory = document.getElementById('expr-history');
+const livePreview = document.getElementById('live-preview');
+const evalError   = document.getElementById('eval-error');
+
+/* ══════════════════════════════════════════════════════════
+   MATH SCOPE  (angle-unit aware)
+   ══════════════════════════════════════════════════════════ */
+function angleConverters() {
+  if (angleUnit === 'DEG')  return { toRad: d => d * Math.PI / 180, fromRad: r => r * 180 / Math.PI };
+  if (angleUnit === 'GRAD') return { toRad: g => g * Math.PI / 200, fromRad: r => r * 200 / Math.PI };
+  return { toRad: r => r, fromRad: r => r };
+}
+
+function buildScope(extra) {
+  const { toRad, fromRad } = angleConverters();
+  const scope = {
+    sin:  x => Math.sin(toRad(x)),
+    cos:  x => Math.cos(toRad(x)),
+    tan:  x => Math.tan(toRad(x)),
+    asin: x => fromRad(Math.asin(x)),
+    acos: x => fromRad(Math.acos(x)),
+    atan: x => fromRad(Math.atan(x)),
+    sinh: Math.sinh, cosh: Math.cosh, tanh: Math.tanh,
+    asinh: Math.asinh, acosh: Math.acosh, atanh: Math.atanh,
+    log: (x, b) => (b === undefined ? Math.log10(x) : Math.log(x) / Math.log(b)),
+    phi: (1 + Math.sqrt(5)) / 2,
+    ans: lastAnswer
+  };
+  return Object.assign(scope, extra || {});
+}
+
+function preprocess(expr) {
+  return String(expr)
+    .replace(/π/g, ' pi ')
+    .replace(/ϕ/g, ' phi ')
+    .replace(/×/g, '*')
+    .replace(/÷/g, '/')
+    .replace(/−/g, '-')
+    .replace(/,/g, '')          // allow 1,000
+    .trim();
+}
+
+function evaluateExpression(expr, extraScope) {
+  const clean = preprocess(expr);
+  if (!clean) return 0;
+  return math.evaluate(clean, buildScope(extraScope));
+}
+
+/* ══════════════════════════════════════════════════════════
+   DISPLAY HELPERS
+   ══════════════════════════════════════════════════════════ */
+function formatValue(v) {
+  if (typeof v === 'number') {
+    if (Number.isNaN(v)) return 'NaN';
+    if (!Number.isFinite(v)) return v > 0 ? '∞' : '-∞';
+    return math.format(v, { precision: 12 });
+  }
+  if (typeof v === 'boolean') return v ? 'true' : 'false';
+  return math.format(v, { precision: 10 });
+}
+
+function setDisplay(value) {
+  currentDisplay = value;
+  mainDisplay.value = value;
+}
+
+function updateLivePreview() {
+  const raw = currentDisplay.trim();
+  if (!raw || raw === '0') { livePreview.textContent = ''; evalError.classList.add('hidden'); return; }
+  try {
+    const result = evaluateExpression(raw);
+    if (typeof result === 'number' || typeof result === 'boolean') {
+      livePreview.textContent = '= ' + formatValue(result);
+    } else {
+      livePreview.textContent = '';
+    }
+  } catch (e) {
+    livePreview.textContent = '';
+  }
+}
+
+/* ══════════════════════════════════════════════════════════
+   INPUT ACTIONS
+   ══════════════════════════════════════════════════════════ */
+function appendNum(n) {
+  if (currentDisplay === '0' && n !== '.') currentDisplay = n;
+  else currentDisplay += n;
+  mainDisplay.value = currentDisplay;
+  updateLivePreview();
+}
+
+function appendOp(op) {
+  if (currentDisplay === '0' && (op === '*' || op === '/' || op === '^' || op === 'mod')) {
+    currentDisplay = '0';
+  }
+  currentDisplay += ` ${op} `;
+  mainDisplay.value = currentDisplay;
+  updateLivePreview();
+}
+
+function appendSymbol(sym) {
+  if (currentDisplay === '0' && sym !== '0x' && sym !== '0b') currentDisplay = '';
+  currentDisplay += sym;
+  mainDisplay.value = currentDisplay;
+  updateLivePreview();
+}
+
+function appendFunc(name) {
+  if (currentDisplay === '0') currentDisplay = '';
+  currentDisplay += `${name}(`;
+  mainDisplay.value = currentDisplay;
+  updateLivePreview();
+}
+
+/** Wrap the current expression if it is not a single atom. */
+function wrapExpression(expr) {
+  const e = expr.trim();
+  if (/^-?\d+(\.\d+)?$/.test(e)) return e;
+  if (/^[a-zA-Z_]\w*$/.test(e)) return e;
+  return `(${e})`;
+}
+
+function applyPostfix(suffix) {
+  if (!currentDisplay.trim() || currentDisplay === '0') return;
+  setDisplay(wrapExpression(currentDisplay) + suffix);
+  updateLivePreview();
+}
+
+function applyReciprocal() {
+  if (!currentDisplay.trim() || currentDisplay === '0') return;
+  setDisplay(`1/(${currentDisplay})`);
+  updateLivePreview();
+}
+
+function clearAll() {
+  setDisplay('0');
+  exprHistory.textContent = '0';
+  evalError.classList.add('hidden');
+  livePreview.textContent = '';
+}
+
+function deleteLast() {
+  const trimmed = currentDisplay.trimEnd();
+  currentDisplay = trimmed.length <= 1 ? '0' : trimmed.slice(0, -1);
+  mainDisplay.value = currentDisplay;
+  updateLivePreview();
+}
+
+function toggleSign() {
+  const t = currentDisplay.trim();
+  if (!t || t === '0') return;
+  setDisplay(t.startsWith('-') ? t.slice(1) : '-' + t);
+  updateLivePreview();
+}
+
+/* ══════════════════════════════════════════════════════════
+   EVALUATION
+   ══════════════════════════════════════════════════════════ */
+function calculateResult() {
+  const raw = currentDisplay.trim();
+  if (!raw || raw === '0') return;
+
+  try {
+    const result = evaluateExpression(raw);
+    const formatted = formatValue(result);
+
+    exprHistory.textContent = raw + ' =';
+    setDisplay(formatted);
+    evalError.classList.add('hidden');
+    livePreview.textContent = '';
+
+    lastAnswer = (typeof result === 'number') ? result : lastAnswer;
+
+    addToLogHistory(raw, formatted);
+    updateProgrammerDisplay();
+  } catch (err) {
+    evalError.textContent = 'Error: ' + (err.message || 'invalid expression').split('\n')[0].slice(0, 60);
+    evalError.classList.remove('hidden');
+  }
+}
+
+/* ══════════════════════════════════════════════════════════
+   HISTORY
+   ══════════════════════════════════════════════════════════ */
+const escapeHtml = s => String(s).replace(/[&<>"']/g,
+  c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+
+function renderHistory() {
+  const container = document.getElementById('history-list');
+  if (!historyLog.length) {
+    container.innerHTML = '<div class="text-slate-500 italic text-center py-8">No calculations yet</div>';
+    return;
+  }
+  container.innerHTML = historyLog.map((item, i) => `
+    <div data-index="${i}"
+         class="history-item fade-up p-2 bg-slate-900/60 hover:bg-slate-800 rounded-lg border border-slate-800 cursor-pointer transition">
+      <div class="text-slate-400 text-[11px] truncate">${escapeHtml(item.expr)}</div>
+      <div class="text-indigo-300 font-bold text-sm text-right">${escapeHtml(item.res)}</div>
+    </div>`).join('');
+}
+
+function addToLogHistory(expr, res) {
+  historyLog.unshift({ expr, res });
+  if (historyLog.length > 30) historyLog.pop();
+  renderHistory();
+}
+
+document.getElementById('history-list').addEventListener('click', e => {
+  const el = e.target.closest('.history-item');
+  if (!el) return;
+  const item = historyLog[+el.dataset.index];
+  if (!item) return;
+  setDisplay(item.res);
+  exprHistory.textContent = item.expr + ' =';
+  updateLivePreview();
+});
+
+function clearHistoryLog() {
+  historyLog = [];
+  renderHistory();
+}
+
+/* ══════════════════════════════════════════════════════════
+   TABS
+   ══════════════════════════════════════════════════════════ */
+document.querySelectorAll('.tab-btn').forEach(btn => {
+  btn.addEventListener('click', () => switchTab(btn.dataset.tab));
+});
+
+function switchTab(tabName) {
+  document.querySelectorAll('.tab-btn').forEach(b => {
+    b.classList.toggle('active', b.dataset.tab === tabName);
+    b.classList.toggle('text-slate-400', b.dataset.tab !== tabName);
+  });
+  document.querySelectorAll('.mode-view').forEach(v => v.classList.add('hidden'));
+  const view = document.getElementById('view-' + tabName);
+  if (view) view.classList.remove('hidden');
+
+  const baseBadge = document.getElementById('base-badge');
+  if (tabName === 'programmer') {
+    baseBadge.classList.remove('hidden');
+    updateProgrammerDisplay();
+  } else {
+    baseBadge.classList.add('hidden');
+  }
+
+  // Chart.js needs a visible container to measure correctly.
+  if (tabName === 'calculus') setTimeout(renderGraph, 60);
+}
+
+/* ══════════════════════════════════════════════════════════
+   ANGLE UNIT
+   ══════════════════════════════════════════════════════════ */
+document.querySelectorAll('.angle-btn').forEach(btn => {
+  btn.addEventListener('click', () => setAngleUnit(btn.dataset.angle));
+});
+
+function setAngleUnit(unit) {
+  angleUnit = unit;
+  document.getElementById('angle-badge').textContent = unit;
+  document.querySelectorAll('.angle-btn').forEach(b => {
+    const on = b.dataset.angle === unit;
+    b.className = 'angle-btn px-3 py-1 rounded-lg ' +
+      (on ? 'font-semibold bg-indigo-600 text-white'
+          : 'font-medium text-slate-400 hover:text-white');
+  });
+  updateLivePreview();
+}
+
+/* ══════════════════════════════════════════════════════════
+   2nd / hyp TRIG TOGGLES
+   ══════════════════════════════════════════════════════════ */
+const btn2nd = document.getElementById('btn-2nd');
+const btnHyp = document.getElementById('btn-hyp');
+
+btn2nd.addEventListener('click', () => { isInverse = !isInverse; btn2nd.classList.toggle('key-toggle-on', isInverse); updateTrigKeys(); });
+btnHyp.addEventListener('click', () => { isHyp = !isHyp; btnHyp.classList.toggle('key-toggle-on', isHyp); updateTrigKeys(); });
+
+function updateTrigKeys() {
+  let labels, funcs;
+  if (isInverse && isHyp)      { labels = ['sinh⁻¹','cosh⁻¹','tanh⁻¹']; funcs = ['asinh','acosh','atanh']; }
+  else if (isInverse)          { labels = ['sin⁻¹','cos⁻¹','tan⁻¹'];   funcs = ['asin','acos','atan']; }
+  else if (isHyp)              { labels = ['sinh','cosh','tanh'];      funcs = ['sinh','cosh','tanh']; }
+  else                         { labels = ['sin','cos','tan'];         funcs = ['sin','cos','tan']; }
+
+  for (let i = 0; i < 3; i++) {
+    const btn = document.getElementById('trig-' + (i + 1));
+    btn.textContent = labels[i];
+    btn.dataset.fn = funcs[i];
+  }
+}
+
+/* ══════════════════════════════════════════════════════════
+   MEMORY
+   ══════════════════════════════════════════════════════════ */
+function memoryClear() {
+  memoryValue = 0;
+  document.getElementById('memory-badge').classList.add('hidden');
+}
+
+function memoryRecall() {
+  if (currentDisplay === '0') setDisplay(String(memoryValue));
+  else setDisplay(currentDisplay + String(memoryValue));
+  updateLivePreview();
+}
+
+function memoryAdd() {
+  try {
+    const v = evaluateExpression(currentDisplay);
+    if (typeof v === 'number') {
+      memoryValue += v;
+      document.getElementById('memory-badge').classList.remove('hidden');
+    }
+  } catch (e) { /* ignore */ }
+}
+
+function memorySub() {
+  try {
+    const v = evaluateExpression(currentDisplay);
+    if (typeof v === 'number') {
+      memoryValue -= v;
+      document.getElementById('memory-badge').classList.remove('hidden');
+    }
+  } catch (e) { /* ignore */ }
+}
+
+/* ══════════════════════════════════════════════════════════
+   CALCULUS
+   ══════════════════════════════════════════════════════════ */
+function makeFunction(exprStr) {
+  return x => {
+    const v = evaluateExpression(exprStr, { x });
+    if (typeof v !== 'number' || !Number.isFinite(v)) throw new Error('non-numeric');
+    return v;
+  };
+}
+
+function computeDerivative() {
+  const out = document.getElementById('derivative-out');
+  try {
+    const fx = makeFunction(document.getElementById('calc-fx').value);
+    const x0 = parseFloat(document.getElementById('calc-x0').value);
+    if (!Number.isFinite(x0)) throw new Error('bad x');
+
+    const h = 1e-5;
+    const d = (fx(x0 + h) - fx(x0 - h)) / (2 * h);
+    out.textContent = `f′(${x0}) ≈ ${d.toFixed(6)}`;
+  } catch (e) {
+    out.textContent = 'Error: could not evaluate derivative.';
+  }
+}
+
+function computeIntegral() {
+  const out = document.getElementById('integral-out');
+  try {
+    const fx = makeFunction(document.getElementById('calc-fx').value);
+    const a = parseFloat(document.getElementById('calc-a').value);
+    const b = parseFloat(document.getElementById('calc-b').value);
+    if (!Number.isFinite(a) || !Number.isFinite(b)) throw new Error('bad bounds');
+
+    const n = 1000;                 // even
+    const h = (b - a) / n;
+    let sum = fx(a) + fx(b);
+    for (let i = 1; i < n; i++) {
+      sum += fx(a + i * h) * (i % 2 === 0 ? 2 : 4);
+    }
+    const integral = (h / 3) * sum;
+    out.textContent = `∫ from ${a} to ${b} ≈ ${integral.toFixed(6)}`;
+  } catch (e) {
+    out.textContent = 'Error: could not evaluate integral.';
+  }
+}
+
+/* ══════════════════════════════════════════════════════════
+   GRAPH
+   ══════════════════════════════════════════════════════════ */
+function renderGraph() {
+  const canvas = document.getElementById('graphCanvas');
+  if (!canvas || canvas.offsetParent === null) return;
+
+  let fx;
+  try {
+    fx = makeFunction(document.getElementById('calc-fx').value);
+  } catch (e) { return; }
+
+  const labels = [], dataFx = [], dataDf = [];
+  const h = 1e-3;
+
+  for (let x = -6; x <= 6.0001; x += 0.15) {
+    labels.push(x.toFixed(2));
+    try { dataFx.push(fx(x)); } catch (e) { dataFx.push(null); }
+    try { dataDf.push((fx(x + h) - fx(x - h)) / (2 * h)); } catch (e) { dataDf.push(null); }
+  }
+
+  if (chartInstance) { chartInstance.destroy(); chartInstance = null; }
+
+  chartInstance = new Chart(canvas.getContext('2d'), {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [
+        { label: 'f(x)',  data: dataFx, borderColor: '#818cf8', borderWidth: 2, pointRadius: 0, tension: .35, spanGaps: true },
+        { label: "f'(x)", data: dataDf, borderColor: '#c084fc', borderWidth: 1.4, borderDash: [5, 4], pointRadius: 0, tension: .35, spanGaps: true }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      animation: { duration: 250 },
+      plugins: { legend: { display: false }, tooltip: { enabled: true } },
+      scales: {
+        x: { grid: { color: 'rgba(255,255,255,.05)' }, ticks: { color: '#64748b', font: { size: 9 }, maxTicksLimit: 10 } },
+        y: { grid: { color: 'rgba(255,255,255,.05)' }, ticks: { color: '#64748b', font: { size: 9 }, maxTicksLimit: 8 } }
+      }
+    }
+  });
+}
+
+/* ══════════════════════════════════════════════════════════
+   PROGRAMMER
+   ══════════════════════════════════════════════════════════ */
+function currentInteger() {
+  try {
+    const v = evaluateExpression(currentDisplay);
+    if (typeof v === 'number' && Number.isFinite(v)) return Math.trunc(v);
+    if (typeof v === 'bigint') return Number(v);
+  } catch (e) { /* ignore */ }
+  return null;
+}
+
+function updateProgrammerDisplay() {
+  const n = currentInteger();
+  if (n === null) return;
+  document.getElementById('hex-display').textContent = (n < 0 ? '-' : '') + Math.abs(n).toString(16).toUpperCase();
+  document.getElementById('dec-display').textContent = n.toString(10);
+  document.getElementById('oct-display').textContent = (n < 0 ? '-' : '') + Math.abs(n).toString(8);
+  document.getElementById('bin-display').textContent = (n < 0 ? '-' : '') + Math.abs(n).toString(2);
+}
+
+function convertCurrentBase(target) {
+  const n = currentInteger();
+  if (n === null) return;
+  if (target === 'HEX') setDisplay((n < 0 ? '-' : '') + '0x' + Math.abs(n).toString(16).toUpperCase());
+  if (target === 'BIN') setDisplay((n < 0 ? '-' : '') + '0b' + Math.abs(n).toString(2));
+  updateLivePreview();
+}
+
+/* ══════════════════════════════════════════════════════════
+   STATISTICS
+   ══════════════════════════════════════════════════════════ */
+function calculateStatistics() {
+  const raw = document.getElementById('stats-input').value;
+  const arr = raw.split(/[\s,]+/).map(Number).filter(Number.isFinite);
+
+  const set = (id, val) => document.getElementById(id).textContent = val;
+
+  if (!arr.length) {
+    ['stat-mean','stat-median','stat-std','stat-var','stat-min','stat-max','stat-sum','stat-count']
+      .forEach(id => set(id, '—'));
+    return;
+  }
+
+  set('stat-mean',   math.mean(arr).toFixed(4));
+  set('stat-median', math.median(arr).toFixed(4));
+  set('stat-std',    math.std(arr, 'unbiased').toFixed(4));
+  set('stat-var',    math.variance(arr, 'unbiased').toFixed(4));
+  set('stat-min',    Math.min(...arr).toFixed(4));
+  set('stat-max',    Math.max(...arr).toFixed(4));
+  set('stat-sum',    math.sum(arr).toFixed(4));
+  set('stat-count',  arr.length);
+}
+
+function factorial(n) {
+  if (n < 0 || !Number.isInteger(n)) return NaN;
+  let r = 1;
+  for (let i = 2; i <= n; i++) r *= i;
+  return r;
+}
+
+function calcPermutation() {
+  const n = parseInt(document.getElementById('perm-n').value, 10);
+  const r = parseInt(document.getElementById('perm-r').value, 10);
+  const out = document.getElementById('perm-out');
+  if (!Number.isInteger(n) || !Number.isInteger(r) || n < 0 || r < 0 || r > n) {
+    out.textContent = 'Invalid n or r (need 0 ≤ r ≤ n)'; return;
+  }
+  out.textContent = `Result: ${factorial(n) / factorial(n - r)}`;
+}
+
+function calcCombination() {
+  const n = parseInt(document.getElementById('comb-n').value, 10);
+  const r = parseInt(document.getElementById('comb-r').value, 10);
+  const out = document.getElementById('comb-out');
+  if (!Number.isInteger(n) || !Number.isInteger(r) || n < 0 || r < 0 || r > n) {
+    out.textContent = 'Invalid n or r (need 0 ≤ r ≤ n)'; return;
+  }
+  out.textContent = `Result: ${Math.round(factorial(n) / (factorial(r) * factorial(n - r)))}`;
+}
+
+/* ══════════════════════════════════════════════════════════
+   MATRIX
+   ══════════════════════════════════════════════════════════ */
+document.querySelectorAll('.dim-btn').forEach(btn => {
+  btn.addEventListener('click', () => setMatrixDimension(+btn.dataset.dim));
+});
+
+function setMatrixDimension(dim) {
+  matrixDim = dim;
+  document.querySelectorAll('.dim-btn').forEach(b => {
+    const on = +b.dataset.dim === dim;
+    b.className = 'dim-btn px-3 py-1.5 text-xs font-bold rounded-lg transition ' +
+      (on ? 'bg-pink-600 text-white shadow' : 'bg-slate-800 text-slate-400 hover:text-white');
+  });
+  initMatrixInputs();
+}
+
+function initMatrixInputs() {
+  ['matrix-a', 'matrix-b'].forEach(id => {
+    const container = document.getElementById(id);
+    container.style.gridTemplateColumns = `repeat(${matrixDim}, minmax(0, 1fr))`;
+    let html = '';
+    for (let i = 0; i < matrixDim * matrixDim; i++) {
+      const val = (i % (matrixDim + 1) === 0) ? 1 : 0;
+      html += `<input type="number" step="any" class="mat-cell" value="${val}">`;
+    }
+    container.innerHTML = html;
+  });
+}
+
+function getMatrix(containerId) {
+  const inputs = document.querySelectorAll(`#${containerId} .mat-cell`);
+  const m = [];
+  for (let i = 0; i < matrixDim; i++) {
+    const row = [];
+    for (let j = 0; j < matrixDim; j++) {
+      row.push(parseFloat(inputs[i * matrixDim + j].value) || 0);
+    }
+    m.push(row);
+  }
+  return m;
+}
+
+function formatMatrix(m) {
+  if (!Array.isArray(m)) return String(m);
+  if (!Array.isArray(m[0])) return String(m);
+  return m.map(row => '[ ' + row.map(v => {
+    const n = typeof v === 'number' ? +v.toFixed(6) : v;
+    return String(n).padStart(10, ' ');
+  }).join('  ') + ' ]').join('\n');
+}
+
+function calcMatrixOp(op) {
+  const out = document.getElementById('matrix-result');
+  try {
+    const A = getMatrix('matrix-a');
+    const B = getMatrix('matrix-b');
+    let result;
+
+    switch (op) {
+      case 'detA':   result = `det(A) = ${math.det(A)}`; break;
+      case 'invA':   result = formatMatrix(math.inv(A)); break;
+      case 'transA': result = formatMatrix(math.transpose(A)); break;
+      case 'add':    result = formatMatrix(math.add(A, B)); break;
+      case 'sub':    result = formatMatrix(math.subtract(A, B)); break;
+      case 'mult':   result = formatMatrix(math.multiply(A, B)); break;
+    }
+
+    out.textContent = typeof result === 'string' ? result : formatMatrix(result);
+  } catch (e) {
+    out.textContent = 'Matrix error — check dimensions or singularity.';
+  }
+}
+
+/* ══════════════════════════════════════════════════════════
+   KEYBOARD
+   ══════════════════════════════════════════════════════════ */
+document.addEventListener('keydown', e => {
+  const active = document.activeElement;
+  const inOtherField = active && ['INPUT', 'TEXTAREA'].includes(active.tagName) && active.id !== 'main-display';
+
+  if (inOtherField) return;
+
+  // When typing inside the main display, let the native input handle everything
+  // except the two global shortcuts.
+  if (active && active.id === 'main-display') {
+    if (e.key === 'Enter')     { e.preventDefault(); calculateResult(); }
+    if (e.key === 'Escape')    { e.preventDefault(); clearAll(); }
+    return;
+  }
+
+  if (/^[0-9.]$/.test(e.key))                       { appendNum(e.key); }
+  else if (['+', '-', '*', '/', '^'].includes(e.key)) { appendOp(e.key); }
+  else if (e.key === '(' || e.key === ')')          { appendSymbol(e.key); }
+  else if (e.key === 'Enter')                       { e.preventDefault(); calculateResult(); }
+  else if (e.key === 'Backspace')                   { e.preventDefault(); deleteLast(); }
+  else if (e.key === 'Escape')                      { e.preventDefault(); clearAll(); }
+  else if (e.key === 'Delete')                      { e.preventDefault(); clearAll(); }
+});
+
+/* Prevent Enter/Space from re-triggering the last focused button. */
+document.addEventListener('click', e => {
+  const btn = e.target.closest('button');
+  if (btn) btn.blur();
+});
+
+/* ══════════════════════════════════════════════════════════
+   INIT
+   ══════════════════════════════════════════════════════════ */
+(function init() {
+  initMatrixInputs();
+  updateTrigKeys();
+  updateLivePreview();
+  renderHistory();
+  calculateStatistics();
+  // Chart is created lazily when the Calculus tab becomes visible.
+})();
+</script>
+</body>
+</html>
