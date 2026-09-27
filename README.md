@@ -19,7 +19,7 @@ Built with HTML, Tailwind CSS, and vanilla JavaScript. No build step, no backend
 
 ## Live site
 
-Open [link](https://hchunhei81-cyber.github.io/pomodoro-focus/index.html))
+Open [timer](https://hchunhei81-cyber.github.io/pomodoro-focus/index.html) or [notes](https://hchunhei81-cyber.github.io/A-timer/note.html)
 
 No sign-up required. Everything is stored in your own browser.
 
