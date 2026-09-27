@@ -1,0 +1,1022 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Multi-Function Card · Subjects + LocalStorage</title>
+  <style>
+    /* ---------- GLOBAL RESET & VARIABLES ---------- */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --bg-body: #eef2f8;
+      --bg-card: #ffffff;
+      --bg-soft: #f5f9ff;
+      --bg-answer: #ebf3fd;
+      --bg-highlight: #fff9e0;
+      --bg-note: #f6fbf6;
+      --border-light: #d0dded;
+      --border-mid: #b0c6df;
+      --text-primary: #0d2138;
+      --text-secondary: #3d5570;
+      --text-muted: #6b7e97;
+      --accent: #1e4b7a;
+      --accent-hover: #255f94;
+      --accent-light: #d9e8fc;
+      --shadow-card: 0 24px 42px -12px rgba(12, 30, 60, 0.24), 0 8px 20px -8px rgba(0, 20, 40, 0.12);
+      --radius-lg: 28px;
+      --radius-md: 16px;
+      --radius-sm: 40px;
+      --transition: 0.2s ease;
+    }
+
+    body {
+      font-family: 'Inter', 'Segoe UI', 'Roboto', system-ui, -apple-system, sans-serif;
+      background: var(--bg-body);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px 16px;
+      color: var(--text-primary);
+      line-height: 1.55;
+    }
+
+    /* ---------- CARD CONTAINER ---------- */
+    .card-wrapper {
+      max-width: 900px;
+      width: 100%;
+      background: var(--bg-card);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-card);
+      padding: 34px 34px 30px;
+      border: 1px solid rgba(255, 255, 255, 0.7);
+      backdrop-filter: blur(2px);
+      transition: var(--transition);
+    }
+
+    /* ---------- SECTION LABELS ---------- */
+    .section-label {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 10px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.8px;
+      text-transform: uppercase;
+      color: var(--text-muted);
+    }
+
+    .section-label::after {
+      content: "";
+      flex: 1;
+      height: 1px;
+      background: linear-gradient(90deg, var(--border-light), transparent);
+    }
+
+    /* ---------- SUBJECT BAR ---------- */
+    .subject-bar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 12px;
+      background: var(--bg-soft);
+      border-radius: var(--radius-sm);
+      padding: 8px 14px 8px 18px;
+      border: 1px solid var(--border-light);
+    }
+
+    .subject-selector {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      flex: 1;
+      min-width: 180px;
+    }
+
+    .subject-btn {
+      background: transparent;
+      border: 1.5px solid var(--border-mid);
+      border-radius: 36px;
+      padding: 7px 20px;
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: var(--transition);
+      white-space: nowrap;
+      font-family: inherit;
+    }
+
+    .subject-btn:hover {
+      background: var(--accent-light);
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    .subject-btn.active {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #ffffff;
+      box-shadow: 0 4px 12px rgba(30, 75, 122, 0.3);
+    }
+
+    .subject-btn.active:hover {
+      background: var(--accent-hover);
+      border-color: var(--accent-hover);
+    }
+
+    .subject-actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    /* ---------- BUTTONS (GENERAL) ---------- */
+    .fn-btn {
+      background: #ffffff;
+      border: 1.5px solid var(--border-mid);
+      border-radius: 40px;
+      padding: 9px 20px;
+      font-size: 0.84rem;
+      font-weight: 500;
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: var(--transition);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.02);
+      font-family: inherit;
+      white-space: nowrap;
+      user-select: none;
+    }
+
+    .fn-btn:hover {
+      background: var(--accent-light);
+      border-color: var(--accent);
+      color: var(--accent);
+      box-shadow: 0 8px 14px -8px rgba(30, 75, 122, 0.4);
+    }
+
+    .fn-btn:active {
+      transform: scale(0.97);
+      background: #c2d9f5;
+    }
+
+    .fn-btn-primary {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #ffffff;
+    }
+
+    .fn-btn-primary:hover {
+      background: var(--accent-hover);
+      border-color: var(--accent-hover);
+      color: #ffffff;
+    }
+
+    .fn-btn-sm {
+      padding: 6px 14px;
+      font-size: 0.78rem;
+    }
+
+    /* ---------- QUESTION & ANSWER ---------- */
+    .question-text {
+      font-size: 1.85rem;
+      font-weight: 600;
+      line-height: 1.3;
+      color: var(--text-primary);
+      padding: 6px 0 14px 0;
+      border-bottom: 2px solid var(--border-light);
+      word-break: break-word;
+      transition: background 0.1s;
+      cursor: default;
+    }
+
+    .answer-box {
+      background: var(--bg-answer);
+      border-radius: var(--radius-md);
+      padding: 22px 26px;
+      border-left: 6px solid var(--accent);
+      transition: var(--transition);
+      box-shadow: inset 0 1px 6px rgba(255, 255, 255, 0.8);
+      word-break: break-word;
+    }
+
+    .answer-text {
+      font-size: 1.35rem;
+      font-weight: 500;
+      color: var(--text-secondary);
+    }
+
+    .answer-hidden {
+      display: none;
+    }
+
+    /* ---------- COUNTER PANEL ---------- */
+    .counter-panel {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      background: var(--bg-soft);
+      border-radius: var(--radius-sm);
+      padding: 6px 10px 6px 22px;
+      border: 1px solid var(--border-light);
+      gap: 12px;
+    }
+
+    .counter-display {
+      font-size: 1.4rem;
+      font-weight: 700;
+      font-variant-numeric: tabular-nums;
+      color: var(--text-primary);
+      min-width: 3.2rem;
+      text-align: center;
+      background: var(--accent-light);
+      padding: 6px 18px;
+      border-radius: 36px;
+      transition: background 0.08s;
+    }
+
+    .counter-display.bump {
+      background: #b4cef0;
+    }
+
+    /* ---------- HIGHLIGHT AREA ---------- */
+    .highlight-area {
+      background: #fefcf2;
+      border: 1.5px dashed #decb8a;
+      border-radius: var(--radius-md);
+      padding: 18px 22px;
+      font-size: 1.05rem;
+      color: #4d4632;
+      transition: var(--transition);
+      word-break: break-word;
+    }
+
+    .highlight-area.active-highlight {
+      background: var(--bg-highlight);
+      border: 2px solid #cbab3a;
+      box-shadow: 0 0 0 4px rgba(220, 190, 90, 0.25);
+    }
+
+    /* ---------- NOTE AREA ---------- */
+    .note-area {
+      background: var(--bg-note);
+      border-radius: var(--radius-md);
+      padding: 16px 18px;
+      border: 1px solid #c2ddc2;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .note-area textarea {
+      width: 100%;
+      border: 1px solid #b8d4b8;
+      border-radius: 14px;
+      padding: 14px 16px;
+      font-family: inherit;
+      font-size: 0.95rem;
+      background: #ffffff;
+      resize: vertical;
+      min-height: 80px;
+      outline: none;
+      transition: var(--transition);
+      color: var(--text-primary);
+    }
+
+    .note-area textarea:focus {
+      border-color: #6a9e6a;
+      box-shadow: 0 0 0 4px rgba(100, 160, 100, 0.15);
+    }
+
+    .note-actions {
+      display: flex;
+      gap: 10px;
+      justify-content: flex-end;
+      flex-wrap: wrap;
+    }
+
+    .note-indicator {
+      font-size: 0.8rem;
+      color: #2f6b2f;
+      background: #e2f0e2;
+      padding: 5px 16px;
+      border-radius: 36px;
+      align-self: flex-start;
+      transition: var(--transition);
+      font-weight: 500;
+    }
+
+    /* ---------- BADGE ---------- */
+    .save-badge {
+      font-size: 0.68rem;
+      background: #e6edf6;
+      color: #3b5d82;
+      padding: 3px 12px;
+      border-radius: 36px;
+      font-weight: 600;
+      letter-spacing: 0.3px;
+      transition: var(--transition);
+    }
+
+    /* ---------- DIVIDER ---------- */
+    .divider {
+      height: 1px;
+      background: radial-gradient(circle, var(--border-mid) 30%, transparent 90%);
+      margin: 22px 0 18px;
+    }
+
+    /* ---------- STATS ROW (MORE FUNCTIONS) ---------- */
+    .stats-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 14px;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      background: var(--bg-soft);
+      border-radius: 50px;
+      padding: 8px 20px;
+      border: 1px solid var(--border-light);
+    }
+
+    .stats-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .stats-value {
+      font-weight: 700;
+      color: var(--text-primary);
+      background: #ffffff;
+      padding: 2px 12px;
+      border-radius: 30px;
+      border: 1px solid var(--border-light);
+      min-width: 2.4rem;
+      text-align: center;
+      font-variant-numeric: tabular-nums;
+    }
+
+    /* ---------- BUTTON ROW ---------- */
+    .button-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 8px;
+    }
+
+    /* ---------- SECTION SPACING ---------- */
+    .section {
+      margin-bottom: 22px;
+    }
+
+    .section:last-child {
+      margin-bottom: 0;
+    }
+
+    /* ---------- UTILITY ---------- */
+    .hidden {
+      display: none !important;
+    }
+
+    /* ---------- RESPONSIVE ---------- */
+    @media (max-width: 640px) {
+      .card-wrapper {
+        padding: 20px 16px;
+      }
+      .question-text {
+        font-size: 1.45rem;
+      }
+      .answer-text {
+        font-size: 1.15rem;
+      }
+      .counter-panel {
+        padding: 8px 12px;
+      }
+      .fn-btn {
+        padding: 7px 16px;
+        font-size: 0.78rem;
+      }
+      .subject-bar {
+        padding: 8px 12px;
+      }
+      .subject-btn {
+        padding: 5px 14px;
+        font-size: 0.78rem;
+      }
+      .stats-row {
+        padding: 6px 14px;
+        font-size: 0.75rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="card-wrapper" id="app">
+
+    <!-- ========= SUBJECT MANAGER ========= -->
+    <div class="section">
+      <div class="section-label">
+        Subjects
+        <span class="save-badge" id="saveBadge">Auto-saved</span>
+      </div>
+      <div class="subject-bar">
+        <div class="subject-selector" id="subjectSelector"></div>
+        <div class="subject-actions">
+          <button class="fn-btn fn-btn-sm" id="addSubjectBtn">New</button>
+          <button class="fn-btn fn-btn-sm" id="deleteSubjectBtn">Delete</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========= QUESTION ========= -->
+    <div class="section">
+      <div class="section-label">Question</div>
+      <div class="question-text" id="questionDisplay">What is Anki's spaced repetition algorithm?</div>
+    </div>
+
+    <!-- ========= ANSWER ========= -->
+    <div class="section">
+      <div class="section-label">Answer</div>
+      <div class="answer-box" id="answerBox">
+        <div class="answer-text" id="answerText">
+          Spaced repetition algorithms dynamically adjust review intervals based on memory strength. Using algorithms like SuperMemo's SM-2, they schedule reviews at the critical point of forgetting to efficiently consolidate long-term memory.
+        </div>
+      </div>
+    </div>
+
+    <!-- ========= FUNCTION PANEL ========= -->
+    <div class="section">
+      <div class="section-label">Functions</div>
+      <div class="button-row">
+        <button class="fn-btn" id="toggleAnswerBtn">Hide Answer</button>
+        <button class="fn-btn" id="highlightAnswerBtn">Highlight Answer</button>
+        <button class="fn-btn" id="resetCounterBtn">Reset Counter</button>
+        <button class="fn-btn" id="appendMarkBtn">Mark Question</button>
+        <button class="fn-btn" id="shuffleQuestionBtn">Shuffle Question</button>
+      </div>
+    </div>
+
+    <!-- ========= COUNTER ========= -->
+    <div class="section">
+      <div class="section-label">Counter · Review Sessions</div>
+      <div class="counter-panel">
+        <div class="counter-display" id="counterDisplay">0</div>
+        <div class="btn-group" style="display: flex; gap: 8px; flex-wrap: wrap;">
+          <button class="fn-btn" id="decrementBtn">– Decrease</button>
+          <button class="fn-btn" id="incrementBtn">+ Increase</button>
+          <button class="fn-btn" id="resetCounterPanelBtn">Reset</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========= STATS ROW (MORE FUNCTIONS) ========= -->
+    <div class="section">
+      <div class="section-label">Statistics</div>
+      <div class="stats-row">
+        <div class="stats-item">Reviews: <span class="stats-value" id="statReviews">0</span></div>
+        <div class="stats-item">Note Length: <span class="stats-value" id="statNoteLength">0</span></div>
+        <div class="stats-item">Answer Visible: <span class="stats-value" id="statAnswerVisible">Yes</span></div>
+        <div class="stats-item">Highlight: <span class="stats-value" id="statHighlight">Off</span></div>
+      </div>
+    </div>
+
+    <!-- ========= HIGHLIGHT AREA ========= -->
+    <div class="section">
+      <div class="section-label">Highlight Zone</div>
+      <div class="highlight-area" id="highlightArea">
+        Click the button below to highlight this text — it is independent of the answer area.
+      </div>
+      <div class="button-row" style="margin-top: 12px;">
+        <button class="fn-btn" id="toggleHighlightAreaBtn">Toggle Highlight</button>
+      </div>
+    </div>
+
+    <!-- ========= NOTE AREA ========= -->
+    <div class="section">
+      <div class="section-label">Quick Note</div>
+      <div class="note-area">
+        <textarea id="noteInput" placeholder="Type a temporary note... Content is auto-saved to the current subject."></textarea>
+        <div class="note-actions">
+          <button class="fn-btn" id="saveNoteBtn">Save Note</button>
+          <button class="fn-btn" id="clearNoteBtn">Clear</button>
+        </div>
+        <div class="note-indicator" id="noteStatus">Unsaved</div>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- ========= QUESTION SWITCHER ========= -->
+    <div class="section">
+      <div class="button-row" style="justify-content: space-between;">
+        <button class="fn-btn" id="swapQuestionBtn">Switch to Alternate</button>
+        <button class="fn-btn" id="restoreQuestionBtn">Restore Original</button>
+      </div>
+      <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 12px; text-align: center; letter-spacing: 0.2px;">
+        All functions are emoji-free · Data stored locally per subject
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    (function() {
+      "use strict";
+
+      /* ============================================================
+         CONSTANTS
+         ============================================================ */
+      const STORAGE_KEY = 'anki_multifunc_subjects_v2';
+      const DEFAULT_SUBJECTS = ['General', 'Algorithms', 'Languages'];
+      const ORIGINAL_QUESTION = 'What is Anki\'s spaced repetition algorithm?';
+      const ORIGINAL_ANSWER = 'Spaced repetition algorithms dynamically adjust review intervals based on memory strength. Using algorithms like SuperMemo\'s SM-2, they schedule reviews at the critical point of forgetting to efficiently consolidate long-term memory.';
+      const ALTERNATE_QUESTION = 'Explain the role of "active recall" in Anki.';
+      const ALTERNATE_ANSWER = 'Active recall requires attempting to answer a question before revealing the answer, which significantly strengthens memory retrieval pathways.';
+
+      /* ============================================================
+         GLOBAL STATE
+         ============================================================ */
+      let subjects = [];
+      let currentSubject = '';
+      let subjectData = {};
+
+      // Current active state (mirrors currentSubject data)
+      let counter = 0;
+      let isAnswerVisible = true;
+      let isAnswerHighlighted = false;
+      let isHighlightAreaActive = false;
+      let isAlternateQuestion = false;
+
+      // DOM refs
+      const subjectSelector = document.getElementById('subjectSelector');
+      const addSubjectBtn = document.getElementById('addSubjectBtn');
+      const deleteSubjectBtn = document.getElementById('deleteSubjectBtn');
+      const saveBadge = document.getElementById('saveBadge');
+      const questionDisplay = document.getElementById('questionDisplay');
+      const answerBox = document.getElementById('answerBox');
+      const answerTextEl = document.getElementById('answerText');
+      const toggleAnswerBtn = document.getElementById('toggleAnswerBtn');
+      const highlightAnswerBtn = document.getElementById('highlightAnswerBtn');
+      const resetCounterBtn = document.getElementById('resetCounterBtn');
+      const appendMarkBtn = document.getElementById('appendMarkBtn');
+      const shuffleQuestionBtn = document.getElementById('shuffleQuestionBtn');
+      const counterDisplay = document.getElementById('counterDisplay');
+      const incrementBtn = document.getElementById('incrementBtn');
+      const decrementBtn = document.getElementById('decrementBtn');
+      const resetCounterPanelBtn = document.getElementById('resetCounterPanelBtn');
+      const statReviews = document.getElementById('statReviews');
+      const statNoteLength = document.getElementById('statNoteLength');
+      const statAnswerVisible = document.getElementById('statAnswerVisible');
+      const statHighlight = document.getElementById('statHighlight');
+      const highlightArea = document.getElementById('highlightArea');
+      const toggleHighlightAreaBtn = document.getElementById('toggleHighlightAreaBtn');
+      const noteInput = document.getElementById('noteInput');
+      const saveNoteBtn = document.getElementById('saveNoteBtn');
+      const clearNoteBtn = document.getElementById('clearNoteBtn');
+      const noteStatus = document.getElementById('noteStatus');
+      const swapQuestionBtn = document.getElementById('swapQuestionBtn');
+      const restoreQuestionBtn = document.getElementById('restoreQuestionBtn');
+
+      /* ============================================================
+         LOCAL STORAGE
+         ============================================================ */
+      function loadFromStorage() {
+        const stored = localStorage.getItem(STORAGE_KEY);
+        if (stored) {
+          try {
+            const parsed = JSON.parse(stored);
+            if (parsed && Array.isArray(parsed.subjects) && typeof parsed.subjectData === 'object') {
+              subjects = parsed.subjects;
+              subjectData = parsed.subjectData;
+              currentSubject = parsed.currentSubject || subjects[0] || DEFAULT_SUBJECTS[0];
+              if (!subjects.includes(currentSubject)) {
+                currentSubject = subjects[0] || DEFAULT_SUBJECTS[0];
+                if (!subjects.includes(currentSubject)) {
+                  subjects.push(currentSubject);
+                }
+              }
+              // Ensure each subject has data
+              subjects.forEach(sub => {
+                if (!subjectData[sub]) {
+                  subjectData[sub] = createDefaultSubjectData();
+                }
+              });
+              return;
+            }
+          } catch (e) { /* fall through to default */ }
+        }
+        // Default setup
+        subjects = [...DEFAULT_SUBJECTS];
+        currentSubject = subjects[0];
+        subjectData = {};
+        subjects.forEach(sub => {
+          subjectData[sub] = createDefaultSubjectData();
+        });
+        saveToStorage();
+      }
+
+      function createDefaultSubjectData() {
+        return {
+          counter: 0,
+          note: '',
+          isAnswerVisible: true,
+          isAnswerHighlighted: false,
+          isHighlightAreaActive: false,
+          questionText: ORIGINAL_QUESTION,
+          answerText: ORIGINAL_ANSWER,
+          isAlternateQuestion: false,
+        };
+      }
+
+      function saveToStorage() {
+        if (currentSubject && subjectData[currentSubject]) {
+          subjectData[currentSubject] = {
+            counter: counter,
+            note: noteInput.value,
+            isAnswerVisible: isAnswerVisible,
+            isAnswerHighlighted: isAnswerHighlighted,
+            isHighlightAreaActive: isHighlightAreaActive,
+            questionText: questionDisplay.innerText,
+            answerText: answerTextEl.innerText,
+            isAlternateQuestion: isAlternateQuestion,
+          };
+        }
+        const payload = {
+          subjects: subjects,
+          subjectData: subjectData,
+          currentSubject: currentSubject,
+        };
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
+        flashSaveBadge();
+      }
+
+      function flashSaveBadge() {
+        saveBadge.textContent = 'Saved';
+        saveBadge.style.background = '#dff0df';
+        saveBadge.style.color = '#1a5a1a';
+        if (window.saveTimeout) clearTimeout(window.saveTimeout);
+        window.saveTimeout = setTimeout(() => {
+          saveBadge.textContent = 'Auto-saved';
+          saveBadge.style.background = '#e6edf6';
+          saveBadge.style.color = '#3b5d82';
+        }, 1200);
+      }
+
+      /* ============================================================
+         SUBJECT RENDERING
+         ============================================================ */
+      function renderSubjectButtons() {
+        subjectSelector.innerHTML = '';
+        subjects.forEach(sub => {
+          const btn = document.createElement('button');
+          btn.className = 'subject-btn' + (sub === currentSubject ? ' active' : '');
+          btn.textContent = sub;
+          btn.addEventListener('click', () => {
+            if (sub === currentSubject) return;
+            // Save current state before switching
+            syncCurrentToDataAndSave();
+            currentSubject = sub;
+            loadSubjectData(currentSubject);
+            renderSubjectButtons();
+            saveToStorage();
+          });
+          subjectSelector.appendChild(btn);
+        });
+      }
+
+      function loadSubjectData(subjectName) {
+        const data = subjectData[subjectName];
+        if (!data) return;
+
+        counter = data.counter ?? 0;
+        isAnswerVisible = data.isAnswerVisible ?? true;
+        isAnswerHighlighted = data.isAnswerHighlighted ?? false;
+        isHighlightAreaActive = data.isHighlightAreaActive ?? false;
+        isAlternateQuestion = data.isAlternateQuestion ?? false;
+
+        // Update UI
+        questionDisplay.innerText = data.questionText ?? ORIGINAL_QUESTION;
+        answerTextEl.innerText = data.answerText ?? ORIGINAL_ANSWER;
+        noteInput.value = data.note ?? '';
+        counterDisplay.textContent = counter;
+
+        // Answer visibility
+        if (isAnswerVisible) {
+          answerBox.classList.remove('answer-hidden');
+          toggleAnswerBtn.textContent = 'Hide Answer';
+        } else {
+          answerBox.classList.add('answer-hidden');
+          toggleAnswerBtn.textContent = 'Show Answer';
+        }
+
+        // Answer highlight
+        if (isAnswerHighlighted) {
+          answerBox.style.background = '#fff3bf';
+          answerBox.style.borderLeftColor = '#b38f2c';
+          answerBox.style.boxShadow = 'inset 0 1px 4px rgba(255,255,200,0.8), 0 2px 10px rgba(200, 160, 40, 0.2)';
+          highlightAnswerBtn.textContent = 'Unhighlight';
+        } else {
+          answerBox.style.background = 'var(--bg-answer)';
+          answerBox.style.borderLeftColor = 'var(--accent)';
+          answerBox.style.boxShadow = 'inset 0 1px 6px rgba(255, 255, 255, 0.8)';
+          highlightAnswerBtn.textContent = 'Highlight Answer';
+        }
+
+        // Highlight zone
+        if (isHighlightAreaActive) {
+          highlightArea.classList.add('active-highlight');
+          toggleHighlightAreaBtn.textContent = 'Unhighlight Zone';
+        } else {
+          highlightArea.classList.remove('active-highlight');
+          toggleHighlightAreaBtn.textContent = 'Toggle Highlight';
+        }
+
+        // Stats
+        updateStats();
+
+        // Reset note status
+        resetNoteStatus();
+      }
+
+      function syncCurrentToDataAndSave() {
+        if (!currentSubject || !subjectData[currentSubject]) return;
+        subjectData[currentSubject] = {
+          counter: counter,
+          note: noteInput.value,
+          isAnswerVisible: isAnswerVisible,
+          isAnswerHighlighted: isAnswerHighlighted,
+          isHighlightAreaActive: isHighlightAreaActive,
+          questionText: questionDisplay.innerText,
+          answerText: answerTextEl.innerText,
+          isAlternateQuestion: isAlternateQuestion,
+        };
+        saveToStorage();
+        updateStats();
+      }
+
+      function updateStats() {
+        statReviews.textContent = counter;
+        statNoteLength.textContent = noteInput.value.length;
+        statAnswerVisible.textContent = isAnswerVisible ? 'Yes' : 'No';
+        statHighlight.textContent = isAnswerHighlighted ? 'On' : 'Off';
+      }
+
+      /* ============================================================
+         UTILITY FUNCTIONS
+         ============================================================ */
+      function setCounter(value) {
+        if (value < 0) value = 0;
+        if (value > 9999) value = 9999;
+        counter = value;
+        counterDisplay.textContent = counter;
+        counterDisplay.classList.add('bump');
+        setTimeout(() => counterDisplay.classList.remove('bump'), 100);
+        updateStats();
+        syncCurrentToDataAndSave();
+      }
+
+      function resetNoteStatus() {
+        if (window.noteTimeout) clearTimeout(window.noteTimeout);
+        noteStatus.textContent = 'Unsaved';
+        noteStatus.style.color = '#2f6b2f';
+        noteStatus.style.background = '#e2f0e2';
+      }
+
+      function setNoteStatus(message, isSuccess = true) {
+        noteStatus.textContent = message;
+        noteStatus.style.color = isSuccess ? '#1a5a1a' : '#8b3a3a';
+        noteStatus.style.background = isSuccess ? '#e2f0e2' : '#f8e2e2';
+        if (window.noteTimeout) clearTimeout(window.noteTimeout);
+        window.noteTimeout = setTimeout(() => {
+          noteStatus.textContent = 'Unsaved';
+          noteStatus.style.color = '#2f6b2f';
+          noteStatus.style.background = '#e2f0e2';
+        }, 3000);
+      }
+
+      /* ============================================================
+         EVENT LISTENERS
+         ============================================================ */
+
+      // --- Answer visibility ---
+      toggleAnswerBtn.addEventListener('click', () => {
+        isAnswerVisible = !isAnswerVisible;
+        if (isAnswerVisible) {
+          answerBox.classList.remove('answer-hidden');
+          toggleAnswerBtn.textContent = 'Hide Answer';
+        } else {
+          answerBox.classList.add('answer-hidden');
+          toggleAnswerBtn.textContent = 'Show Answer';
+        }
+        updateStats();
+        syncCurrentToDataAndSave();
+      });
+
+      // --- Answer highlight ---
+      highlightAnswerBtn.addEventListener('click', () => {
+        isAnswerHighlighted = !isAnswerHighlighted;
+        if (isAnswerHighlighted) {
+          answerBox.style.background = '#fff3bf';
+          answerBox.style.borderLeftColor = '#b38f2c';
+          answerBox.style.boxShadow = 'inset 0 1px 4px rgba(255,255,200,0.8), 0 2px 10px rgba(200, 160, 40, 0.2)';
+          highlightAnswerBtn.textContent = 'Unhighlight';
+        } else {
+          answerBox.style.background = 'var(--bg-answer)';
+          answerBox.style.borderLeftColor = 'var(--accent)';
+          answerBox.style.boxShadow = 'inset 0 1px 6px rgba(255, 255, 255, 0.8)';
+          highlightAnswerBtn.textContent = 'Highlight Answer';
+        }
+        updateStats();
+        syncCurrentToDataAndSave();
+      });
+
+      // --- Counter reset ---
+      function resetCounterHandler() {
+        setCounter(0);
+      }
+      resetCounterBtn.addEventListener('click', resetCounterHandler);
+      resetCounterPanelBtn.addEventListener('click', resetCounterHandler);
+
+      // --- Counter increment / decrement ---
+      incrementBtn.addEventListener('click', () => setCounter(counter + 1));
+      decrementBtn.addEventListener('click', () => setCounter(counter - 1));
+
+      // --- Mark question ---
+      appendMarkBtn.addEventListener('click', () => {
+        if (!questionDisplay.innerText.includes(' [Marked]')) {
+          questionDisplay.innerText = questionDisplay.innerText + ' [Marked]';
+        } else {
+          questionDisplay.style.transition = 'background 0.1s';
+          questionDisplay.style.background = '#fff0d0';
+          setTimeout(() => questionDisplay.style.background = '', 200);
+        }
+        syncCurrentToDataAndSave();
+      });
+
+      // --- Shuffle question (extra function) ---
+      shuffleQuestionBtn.addEventListener('click', () => {
+        const questions = [
+          'What is Anki?',
+          'How does spaced repetition work?',
+          'What is active recall?',
+          'Explain the forgetting curve.',
+          'What is the SM-2 algorithm?'
+        ];
+        const randomQ = questions[Math.floor(Math.random() * questions.length)];
+        questionDisplay.innerText = randomQ;
+        isAlternateQuestion = false;
+        syncCurrentToDataAndSave();
+      });
+
+      // --- Highlight zone toggle ---
+      toggleHighlightAreaBtn.addEventListener('click', () => {
+        isHighlightAreaActive = !isHighlightAreaActive;
+        if (isHighlightAreaActive) {
+          highlightArea.classList.add('active-highlight');
+          toggleHighlightAreaBtn.textContent = 'Unhighlight Zone';
+        } else {
+          highlightArea.classList.remove('active-highlight');
+          toggleHighlightAreaBtn.textContent = 'Toggle Highlight';
+        }
+        syncCurrentToDataAndSave();
+      });
+
+      // --- Note save / clear ---
+      saveNoteBtn.addEventListener('click', () => {
+        const content = noteInput.value.trim();
+        if (content === '') {
+          setNoteStatus('Note is empty — not saved', false);
+        } else {
+          setNoteStatus(`Saved (${content.length} chars)`, true);
+        }
+        syncCurrentToDataAndSave();
+      });
+
+      clearNoteBtn.addEventListener('click', () => {
+        noteInput.value = '';
+        resetNoteStatus();
+        updateStats();
+        syncCurrentToDataAndSave();
+      });
+
+      noteInput.addEventListener('input', () => {
+        resetNoteStatus();
+        updateStats();
+        if (window.noteSaveTimer) clearTimeout(window.noteSaveTimer);
+        window.noteSaveTimer = setTimeout(() => {
+          syncCurrentToDataAndSave();
+        }, 800);
+      });
+
+      // --- Question swap / restore ---
+      swapQuestionBtn.addEventListener('click', () => {
+        if (!isAlternateQuestion) {
+          questionDisplay.innerText = ALTERNATE_QUESTION;
+          answerTextEl.innerText = ALTERNATE_ANSWER;
+          isAlternateQuestion = true;
+        } else {
+          questionDisplay.style.transition = 'background 0.1s';
+          questionDisplay.style.background = '#ffe0c0';
+          setTimeout(() => questionDisplay.style.background = '', 200);
+        }
+        syncCurrentToDataAndSave();
+      });
+
+      restoreQuestionBtn.addEventListener('click', () => {
+        if (isAlternateQuestion) {
+          questionDisplay.innerText = ORIGINAL_QUESTION;
+          answerTextEl.innerText = ORIGINAL_ANSWER;
+          isAlternateQuestion = false;
+        } else {
+          questionDisplay.style.transition = 'background 0.1s';
+          questionDisplay.style.background = '#e0e8ff';
+          setTimeout(() => questionDisplay.style.background = '', 200);
+        }
+        syncCurrentToDataAndSave();
+      });
+
+      // --- Double-click question toggles answer ---
+      questionDisplay.addEventListener('dblclick', () => {
+        isAnswerVisible = !isAnswerVisible;
+        if (isAnswerVisible) {
+          answerBox.classList.remove('answer-hidden');
+          toggleAnswerBtn.textContent = 'Hide Answer';
+        } else {
+          answerBox.classList.add('answer-hidden');
+          toggleAnswerBtn.textContent = 'Show Answer';
+        }
+        updateStats();
+        syncCurrentToDataAndSave();
+      });
+
+      // --- Subject add / delete ---
+      addSubjectBtn.addEventListener('click', () => {
+        const name = prompt('Enter new subject name:');
+        if (!name || name.trim() === '') return;
+        const trimmed = name.trim();
+        if (subjects.includes(trimmed)) {
+          alert('Subject already exists');
+          return;
+        }
+        syncCurrentToDataAndSave();
+        subjects.push(trimmed);
+        subjectData[trimmed] = createDefaultSubjectData();
+        currentSubject = trimmed;
+        loadSubjectData(trimmed);
+        renderSubjectButtons();
+        saveToStorage();
+      });
+
+      deleteSubjectBtn.addEventListener('click', () => {
+        if (subjects.length <= 1) {
+          alert('At least one subject must remain');
+          return;
+        }
+        if (!confirm(`Delete subject "${currentSubject}"? All its data will be removed.`)) return;
+        const index = subjects.indexOf(currentSubject);
+        if (index !== -1) subjects.splice(index, 1);
+        delete subjectData[currentSubject];
+        currentSubject = subjects[0];
+        loadSubjectData(currentSubject);
+        renderSubjectButtons();
+        saveToStorage();
+      });
+
+      /* ============================================================
+         INITIALIZATION
+         ============================================================ */
+      function init() {
+        loadFromStorage();
+        // Ensure data integrity
+        subjects.forEach(sub => {
+          if (!subjectData[sub]) subjectData[sub] = createDefaultSubjectData();
+        });
+        loadSubjectData(currentSubject);
+        renderSubjectButtons();
+        saveToStorage();
+
+        // Auto-save every 30 seconds
+        setInterval(() => {
+          syncCurrentToDataAndSave();
+        }, 30000);
+      }
+
+      init();
+
+    })();
+  </script>
+</body>
+</html>
