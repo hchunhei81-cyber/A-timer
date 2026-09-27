@@ -1,6 +1,6 @@
 # Pomodoro Focus
 
-A single-file Pomodoro timer, task manager, and flight deck simulator — plus a standalone study card tool.
+A Pomodoro timer, task manager, and flight deck simulator — plus a standalone study card tool.
 
 Built with HTML, Tailwind CSS, and vanilla JavaScript. No build step, no backend, no accounts. All data stays in your browser.
 
