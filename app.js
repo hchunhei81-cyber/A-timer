@@ -179,15 +179,6 @@
        ============================================================ */
     var ICON_SVG = '<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512"><rect width="512" height="512" rx="116" fill="#050b14"/><circle cx="256" cy="256" r="142" fill="none" stroke="#2a4a6a" stroke-width="30"/><path d="M256 114a142 142 0 0 1 100 242" fill="none" stroke="#fbbf24" stroke-width="30" stroke-linecap="round"/><circle cx="256" cy="256" r="16" fill="#fbbf24"/></svg>';
     var APP_ICON = 'data:image/svg+xml;base64,' + btoa(ICON_SVG);
-    function setupIcon() {
-        try {
-            var f = document.createElement('link'); f.rel = 'icon'; f.type = 'image/svg+xml'; f.href = APP_ICON; document.head.appendChild(f);
-            var a = document.createElement('link'); a.rel = 'apple-touch-icon'; a.href = APP_ICON; document.head.appendChild(a);
-            var mf = { name: 'Pomodoro Focus', short_name: 'Pomodoro', start_url: '.', scope: '.', display: 'standalone', background_color: '#050b14', theme_color: '#050b14', icons: [{ src: APP_ICON, sizes: '512x512', type: 'image/svg+xml', purpose: 'any' }, { src: APP_ICON, sizes: '512x512', type: 'image/svg+xml', purpose: 'maskable' }] };
-            var bl = new Blob([JSON.stringify(mf)], { type: 'application/manifest+json' });
-            var l = document.createElement('link'); l.rel = 'manifest'; l.href = URL.createObjectURL(bl); document.head.appendChild(l);
-        } catch (e) { }
-    }
 
     /* ============================================================
        ICONS
@@ -1372,7 +1363,6 @@
     }
 
     function init() {
-        setupIcon();
         applyTheme();
         updateNotifyButton();
         el.ring.style.strokeDasharray = String(CIRC);

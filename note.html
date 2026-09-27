@@ -1,229 +1,242 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="robots" content="noindex, nofollow">
-<title>Study Cards</title>
-<link rel="stylesheet" href="note.css">
+  <meta charset="UTF-8">
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" type="image/svg+xml" href="icon.svg">
+  <link rel="apple-touch-icon" href="icon.svg">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Study Cards</title>
+  <link rel="stylesheet" href="note.css">
 </head>
+
 <body>
 
-<div class="wrap">
+  <div class="wrap">
 
-  <!-- HEADER -->
-  <div class="topbar">
-    <div class="brand">
-      <div class="brand-icon">
-        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor"
-             stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-          <path d="M14 2v6h6"/>
-          <path d="M8 13h8M8 17h5"/>
-        </svg>
-      </div>
-      <div>
-        <h1>Study Cards</h1>
-        <p>Spaced repetition for focus sessions</p>
-      </div>
-    </div>
-    <a href="index.html" class="back">← Timer</a>
-  </div>
-
-  <!-- MAIN CARD -->
-  <div class="card">
-
-    <!-- SUBJECTS -->
-    <div class="section">
-      <div class="label">Subjects</div>
-      <div class="subject-bar">
-        <div class="subject-selector" id="subjectSelector"></div>
-        <div class="subj-actions">
-          <button class="btn btn-sm" id="addSubjectBtn">+ New</button>
-          <button class="btn btn-sm" id="deleteSubjectBtn">Delete</button>
+    <!-- HEADER -->
+    <div class="topbar">
+      <div class="brand">
+        <div class="brand-icon">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+            <path d="M14 2v6h6" />
+            <path d="M8 13h8M8 17h5" />
+          </svg>
+        </div>
+        <div>
+          <h1>Study Cards</h1>
+          <p>Spaced repetition for focus sessions</p>
         </div>
       </div>
+      <a href="index.html" class="back">← Timer</a>
     </div>
 
-    <!-- CARD NAVIGATOR -->
-    <div class="section" id="navSection">
-      <div class="card-nav">
-        <div class="nav-info">
-          <span class="nav-count" id="cardCount">0 / 0</span>
-          <div class="nav-progress"><span id="navProgressFill" style="width:0%"></span></div>
-        </div>
-        <div class="nav-btns">
-          <button class="nav-btn" id="prevCardBtn" title="Previous card (Left arrow)" aria-label="Previous card">
-            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor"
-                 stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M15 18l-6-6 6-6"/>
-            </svg>
-          </button>
-          <button class="nav-btn" id="nextCardBtn" title="Next card (Right arrow)" aria-label="Next card">
-            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor"
-                 stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M9 6l6 6-6 6"/>
-            </svg>
-          </button>
-          <button class="nav-btn" id="newCardBtn" title="New card (N)" aria-label="New card">
-            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor"
-                 stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M12 5v14M5 12h14"/>
-            </svg>
-          </button>
-          <button class="nav-btn" id="editCardBtn" title="Edit card (E)" aria-label="Edit card">
-            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor"
-                 stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M12 20h9"/>
-              <path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4z"/>
-            </svg>
-          </button>
-          <button class="nav-btn" id="deleteCardBtn" title="Delete card (D)" aria-label="Delete card">
-            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor"
-                 stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>
-            </svg>
-          </button>
-        </div>
-      </div>
-    </div>
+    <!-- MAIN CARD -->
+    <div class="card">
 
-    <!-- FLASHCARD -->
-    <div class="section">
-      <div id="flashcardContainer">
-        <div class="flashcard" id="flashcard">
-          <div class="card-question" id="cardQuestion">Click to flip</div>
-          <div class="card-divider"></div>
-          <div class="card-answer-wrap hidden-answer" id="cardAnswerWrap">
-            <div class="card-answer" id="cardAnswer">Answer</div>
-          </div>
-          <div class="card-hint" id="cardHint">
-            Press <span>Space</span> to flip
+      <!-- SUBJECTS -->
+      <div class="section">
+        <div class="label">Subjects</div>
+        <div class="subject-bar">
+          <div class="subject-selector" id="subjectSelector"></div>
+          <div class="subj-actions">
+            <button class="btn btn-sm" id="addSubjectBtn">+ New</button>
+            <button class="btn btn-sm" id="deleteSubjectBtn">Delete</button>
           </div>
         </div>
       </div>
+
+      <!-- CARD NAVIGATOR -->
+      <div class="section" id="navSection">
+        <div class="card-nav">
+          <div class="nav-info">
+            <span class="nav-count" id="cardCount">0 / 0</span>
+            <div class="nav-progress"><span id="navProgressFill" style="width:0%"></span></div>
+          </div>
+          <div class="nav-btns">
+            <button class="nav-btn" id="prevCardBtn" title="Previous card (Left arrow)" aria-label="Previous card">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round">
+                <path d="M15 18l-6-6 6-6" />
+              </svg>
+            </button>
+            <button class="nav-btn" id="nextCardBtn" title="Next card (Right arrow)" aria-label="Next card">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round">
+                <path d="M9 6l6 6-6 6" />
+              </svg>
+            </button>
+            <button class="nav-btn" id="newCardBtn" title="New card (N)" aria-label="New card">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 5v14M5 12h14" />
+              </svg>
+            </button>
+            <button class="nav-btn" id="editCardBtn" title="Edit card (E)" aria-label="Edit card">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 20h9" />
+                <path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4z" />
+              </svg>
+            </button>
+            <button class="nav-btn" id="deleteCardBtn" title="Delete card (D)" aria-label="Delete card">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round">
+                <path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" />
+              </svg>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- FLASHCARD -->
+      <div class="section">
+        <div id="flashcardContainer">
+          <div class="flashcard" id="flashcard">
+            <div class="card-question" id="cardQuestion">Click to flip</div>
+            <div class="card-divider"></div>
+            <div class="card-answer-wrap hidden-answer" id="cardAnswerWrap">
+              <div class="card-answer" id="cardAnswer">Answer</div>
+            </div>
+            <div class="card-hint" id="cardHint">
+              Press <span>Space</span> to flip
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ACTION ROW -->
+      <div class="section">
+        <div class="action-row">
+          <button class="btn" id="flipBtn">Flip Card</button>
+          <button class="btn" id="highlightBtn">Highlight</button>
+          <button class="btn btn-good" id="gotItBtn">Got it</button>
+          <button class="btn btn-bad" id="missedBtn">Missed</button>
+          <button class="btn" id="resetStatsBtn">Reset Stats</button>
+        </div>
+      </div>
+
+      <!-- STATS -->
+      <div class="section">
+        <div class="label">Statistics</div>
+        <div class="stats">
+          <div class="stat">
+            <div class="stat-label">Cards</div>
+            <div class="stat-val" id="statCards">0</div>
+          </div>
+          <div class="stat">
+            <div class="stat-label">Got It</div>
+            <div class="stat-val good" id="statGot">0</div>
+          </div>
+          <div class="stat">
+            <div class="stat-label">Missed</div>
+            <div class="stat-val bad" id="statMissed">0</div>
+          </div>
+          <div class="stat">
+            <div class="stat-label">Accuracy</div>
+            <div class="stat-val" id="statAcc">—</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- DATA -->
+      <div class="section">
+        <div class="label">Data</div>
+        <div class="action-row" style="justify-content:flex-start">
+          <button class="btn btn-sm" id="exportBtn">Export JSON</button>
+          <button class="btn btn-sm" id="importBtn">Import JSON</button>
+          <button class="btn btn-sm" id="helpBtn">Shortcuts</button>
+          <input type="file" id="importFile" accept="application/json,.json" style="display:none">
+        </div>
+      </div>
+
     </div>
 
-    <!-- ACTION ROW -->
-    <div class="section">
-      <div class="action-row">
-        <button class="btn" id="flipBtn">Flip Card</button>
-        <button class="btn" id="highlightBtn">Highlight</button>
-        <button class="btn btn-good" id="gotItBtn">Got it</button>
-        <button class="btn btn-bad" id="missedBtn">Missed</button>
-        <button class="btn" id="resetStatsBtn">Reset Stats</button>
-      </div>
-    </div>
-
-    <!-- STATS -->
-    <div class="section">
-      <div class="label">Statistics</div>
-      <div class="stats">
-        <div class="stat">
-          <div class="stat-label">Cards</div>
-          <div class="stat-val" id="statCards">0</div>
-        </div>
-        <div class="stat">
-          <div class="stat-label">Got It</div>
-          <div class="stat-val good" id="statGot">0</div>
-        </div>
-        <div class="stat">
-          <div class="stat-label">Missed</div>
-          <div class="stat-val bad" id="statMissed">0</div>
-        </div>
-        <div class="stat">
-          <div class="stat-label">Accuracy</div>
-          <div class="stat-val" id="statAcc">—</div>
-        </div>
-      </div>
-    </div>
-
-    <!-- DATA -->
-    <div class="section">
-      <div class="label">Data</div>
-      <div class="action-row" style="justify-content:flex-start">
-        <button class="btn btn-sm" id="exportBtn">Export JSON</button>
-        <button class="btn btn-sm" id="importBtn">Import JSON</button>
-        <button class="btn btn-sm" id="helpBtn">Shortcuts</button>
-        <input type="file" id="importFile" accept="application/json,.json" style="display:none">
-      </div>
+    <!-- HELP TEXT -->
+    <div class="help">
+      <span class="kbd">Space</span> flip ·
+      <span class="kbd">←</span> <span class="kbd">→</span> navigate ·
+      <span class="kbd">N</span> new ·
+      <span class="kbd">E</span> edit ·
+      <span class="kbd">D</span> delete ·
+      <span class="kbd">G</span> got it ·
+      <span class="kbd">M</span> missed ·
+      <span class="kbd">Esc</span> close modal
     </div>
 
   </div>
 
-  <!-- HELP TEXT -->
-  <div class="help">
-    <span class="kbd">Space</span> flip ·
-    <span class="kbd">←</span> <span class="kbd">→</span> navigate ·
-    <span class="kbd">N</span> new ·
-    <span class="kbd">E</span> edit ·
-    <span class="kbd">D</span> delete ·
-    <span class="kbd">G</span> got it ·
-    <span class="kbd">M</span> missed ·
-    <span class="kbd">Esc</span> close modal
-  </div>
-
-</div>
-
-<!-- ============ EDIT MODAL ============ -->
-<div id="editModal" class="modal-root hidden" role="dialog" aria-modal="true">
-  <div class="modal-bg" data-close></div>
-  <div class="modal-panel">
-    <div class="modal-title" id="editModalTitle">Edit Card</div>
-    <div class="modal-sub">Keep questions specific. One fact per card.</div>
-    <textarea class="field" id="editQuestion" placeholder="Question" rows="3"></textarea>
-    <textarea class="field" id="editAnswer" placeholder="Answer" rows="5"></textarea>
-    <div class="modal-actions">
-      <button class="btn" data-close>Cancel</button>
-      <button class="btn btn-primary" id="saveEditBtn">Save</button>
-    </div>
-  </div>
-</div>
-
-<!-- ============ HELP MODAL ============ -->
-<div id="helpModal" class="modal-root hidden" role="dialog" aria-modal="true">
-  <div class="modal-bg" data-close></div>
-  <div class="modal-panel">
-    <div class="modal-title">Keyboard Shortcuts</div>
-    <div class="modal-sub">Move faster without the mouse.</div>
-    <div style="display:flex;flex-direction:column;gap:8px;margin-top:8px">
-      <div style="display:flex;justify-content:space-between;gap:16px;padding:9px 12px;border-radius:11px;background:var(--surface-2);border:1px solid var(--border)">
-        <span style="font-size:12.5px;color:var(--text-dim)">Flip card</span>
-        <span class="kbd">Space</span>
-      </div>
-      <div style="display:flex;justify-content:space-between;gap:16px;padding:9px 12px;border-radius:11px;background:var(--surface-2);border:1px solid var(--border)">
-        <span style="font-size:12.5px;color:var(--text-dim)">Previous / next card</span>
-        <span><span class="kbd">←</span> <span class="kbd">→</span></span>
-      </div>
-      <div style="display:flex;justify-content:space-between;gap:16px;padding:9px 12px;border-radius:11px;background:var(--surface-2);border:1px solid var(--border)">
-        <span style="font-size:12.5px;color:var(--text-dim)">New card</span>
-        <span class="kbd">N</span>
-      </div>
-      <div style="display:flex;justify-content:space-between;gap:16px;padding:9px 12px;border-radius:11px;background:var(--surface-2);border:1px solid var(--border)">
-        <span style="font-size:12.5px;color:var(--text-dim)">Edit current card</span>
-        <span class="kbd">E</span>
-      </div>
-      <div style="display:flex;justify-content:space-between;gap:16px;padding:9px 12px;border-radius:11px;background:var(--surface-2);border:1px solid var(--border)">
-        <span style="font-size:12.5px;color:var(--text-dim)">Delete card</span>
-        <span class="kbd">D</span>
-      </div>
-      <div style="display:flex;justify-content:space-between;gap:16px;padding:9px 12px;border-radius:11px;background:var(--surface-2);border:1px solid var(--border)">
-        <span style="font-size:12.5px;color:var(--text-dim)">Mark got it / missed</span>
-        <span><span class="kbd">G</span> <span class="kbd">M</span></span>
-      </div>
-      <div style="display:flex;justify-content:space-between;gap:16px;padding:9px 12px;border-radius:11px;background:var(--surface-2);border:1px solid var(--border)">
-        <span style="font-size:12.5px;color:var(--text-dim)">Close modal</span>
-        <span class="kbd">Esc</span>
+  <!-- ============ EDIT MODAL ============ -->
+  <div id="editModal" class="modal-root hidden" role="dialog" aria-modal="true">
+    <div class="modal-bg" data-close></div>
+    <div class="modal-panel">
+      <div class="modal-title" id="editModalTitle">Edit Card</div>
+      <div class="modal-sub">Keep questions specific. One fact per card.</div>
+      <textarea class="field" id="editQuestion" placeholder="Question" rows="3"></textarea>
+      <textarea class="field" id="editAnswer" placeholder="Answer" rows="5"></textarea>
+      <div class="modal-actions">
+        <button class="btn" data-close>Cancel</button>
+        <button class="btn btn-primary" id="saveEditBtn">Save</button>
       </div>
     </div>
-    <div class="modal-actions">
-      <button class="btn btn-primary" data-close>Got it</button>
+  </div>
+
+  <!-- ============ HELP MODAL ============ -->
+  <div id="helpModal" class="modal-root hidden" role="dialog" aria-modal="true">
+    <div class="modal-bg" data-close></div>
+    <div class="modal-panel">
+      <div class="modal-title">Keyboard Shortcuts</div>
+      <div class="modal-sub">Move faster without the mouse.</div>
+      <div style="display:flex;flex-direction:column;gap:8px;margin-top:8px">
+        <div
+          style="display:flex;justify-content:space-between;gap:16px;padding:9px 12px;border-radius:11px;background:var(--surface-2);border:1px solid var(--border)">
+          <span style="font-size:12.5px;color:var(--text-dim)">Flip card</span>
+          <span class="kbd">Space</span>
+        </div>
+        <div
+          style="display:flex;justify-content:space-between;gap:16px;padding:9px 12px;border-radius:11px;background:var(--surface-2);border:1px solid var(--border)">
+          <span style="font-size:12.5px;color:var(--text-dim)">Previous / next card</span>
+          <span><span class="kbd">←</span> <span class="kbd">→</span></span>
+        </div>
+        <div
+          style="display:flex;justify-content:space-between;gap:16px;padding:9px 12px;border-radius:11px;background:var(--surface-2);border:1px solid var(--border)">
+          <span style="font-size:12.5px;color:var(--text-dim)">New card</span>
+          <span class="kbd">N</span>
+        </div>
+        <div
+          style="display:flex;justify-content:space-between;gap:16px;padding:9px 12px;border-radius:11px;background:var(--surface-2);border:1px solid var(--border)">
+          <span style="font-size:12.5px;color:var(--text-dim)">Edit current card</span>
+          <span class="kbd">E</span>
+        </div>
+        <div
+          style="display:flex;justify-content:space-between;gap:16px;padding:9px 12px;border-radius:11px;background:var(--surface-2);border:1px solid var(--border)">
+          <span style="font-size:12.5px;color:var(--text-dim)">Delete card</span>
+          <span class="kbd">D</span>
+        </div>
+        <div
+          style="display:flex;justify-content:space-between;gap:16px;padding:9px 12px;border-radius:11px;background:var(--surface-2);border:1px solid var(--border)">
+          <span style="font-size:12.5px;color:var(--text-dim)">Mark got it / missed</span>
+          <span><span class="kbd">G</span> <span class="kbd">M</span></span>
+        </div>
+        <div
+          style="display:flex;justify-content:space-between;gap:16px;padding:9px 12px;border-radius:11px;background:var(--surface-2);border:1px solid var(--border)">
+          <span style="font-size:12.5px;color:var(--text-dim)">Close modal</span>
+          <span class="kbd">Esc</span>
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button class="btn btn-primary" data-close>Got it</button>
+      </div>
     </div>
   </div>
-</div>
 
-<div id="toastRoot" aria-live="polite" aria-atomic="true"></div>
+  <div id="toastRoot" aria-live="polite" aria-atomic="true"></div>
 
-<script src="note.js"></script>
+  <script src="note.js"></script>
 </body>
+
 </html>
