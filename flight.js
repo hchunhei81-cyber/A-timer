@@ -204,7 +204,7 @@
         var svg = el.pfd;
         if (!svg) return;
         var h = '';
-        h += '<defs><linearGradient id="skyG" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#031527"/><stop offset="0.55" stop-color="#12466f"/><stop offset="1" stop-color="#4aa8dc"/></linearGradient><linearGradient id="grG" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#b06a2b"/><stop offset="0.4" stop-color="#6b3a14"/><stop offset="1" stop-color="#2a1505"/></linearGradient><clipPath id="ac"><rect x="100" y="40" width="240" height="240"/></clipPath><clipPath id="sc"><rect x="8" y="40" width="72" height="240"/></clipPath><clipPath id="alc"><rect x="360" y="40" width="72" height="240"/></clipPath><clipPath id="hc"><rect x="100" y="290" width="240" height="40"/></clipPath></defs>';
+        h += '<defs><linearGradient id="skyG" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#031527"/><stop offset="0.55" stop-color="#12466f"/><stop offset="1" stop-color="#4aa8dc"/></linearGradient><linearGradient id="grG" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#b06a2b"/><stop offset="0.4" stop-color="#6b3a14"/><stop offset="1" stop-color="#2a1505"/></linearGradient><clipPath id="ac"><rect x="100" y="40" width="240" height="240"/></clipPath><clipPath id="sc"><rect x="0" y="40" width="130" height="240"/></clipPath><clipPath id="alc"><rect x="310" y="40" width="130" height="240"/></clipPath><clipPath id="hc"><rect x="100" y="290" width="240" height="40"/></clipPath></defs>';
         h += '<rect width="440" height="340" fill="#050b14" rx="6"/>';
         h += '<rect width="440" height="26" fill="#000"/><line x1="146.6" y1="4" x2="146.6" y2="22" stroke="#1a3a5a"/><line x1="293.3" y1="4" x2="293.3" y2="22" stroke="#1a3a5a"/>';
         h += '<text id="fmaAt" x="73" y="18" text-anchor="middle" fill="#5bd45b" font-size="11" font-family="ui-monospace,monospace" font-weight="bold">A/T ARM</text>';
@@ -214,7 +214,7 @@
         h += '<text x="48" y="34" text-anchor="middle" fill="#6a9cc0" font-size="8" font-family="ui-monospace,monospace">IAS</text><text x="48" y="292" text-anchor="middle" fill="#6a9cc0" font-size="8" font-family="ui-monospace,monospace">KTS</text>';
         h += '<rect x="100" y="40" width="240" height="240" fill="#000"/><g clip-path="url(#ac)"><g id="attT" transform="translate(220,160)"><g id="attI"><rect x="-400" y="-400" width="800" height="400" fill="url(#skyG)"/><rect x="-400" y="0" width="800" height="400" fill="url(#grG)"/><line x1="-400" y1="0" x2="400" y2="0" stroke="#fff" stroke-width="1.6"/><g id="lad"></g></g></g></g><rect x="100" y="40" width="240" height="240" fill="none" stroke="#2a4a6a"/>';
         h += '<g id="bk"></g><g id="sl"></g><g id="fdir"></g><g id="acf"><line x1="140" y1="160" x2="200" y2="160" stroke="#ffd400" stroke-width="3"/><line x1="240" y1="160" x2="300" y2="160" stroke="#ffd400" stroke-width="3"/><circle cx="220" cy="160" r="3" fill="#ffd400"/><line x1="200" y1="160" x2="205" y2="168" stroke="#ffd400" stroke-width="3"/><line x1="240" y1="160" x2="235" y2="168" stroke="#ffd400" stroke-width="3"/></g>';
-        h += '<g transform="translate(318,55)"><g id="wArr"><polygon points="0,-9 4,5 0,2 -4,5" fill="#5bd45b"/></g><text id="wTxt" x="10" y="3" fill="#5bd45b" font-size="9" font-family="ui-monospace,monospace" font-weight="bold">280/45</text></g>';
+        h += '<g transform="translate(280,55)"><g id="wArr"><polygon points="0,-9 4,5 0,2 -4,5" fill="#5bd45b"/></g><text id="wTxt" x="10" y="3" fill="#5bd45b" font-size="9" font-family="ui-monospace,monospace" font-weight="bold">280/45</text></g>';
         h += '<rect x="352" y="40" width="80" height="240" fill="#0a1424" stroke="#2a4a6a"/><g clip-path="url(#alc)"><g id="altSc"></g></g><path d="M 318 145 L 362 145 L 362 175 L 318 175 Z" fill="#000" stroke="#fff" stroke-width="1.5"/><text id="altV" x="340" y="166" text-anchor="middle" fill="#fff" font-size="15" font-family="ui-monospace,monospace" font-weight="bold">0</text><text x="392" y="34" text-anchor="middle" fill="#6a9cc0" font-size="8" font-family="ui-monospace,monospace">ALT</text><text x="392" y="292" text-anchor="middle" fill="#6a9cc0" font-size="8" font-family="ui-monospace,monospace">FT</text>';
         h += '<g id="vsi"></g>';
         h += '<rect x="100" y="290" width="240" height="40" fill="#0a1424" stroke="#2a4a6a"/><g clip-path="url(#hc)"><g id="hdgSc"></g></g><path d="M 197 290 L 197 330 L 243 330 L 243 290 Z" fill="#000" stroke="#fff" stroke-width="1.5"/><text id="hdgV" x="220" y="317" text-anchor="middle" fill="#fff" font-size="15" font-family="ui-monospace,monospace" font-weight="bold">000</text><polygon points="220,286 213,278 227,278" fill="#fff"/>';
@@ -302,7 +302,7 @@
             var len = (v === 0) ? 12 : (v % 1000 === 0 ? 10 : 6);
             vs += '<line x1="' + (352 - len) + '" y1="' + yv + '" x2="352" y2="' + yv + '" stroke="#6a9cc0"/>';
         });
-        vs += '<text x="334" y="94" text-anchor="middle" fill="#6a9cc0" font-size="8" font-family="ui-monospace,monospace">2</text><text x="334" y="234" text-anchor="middle" fill="#6a9cc0" font-size="8" font-family="ui-monospace,monospace">2</text><text x="336" y="163" text-anchor="middle" fill="#6a9cc0" font-size="7" font-family="ui-monospace,monospace">VSI</text><line id="vsiN" x1="352" y1="160" x2="334" y2="160" stroke="#ffd400" stroke-width="2.5" stroke-linecap="round"/>';
+        vs += '<line id="vsiN" x1="352" y1="160" x2="334" y2="160" stroke="#ffd400" stroke-width="2.5" stroke-linecap="round"/>';
         shared.el.vsi.innerHTML = vs;
         shared.el.vsiN = svg.querySelector('#vsiN');
         shared.el.btm.innerHTML = '<text id="mach" x="140" y="335" text-anchor="middle" fill="#5bd45b" font-size="11" font-family="ui-monospace,monospace" font-weight="bold">M .00</text><text id="gs" x="220" y="335" text-anchor="middle" fill="#5bd45b" font-size="11" font-family="ui-monospace,monospace" font-weight="bold">GS 0</text><text id="dist" x="300" y="335" text-anchor="middle" fill="#5bd45b" font-size="11" font-family="ui-monospace,monospace" font-weight="bold">---</text>';
@@ -319,9 +319,9 @@
         if (el.bkP) el.bkP.setAttribute('transform', 'rotate(' + v.bank.toFixed(2) + ' 220 160)');
         if (el.fdH) { var fdy = 160 + v.fdPitch * 5.5; el.fdH.setAttribute('y1', fdy); el.fdH.setAttribute('y2', fdy); }
         if (el.fdV) { var fdx = 220 + v.fdRoll * 5.5; el.fdV.setAttribute('x1', fdx); el.fdV.setAttribute('x2', fdx); }
-        if (el.spdSc) el.spdSc.setAttribute('transform', 'translate(0,' + (160 + v.ias * el.spdSc._px).toFixed(1) + ')');
+        if (el.spdSc) el.spdSc.setAttribute('transform', 'translate(0,' + (160 - v.ias * el.spdSc._px).toFixed(1) + ')');
         if (el.spdV) el.spdV.textContent = Math.round(v.ias);
-        if (el.altSc) el.altSc.setAttribute('transform', 'translate(0,' + (160 + v.alt * el.altSc._px).toFixed(1) + ')');
+        if (el.altSc) el.altSc.setAttribute('transform', 'translate(0,' + (160 - v.alt * el.altSc._px).toFixed(1) + ')');
         if (el.altV) el.altV.textContent = String(Math.round(v.alt)).padStart(5, '0');
         if (el.vsiN) { var yn = clamp(160 - (v.vs / 2000) * 100, 60, 260); el.vsiN.setAttribute('y1', yn); el.vsiN.setAttribute('y2', yn); }
         if (el.hdgSc) {
