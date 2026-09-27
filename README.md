@@ -131,7 +131,9 @@ No build tools required.
 
 ## File Structure
 ├── index.html      Pomodoro + tasks + Flight Deck
+
 ├── note.html       Study Cards
+
 └── README.md       This file
 
 ## Privacy
@@ -142,7 +144,6 @@ No third-party scripts except the Tailwind CSS CDN
 The Flight Deck "live flight" feature sends a geographic bounding box to the public OpenSky Network API, nothing else
 The page includes <meta name="robots" content="noindex, nofollow"> so it won't be indexed by search engines
 
-## Disclaimer
 ## Disclaimer
 
 This software is provided "as is", without warranty of any kind, express or
