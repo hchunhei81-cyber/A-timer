@@ -19,7 +19,7 @@ Built with HTML, Tailwind CSS, and vanilla JavaScript. No build step, no backend
 
 ## Live site
 
-Open [https://hchunhei81-cyber.github.io/](https://hchunhei81-cyber.github.io/)
+Open [link](https://hchunhei81-cyber.github.io/pomodoro-focus/index.html))
 
 No sign-up required. Everything is stored in your own browser.
 
@@ -59,6 +59,17 @@ No sign-up required. Everything is stored in your own browser.
 - **Highlight**: mark cards that need extra review
 - **Stats**: total cards, got it, missed, accuracy per subject
 - **Export / import**: back up the whole deck library as JSON
+
+## Screenshots
+
+### Classic mode
+![Classic mode](screenshots/classic.png)
+
+### Flight Deck
+![Flight Deck](screenshots/flight-deck.png)
+
+### Study Cards
+![Study Cards](screenshots/cards.png)
 
 ## Keyboard shortcuts
 
