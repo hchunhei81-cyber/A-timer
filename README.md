@@ -1,2 +1,2 @@
 # A-timer
-Timer
+just a timer
