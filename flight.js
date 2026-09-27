@@ -193,7 +193,7 @@
         el.wClouds.classList.toggle('on', w === 'clouds' || w === 'rain');
         el.wNight.classList.toggle('on', w === 'night');
         var labels = { clear: 'Clear skies', clouds: 'Cloudy', rain: 'Rain', night: 'Night' };
-        el.weatherIndicator.textContent = (labels[w] || 'Clear') + ' · ' + new Date().toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
+        el.weatherIndicator.textContent = (labels[w] || 'Clear') + ' - ' + new Date().toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
     }
 
     /* ============================================================
@@ -204,21 +204,87 @@
         var svg = el.pfd;
         if (!svg) return;
         var h = '';
-        h += '<defs><linearGradient id="skyG" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#031527"/><stop offset="0.55" stop-color="#12466f"/><stop offset="1" stop-color="#4aa8dc"/></linearGradient><linearGradient id="grG" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#b06a2b"/><stop offset="0.4" stop-color="#6b3a14"/><stop offset="1" stop-color="#2a1505"/></linearGradient><clipPath id="ac"><rect x="100" y="40" width="240" height="240"/></clipPath><clipPath id="sc"><rect x="0" y="40" width="130" height="240"/></clipPath><clipPath id="alc"><rect x="310" y="40" width="130" height="240"/></clipPath><clipPath id="hc"><rect x="100" y="290" width="240" height="40"/></clipPath></defs>';
+
+        h += '<defs>';
+        h += '<linearGradient id="skyG" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#031527"/><stop offset="0.55" stop-color="#12466f"/><stop offset="1" stop-color="#4aa8dc"/></linearGradient>';
+        h += '<linearGradient id="grG" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#b06a2b"/><stop offset="0.4" stop-color="#6b3a14"/><stop offset="1" stop-color="#2a1505"/></linearGradient>';
+        h += '<clipPath id="ac"><rect x="100" y="40" width="240" height="240"/></clipPath>';
+        h += '<clipPath id="sc"><rect x="0" y="40" width="100" height="240"/></clipPath>';
+        h += '<clipPath id="alc"><rect x="340" y="40" width="100" height="240"/></clipPath>';
+        h += '<clipPath id="hc"><rect x="100" y="290" width="240" height="40"/></clipPath>';
+        h += '</defs>';
+
         h += '<rect width="440" height="340" fill="#050b14" rx="6"/>';
-        h += '<rect width="440" height="26" fill="#000"/><line x1="146.6" y1="4" x2="146.6" y2="22" stroke="#1a3a5a"/><line x1="293.3" y1="4" x2="293.3" y2="22" stroke="#1a3a5a"/>';
+
+        /* FMA bar */
+        h += '<rect width="440" height="26" fill="#000"/>';
+        h += '<line x1="146.6" y1="4" x2="146.6" y2="22" stroke="#1a3a5a"/>';
+        h += '<line x1="293.3" y1="4" x2="293.3" y2="22" stroke="#1a3a5a"/>';
         h += '<text id="fmaAt" x="73" y="18" text-anchor="middle" fill="#5bd45b" font-size="11" font-family="ui-monospace,monospace" font-weight="bold">A/T ARM</text>';
-        h += '<text id="fmaRoll" x="220" y="18" text-anchor="middle" fill="#5bd45b" font-size="11" font-family="ui-monospace,monospace" font-weight="bold">LNAV</text>';
-        h += '<text id="fmaPitch" x="366" y="18" text-anchor="middle" fill="#5bd45b" font-size="11" font-family="ui-monospace,monospace" font-weight="bold">VNAV</text>';
-        h += '<rect x="8" y="40" width="80" height="240" fill="#0a1424" stroke="#2a4a6a"/><g clip-path="url(#sc)"><g id="spdSc"></g></g><path d="M 78 145 L 122 145 L 122 175 L 78 175 Z" fill="#000" stroke="#fff" stroke-width="1.5"/><text id="spdV" x="100" y="166" text-anchor="middle" fill="#fff" font-size="15" font-family="ui-monospace,monospace" font-weight="bold">0</text>';
-        h += '<text x="48" y="34" text-anchor="middle" fill="#6a9cc0" font-size="8" font-family="ui-monospace,monospace">IAS</text><text x="48" y="292" text-anchor="middle" fill="#6a9cc0" font-size="8" font-family="ui-monospace,monospace">KTS</text>';
-        h += '<rect x="100" y="40" width="240" height="240" fill="#000"/><g clip-path="url(#ac)"><g id="attT" transform="translate(220,160)"><g id="attI"><rect x="-400" y="-400" width="800" height="400" fill="url(#skyG)"/><rect x="-400" y="0" width="800" height="400" fill="url(#grG)"/><line x1="-400" y1="0" x2="400" y2="0" stroke="#fff" stroke-width="1.6"/><g id="lad"></g></g></g></g><rect x="100" y="40" width="240" height="240" fill="none" stroke="#2a4a6a"/>';
-        h += '<g id="bk"></g><g id="sl"></g><g id="fdir"></g><g id="acf"><line x1="140" y1="160" x2="200" y2="160" stroke="#ffd400" stroke-width="3"/><line x1="240" y1="160" x2="300" y2="160" stroke="#ffd400" stroke-width="3"/><circle cx="220" cy="160" r="3" fill="#ffd400"/><line x1="200" y1="160" x2="205" y2="168" stroke="#ffd400" stroke-width="3"/><line x1="240" y1="160" x2="235" y2="168" stroke="#ffd400" stroke-width="3"/></g>';
-        h += '<g transform="translate(280,55)"><g id="wArr"><polygon points="0,-9 4,5 0,2 -4,5" fill="#5bd45b"/></g><text id="wTxt" x="10" y="3" fill="#5bd45b" font-size="9" font-family="ui-monospace,monospace" font-weight="bold">280/45</text></g>';
-        h += '<rect x="352" y="40" width="80" height="240" fill="#0a1424" stroke="#2a4a6a"/><g clip-path="url(#alc)"><g id="altSc"></g></g><path d="M 318 145 L 362 145 L 362 175 L 318 175 Z" fill="#000" stroke="#fff" stroke-width="1.5"/><text id="altV" x="340" y="166" text-anchor="middle" fill="#fff" font-size="15" font-family="ui-monospace,monospace" font-weight="bold">0</text><text x="392" y="34" text-anchor="middle" fill="#6a9cc0" font-size="8" font-family="ui-monospace,monospace">ALT</text><text x="392" y="292" text-anchor="middle" fill="#6a9cc0" font-size="8" font-family="ui-monospace,monospace">FT</text>';
+        h += '<text id="fmaRoll" x="220" y="18" text-anchor="middle" fill="#5bd45b" font-size="11" font-family="ui-monospace,monospace" font-weight="bold">HDG SEL</text>';
+        h += '<text id="fmaPitch" x="366" y="18" text-anchor="middle" fill="#5bd45b" font-size="11" font-family="ui-monospace,monospace" font-weight="bold">ALT HOLD</text>';
+
+        /* Attitude indicator background */
+        h += '<rect x="100" y="40" width="240" height="240" fill="#000"/>';
+        h += '<g clip-path="url(#ac)">';
+        h += '<g id="attT" transform="translate(220,160)">';
+        h += '<g id="attI">';
+        h += '<rect x="-400" y="-400" width="800" height="400" fill="url(#skyG)"/>';
+        h += '<rect x="-400" y="0" width="800" height="400" fill="url(#grG)"/>';
+        h += '<line x1="-400" y1="0" x2="400" y2="0" stroke="#fff" stroke-width="1.6"/>';
+        h += '<g id="lad"></g>';
+        h += '</g></g></g>';
+        h += '<rect x="100" y="40" width="240" height="240" fill="none" stroke="#2a4a6a"/>';
+
+        /* Bank scale, slip, flight director */
+        h += '<g id="bk"></g>';
+        h += '<g id="sl"></g>';
+        h += '<g id="fdir"></g>';
+
+        /* Aircraft symbol */
+        h += '<g id="acf">';
+        h += '<line x1="140" y1="160" x2="200" y2="160" stroke="#ffd400" stroke-width="3"/>';
+        h += '<line x1="240" y1="160" x2="300" y2="160" stroke="#ffd400" stroke-width="3"/>';
+        h += '<circle cx="220" cy="160" r="3" fill="#ffd400"/>';
+        h += '<line x1="200" y1="160" x2="205" y2="168" stroke="#ffd400" stroke-width="3"/>';
+        h += '<line x1="240" y1="160" x2="235" y2="168" stroke="#ffd400" stroke-width="3"/>';
+        h += '</g>';
+
+        /* Speed tape */
+        h += '<rect x="8" y="40" width="88" height="240" fill="#0a1424" stroke="#2a4a6a"/>';
+        h += '<g clip-path="url(#sc)"><g id="spdSc"></g></g>';
+        h += '<path d="M 40 145 L 96 145 L 96 175 L 40 175 Z" fill="#000" stroke="#fff" stroke-width="1.5"/>';
+        h += '<text id="spdV" x="68" y="166" text-anchor="middle" fill="#fff" font-size="15" font-family="ui-monospace,monospace" font-weight="bold">0</text>';
+        h += '<text x="48" y="34" text-anchor="middle" fill="#6a9cc0" font-size="8" font-family="ui-monospace,monospace">IAS</text>';
+        h += '<text x="48" y="292" text-anchor="middle" fill="#6a9cc0" font-size="8" font-family="ui-monospace,monospace">KTS</text>';
+
+        /* Altitude tape */
+        h += '<rect x="344" y="40" width="88" height="240" fill="#0a1424" stroke="#2a4a6a"/>';
+        h += '<g clip-path="url(#alc)"><g id="altSc"></g></g>';
+        h += '<path d="M 344 145 L 400 145 L 400 175 L 344 175 Z" fill="#000" stroke="#fff" stroke-width="1.5"/>';
+        h += '<text id="altV" x="372" y="166" text-anchor="middle" fill="#fff" font-size="15" font-family="ui-monospace,monospace" font-weight="bold">0</text>';
+        h += '<text x="404" y="34" text-anchor="middle" fill="#6a9cc0" font-size="8" font-family="ui-monospace,monospace">ALT</text>';
+        h += '<text x="404" y="292" text-anchor="middle" fill="#6a9cc0" font-size="8" font-family="ui-monospace,monospace">FT</text>';
+
+        /* VSI ticks */
         h += '<g id="vsi"></g>';
-        h += '<rect x="100" y="290" width="240" height="40" fill="#0a1424" stroke="#2a4a6a"/><g clip-path="url(#hc)"><g id="hdgSc"></g></g><path d="M 197 290 L 197 330 L 243 330 L 243 290 Z" fill="#000" stroke="#fff" stroke-width="1.5"/><text id="hdgV" x="220" y="317" text-anchor="middle" fill="#fff" font-size="15" font-family="ui-monospace,monospace" font-weight="bold">000</text><polygon points="220,286 213,278 227,278" fill="#fff"/>';
+
+        /* Heading tape */
+        h += '<rect x="100" y="290" width="240" height="40" fill="#0a1424" stroke="#2a4a6a"/>';
+        h += '<g clip-path="url(#hc)"><g id="hdgSc"></g></g>';
+        h += '<path d="M 197 290 L 197 330 L 243 330 L 243 290 Z" fill="#000" stroke="#fff" stroke-width="1.5"/>';
+        h += '<text id="hdgV" x="220" y="317" text-anchor="middle" fill="#fff" font-size="15" font-family="ui-monospace,monospace" font-weight="bold">000</text>';
+        h += '<polygon points="220,286 213,278 227,278" fill="#fff"/>';
+
+        /* Wind indicator (moved left, above attitude indicator) */
+        h += '<g transform="translate(268,54)">';
+        h += '<g id="wArr"><polygon points="0,-9 4,5 0,2 -4,5" fill="#5bd45b"/></g>';
+        h += '<text id="wTxt" x="8" y="3" fill="#5bd45b" font-size="9" font-family="ui-monospace,monospace" font-weight="bold">280/45</text>';
+        h += '</g>';
+
+        /* Bottom info */
         h += '<g id="btm"></g>';
+
         svg.innerHTML = h;
         el.pfdAttT = svg.querySelector('#attT');
         el.lad = svg.querySelector('#lad');
@@ -244,6 +310,8 @@
 
     function buildPFDStatic() {
         var svg = shared.el.pfd;
+
+        /* Pitch ladder */
         var lad = '', pxd = 5.5;
         for (var d = -30; d <= 30; d += 5) {
             if (d === 0) continue;
@@ -255,34 +323,53 @@
             }
         }
         shared.el.lad.innerHTML = lad;
+
+        /* Speed tape ticks */
         var pxk = 1.7, sc = '';
         for (var s = 40; s <= 520; s += 10) {
             var ys = -s * pxk;
-            if (s % 20 === 0) { sc += '<line x1="72" y1="' + ys + '" x2="80" y2="' + ys + '" stroke="#fff" stroke-width="1"/><text x="68" y="' + (ys + 4) + '" text-anchor="end" fill="#fff" font-size="12" font-family="ui-monospace,monospace">' + s + '</text>'; }
-            else { sc += '<line x1="76" y1="' + ys + '" x2="80" y2="' + ys + '" stroke="#fff" stroke-width="0.6"/>'; }
+            if (s % 20 === 0) {
+                sc += '<line x1="80" y1="' + ys + '" x2="88" y2="' + ys + '" stroke="#fff" stroke-width="1"/>';
+                sc += '<text x="76" y="' + (ys + 4) + '" text-anchor="end" fill="#fff" font-size="12" font-family="ui-monospace,monospace">' + s + '</text>';
+            } else {
+                sc += '<line x1="84" y1="' + ys + '" x2="88" y2="' + ys + '" stroke="#fff" stroke-width="0.6"/>';
+            }
         }
         shared.el.spdSc.innerHTML = sc;
         shared.el.spdSc._px = pxk;
+
+        /* Altitude tape ticks */
         var pxf = 0.05, al = '';
         for (var a = 0; a <= 45000; a += 500) {
             var ya = -a * pxf;
-            if (a % 1000 === 0) { al += '<line x1="0" y1="' + ya + '" x2="8" y2="' + ya + '" stroke="#fff" stroke-width="1"/><text x="12" y="' + (ya + 4) + '" text-anchor="start" fill="#fff" font-size="12" font-family="ui-monospace,monospace">' + String(a).padStart(5, '0') + '</text>'; }
-            else { al += '<line x1="0" y1="' + ya + '" x2="4" y2="' + ya + '" stroke="#fff" stroke-width="0.6"/>'; }
+            if (a % 1000 === 0) {
+                al += '<line x1="0" y1="' + ya + '" x2="8" y2="' + ya + '" stroke="#fff" stroke-width="1"/>';
+                al += '<text x="12" y="' + (ya + 4) + '" text-anchor="start" fill="#fff" font-size="12" font-family="ui-monospace,monospace">' + String(a).padStart(5, '0') + '</text>';
+            } else {
+                al += '<line x1="0" y1="' + ya + '" x2="4" y2="' + ya + '" stroke="#fff" stroke-width="0.6"/>';
+            }
         }
         var by = -38000 * pxf;
         al += '<polygon points="72,' + by + ' 62,' + (by - 5) + ' 62,' + (by + 5) + '" fill="#ff00ff"/>';
         shared.el.altSc.innerHTML = al;
         shared.el.altSc._px = pxf;
+
+        /* Heading tape ticks */
         var pxh = 4, hd = '';
         for (var d2 = -360; d2 <= 720; d2 += 5) {
             var x2 = d2 * pxh, mod = ((d2 % 360) + 360) % 360;
             if (mod % 10 === 0) {
                 var lb = mod === 0 ? '360' : String(mod).padStart(3, '0');
-                hd += '<line x1="' + x2 + '" y1="26" x2="' + x2 + '" y2="34" stroke="#fff" stroke-width="1"/><text x="' + x2 + '" y="20" text-anchor="middle" fill="#fff" font-size="11" font-family="ui-monospace,monospace">' + lb + '</text>';
-            } else { hd += '<line x1="' + x2 + '" y1="30" x2="' + x2 + '" y2="34" stroke="#fff" stroke-width="0.6"/>'; }
+                hd += '<line x1="' + x2 + '" y1="26" x2="' + x2 + '" y2="34" stroke="#fff" stroke-width="1"/>';
+                hd += '<text x="' + x2 + '" y="20" text-anchor="middle" fill="#fff" font-size="11" font-family="ui-monospace,monospace">' + lb + '</text>';
+            } else {
+                hd += '<line x1="' + x2 + '" y1="30" x2="' + x2 + '" y2="34" stroke="#fff" stroke-width="0.6"/>';
+            }
         }
         shared.el.hdgSc.innerHTML = hd;
         shared.el.hdgSc._px = pxh;
+
+        /* Bank scale + pointer */
         var bk = '', cx = 220, cy = 160, r = 120;
         [-60, -45, -30, -20, -10, 0, 10, 20, 30, 45, 60].forEach(function (deg) {
             var rad = (deg - 90) * Math.PI / 180, mj = (deg % 30 === 0), r2 = r + (mj ? 12 : 6);
@@ -291,20 +378,28 @@
         bk += '<polygon id="bkP" points="220,40 213,52 227,52" fill="#ffd400" stroke="#000" stroke-width="0.5"/>';
         shared.el.bk.innerHTML = bk;
         shared.el.bkP = svg.querySelector('#bkP');
+
+        /* Slip indicator */
         shared.el.sl.innerHTML = '<rect x="212" y="276" width="16" height="4" fill="none" stroke="#fff"/><rect id="slR" x="217" y="277" width="6" height="2" fill="#ffd400"/>';
         shared.el.slR = svg.querySelector('#slR');
+
+        /* Flight director bars */
         shared.el.fdir.innerHTML = '<line id="fdH" x1="150" y1="160" x2="290" y2="160" stroke="#ff00ff" stroke-width="2"/><line id="fdV" x1="220" y1="100" x2="220" y2="220" stroke="#ff00ff" stroke-width="2"/>';
         shared.el.fdH = svg.querySelector('#fdH');
         shared.el.fdV = svg.querySelector('#fdV');
+
+        /* VSI ticks */
         var vs = '';
         [-2000, -1000, -500, 0, 500, 1000, 2000].forEach(function (v) {
             var yv = 160 - (v / 2000) * 100;
             var len = (v === 0) ? 12 : (v % 1000 === 0 ? 10 : 6);
             vs += '<line x1="' + (352 - len) + '" y1="' + yv + '" x2="352" y2="' + yv + '" stroke="#6a9cc0"/>';
         });
-        vs += '<line id="vsiN" x1="352" y1="160" x2="334" y2="160" stroke="#ffd400" stroke-width="2.5" stroke-linecap="round"/>';
+        vs += '<line id="vsiN" x1="352" y1="160" x2="344" y2="160" stroke="#ffd400" stroke-width="2.5" stroke-linecap="round"/>';
         shared.el.vsi.innerHTML = vs;
         shared.el.vsiN = svg.querySelector('#vsiN');
+
+        /* Bottom info */
         shared.el.btm.innerHTML = '<text id="mach" x="140" y="335" text-anchor="middle" fill="#5bd45b" font-size="11" font-family="ui-monospace,monospace" font-weight="bold">M .00</text><text id="gs" x="220" y="335" text-anchor="middle" fill="#5bd45b" font-size="11" font-family="ui-monospace,monospace" font-weight="bold">GS 0</text><text id="dist" x="300" y="335" text-anchor="middle" fill="#5bd45b" font-size="11" font-family="ui-monospace,monospace" font-weight="bold">---</text>';
         shared.el.mach = svg.querySelector('#mach');
         shared.el.gs = svg.querySelector('#gs');
@@ -314,29 +409,56 @@
     function updatePFD(v) {
         var el = shared.el;
         if (!el.pfdAttT) return;
+
         var pp = v.pitch * 5.5;
         el.pfdAttT.setAttribute('transform', 'translate(220,160) rotate(' + v.bank.toFixed(2) + ') translate(0,' + pp.toFixed(2) + ')');
+
         if (el.bkP) el.bkP.setAttribute('transform', 'rotate(' + v.bank.toFixed(2) + ' 220 160)');
-        if (el.fdH) { var fdy = 160 + v.fdPitch * 5.5; el.fdH.setAttribute('y1', fdy); el.fdH.setAttribute('y2', fdy); }
-        if (el.fdV) { var fdx = 220 + v.fdRoll * 5.5; el.fdV.setAttribute('x1', fdx); el.fdV.setAttribute('x2', fdx); }
+
+        if (el.fdH) {
+            var fdy = 160 + v.fdPitch * 5.5;
+            el.fdH.setAttribute('y1', fdy);
+            el.fdH.setAttribute('y2', fdy);
+        }
+        if (el.fdV) {
+            var fdx = 220 + v.fdRoll * 5.5;
+            el.fdV.setAttribute('x1', fdx);
+            el.fdV.setAttribute('x2', fdx);
+        }
+
         if (el.spdSc) el.spdSc.setAttribute('transform', 'translate(0,' + (160 - v.ias * el.spdSc._px).toFixed(1) + ')');
         if (el.spdV) el.spdV.textContent = Math.round(v.ias);
+
         if (el.altSc) el.altSc.setAttribute('transform', 'translate(0,' + (160 - v.alt * el.altSc._px).toFixed(1) + ')');
         if (el.altV) el.altV.textContent = String(Math.round(v.alt)).padStart(5, '0');
-        if (el.vsiN) { var yn = clamp(160 - (v.vs / 2000) * 100, 60, 260); el.vsiN.setAttribute('y1', yn); el.vsiN.setAttribute('y2', yn); }
+
+        if (el.vsiN) {
+            var yn = clamp(160 - (v.vs / 2000) * 100, 60, 260);
+            el.vsiN.setAttribute('y1', yn);
+            el.vsiN.setAttribute('y2', yn);
+        }
+
         if (el.hdgSc) {
             var hdg = ((v.hdg % 360) + 360) % 360;
             el.hdgSc.setAttribute('transform', 'translate(' + (220 - hdg * el.hdgSc._px).toFixed(1) + ',0)');
             if (el.hdgV) el.hdgV.textContent = String(Math.round(hdg)).padStart(3, '0');
         }
+
         if (el.fmaAt) el.fmaAt.textContent = v.fmaAt;
         if (el.fmaRoll) el.fmaRoll.textContent = v.fmaRoll;
         if (el.fmaPitch) el.fmaPitch.textContent = v.fmaPitch;
+
         if (el.mach) el.mach.textContent = 'M ' + v.mach.toFixed(2);
         if (el.gs) el.gs.textContent = 'GS ' + Math.round(v.gs);
         if (el.dist) el.dist.textContent = v.nextWp || '---';
-        if (el.wArr) { var wr = (flightSim.windDir + 180) - v.hdg; el.wArr.setAttribute('transform', 'rotate(' + wr.toFixed(0) + ')'); }
-        if (el.wTxt) el.wTxt.textContent = String(Math.round(flightSim.windDir)).padStart(3, '0') + '/' + String(Math.round(flightSim.windSpd)).padStart(2, '0');
+
+        if (el.wArr) {
+            var wr = (flightSim.windDir + 180) - v.hdg;
+            el.wArr.setAttribute('transform', 'rotate(' + wr.toFixed(0) + ')');
+        }
+        if (el.wTxt) {
+            el.wTxt.textContent = String(Math.round(flightSim.windDir)).padStart(3, '0') + '/' + String(Math.round(flightSim.windSpd)).padStart(2, '0');
+        }
     }
 
     /* ============================================================
@@ -358,11 +480,13 @@
         var acPos = getACPos(flightSim.progress);
         var hdg = (shared.runtime.mode === 'work' || shared.runtime.mode === 'stopwatch') ? acPos.hdg : 273;
         var hr = hdg * Math.PI / 180, sinH = Math.sin(hr), cosH = Math.cos(hr);
+
         function proj(wx, wy) {
             var dx = wx - acPos.x, dy = wy - acPos.y;
             var fwd = dx * sinH + dy * cosH, rgt = dx * cosH - dy * sinH;
             return { x: cx + rgt * scale, y: cy - fwd * scale };
         }
+
         ctx.strokeStyle = 'rgba(120,180,255,.35)';
         ctx.lineWidth = 1;
         for (var deg = 0; deg < 360; deg += 10) {
@@ -380,6 +504,7 @@
                 ctx.fillText(lb, cx + Math.cos(rad) * (r1 - 15), cy + Math.sin(rad) * (r1 - 15));
             }
         }
+
         ctx.strokeStyle = 'rgba(120,180,255,.22)';
         ctx.lineWidth = 1.5;
         [0.25, 0.5, 0.75, 1].forEach(function (f) {
@@ -387,6 +512,7 @@
             ctx.arc(cx, cy, R * f, 0, Math.PI * 2);
             ctx.stroke();
         });
+
         ctx.fillStyle = 'rgba(120,180,255,.55)';
         ctx.font = 'bold 12px ui-monospace,monospace';
         ctx.textAlign = 'left';
@@ -394,6 +520,7 @@
         [1, 2, 3, 4].forEach(function (i) {
             ctx.fillText(String(Math.round(range / 4 * i)), cx + R * (i / 4) + 5, cy - 5);
         });
+
         if (flightSim.routePoints.length >= 2) {
             var pts = flightSim.routePoints;
             ctx.strokeStyle = '#ff00ff';
@@ -412,6 +539,7 @@
                 else ctx.lineTo(p.x, p.y);
             }
             if (started) ctx.stroke();
+
             for (var j = 0; j < pts.length; j++) {
                 var wp = pts[j], pr = proj(wp.x, wp.y);
                 if (pr.x < -40 || pr.x > W + 40 || pr.y < -40 || pr.y > H + 40) continue;
@@ -445,6 +573,7 @@
                 }
             }
         }
+
         ctx.strokeStyle = '#fff';
         ctx.lineWidth = 2;
         for (var k = 0; k < flightSim.traffic.length; k++) {
@@ -465,6 +594,8 @@
                 ctx.fillText((t.alt > 0 ? '+' : '') + String(Math.round(t.alt / 100)), tp.x + 11, tp.y);
             }
         }
+
+        /* Aircraft symbol */
         ctx.strokeStyle = '#ffd400';
         ctx.lineWidth = 3;
         ctx.lineCap = 'round';
@@ -479,6 +610,8 @@
         ctx.beginPath();
         ctx.arc(cx, cy, 2.5, 0, Math.PI * 2);
         ctx.fill();
+
+        /* Wind arrow */
         var wr = (flightSim.windDir + 180) - hdg;
         var wrad = (wr - 90) * Math.PI / 180, waX = 60, waY = 60;
         ctx.save();
@@ -495,6 +628,8 @@
         ctx.textAlign = 'left';
         ctx.textBaseline = 'middle';
         ctx.fillText(String(Math.round(flightSim.windDir)).padStart(3, '0') + '/' + String(Math.round(flightSim.windSpd)).padStart(2, '0'), waX + 14, waY);
+
+        /* Top bar info */
         ctx.fillStyle = 'rgba(120,180,255,.75)';
         ctx.font = 'bold 13px ui-monospace,monospace';
         ctx.textAlign = 'right';
@@ -502,6 +637,8 @@
         ctx.fillText('RNG ' + range + ' NM', W - 20, 40);
         ctx.textAlign = 'left';
         ctx.fillText(AIRCRAFT[shared.settings.aircraft].code + ' MAP', 20, 40);
+
+        /* Next waypoint */
         var nw = null, nd = Infinity;
         if (flightSim.routePoints.length >= 2) {
             for (var m = 0; m < flightSim.routePoints.length; m++) {
