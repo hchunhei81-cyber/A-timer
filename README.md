@@ -156,7 +156,6 @@ designed to work as a standalone app.
 No build tools required.
 
 ## File Structure
-hchunhei81-cyber.github.io/
 ├── index.html          
 ├── styles.css          
 ├── flight.js          
