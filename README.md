@@ -156,11 +156,17 @@ designed to work as a standalone app.
 No build tools required.
 
 ## File Structure
-├── index.html      Pomodoro + tasks + Flight Deck
-
-├── note.html       Study Cards
-
-└── README.md       This file
+hchunhei81-cyber.github.io/
+├── index.html          
+├── styles.css          
+├── flight.js          
+├── app.js              
+│
+├── note.html          
+├── note.css           
+├── note.js           
+│
+└── README.md / LICENSE 
 
 ## Privacy
 No data is sent to any server
