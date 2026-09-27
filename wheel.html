@@ -1,0 +1,1358 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Lucky Wheel — Spin Your Fate</title>
+<style>
+  /* ============ THEME TOKENS ============ */
+  :root {
+    --bg: #0b0d17;
+    --bg-2: #12162a;
+    --panel: rgba(255, 255, 255, 0.055);
+    --panel-solid: #161a2e;
+    --border: rgba(255, 255, 255, 0.10);
+    --text: #eef1ff;
+    --muted: #98a1c4;
+    --accent: #7c5cff;
+    --accent-2: #ff5c8a;
+    --good: #2ec4b6;
+    --danger: #ff5c6c;
+    --shadow: 0 22px 55px rgba(0, 0, 0, 0.45);
+    --radius: 22px;
+  }
+  html[data-theme="light"] {
+    --bg: #eef1fa;
+    --bg-2: #ffffff;
+    --panel: rgba(255, 255, 255, 0.72);
+    --panel-solid: #ffffff;
+    --border: rgba(20, 24, 60, 0.10);
+    --text: #161a2e;
+    --muted: #666e8f;
+    --shadow: 0 20px 45px rgba(40, 50, 100, 0.16);
+  }
+
+  * { box-sizing: border-box; }
+  html, body { height: 100%; }
+
+  body {
+    margin: 0;
+    min-height: 100vh;
+    font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+    transition: background .45s ease, color .45s ease;
+  }
+
+  /* ============ BACKGROUND ORBS ============ */
+  .bg-orbs { position: fixed; inset: 0; overflow: hidden; pointer-events: none; z-index: 0; }
+  .orb { position: absolute; border-radius: 50%; filter: blur(100px); opacity: .55; }
+  .orb.a { width: 540px; height: 540px; background: #7c5cff; top: -180px; left: -160px; animation: float1 18s ease-in-out infinite; }
+  .orb.b { width: 480px; height: 480px; background: #ff5c8a; bottom: -200px; right: -140px; animation: float2 22s ease-in-out infinite; }
+  .orb.c { width: 380px; height: 380px; background: #2ec4b6; top: 45%; left: 55%; opacity: .28; animation: float1 26s ease-in-out infinite reverse; }
+  html[data-theme="light"] .orb { opacity: .35; }
+  @keyframes float1 { 0%,100% { transform: translate(0,0) scale(1); } 50% { transform: translate(70px, 50px) scale(1.12); } }
+  @keyframes float2 { 0%,100% { transform: translate(0,0) scale(1); } 50% { transform: translate(-60px, -70px) scale(1.1); } }
+
+  /* ============ TOP BAR ============ */
+  .topbar {
+    position: relative; z-index: 3;
+    max-width: 1280px; margin: 0 auto;
+    padding: 20px 24px 12px;
+    display: flex; align-items: center; justify-content: space-between; gap: 16px;
+  }
+  .brand { display: flex; align-items: center; gap: 14px; }
+  .brand .logo {
+    width: 48px; height: 48px; display: grid; place-items: center;
+    border-radius: 15px;
+    background: linear-gradient(135deg, var(--accent), var(--accent-2));
+    box-shadow: 0 10px 26px rgba(124, 92, 255, .45);
+    animation: spinLogo 9s linear infinite;
+  }
+  @keyframes spinLogo { to { transform: rotate(360deg); } }
+  .brand h1 { margin: 0; font-size: 21px; letter-spacing: -0.4px; }
+  .brand p { margin: 2px 0 0; font-size: 12.5px; color: var(--muted); }
+
+  .top-actions { display: flex; gap: 10px; }
+
+  /* ============ BUTTONS ============ */
+  .icon-btn {
+    width: 44px; height: 44px; border-radius: 13px;
+    border: 1px solid var(--border);
+    background: var(--panel);
+    color: var(--text);
+    font-size: 18px; cursor: pointer;
+    display: grid; place-items: center;
+    backdrop-filter: blur(14px);
+    transition: transform .16s ease, background .2s, border-color .2s;
+  }
+  .icon-btn:hover { transform: translateY(-2px); border-color: rgba(124, 92, 255, .6); }
+  .icon-btn:active { transform: scale(.94); }
+  .icon-btn.off { opacity: .42; }
+
+  .btn {
+    border: 1px solid var(--border);
+    background: var(--panel);
+    color: var(--text);
+    padding: 10px 16px; border-radius: 12px;
+    font-size: 13.5px; font-weight: 600; cursor: pointer;
+    transition: transform .15s ease, filter .2s, background .2s;
+    font-family: inherit;
+  }
+  .btn:hover { transform: translateY(-1px); filter: brightness(1.12); }
+  .btn:active { transform: scale(.97); }
+  .btn.primary {
+    background: linear-gradient(135deg, var(--accent), var(--accent-2));
+    border-color: transparent; color: #fff;
+    box-shadow: 0 8px 22px rgba(124, 92, 255, .38);
+  }
+  .btn.danger { color: var(--danger); border-color: rgba(255, 92, 108, .35); }
+  .btn.small { padding: 7px 12px; font-size: 12.5px; border-radius: 10px; }
+  .btn:disabled { opacity: .45; cursor: not-allowed; transform: none !important; }
+
+  /* ============ LAYOUT ============ */
+  main {
+    position: relative; z-index: 2;
+    max-width: 1280px; margin: 0 auto;
+    padding: 8px 24px 60px;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 390px;
+    gap: 26px;
+    align-items: start;
+  }
+  @media (max-width: 1000px) { main { grid-template-columns: 1fr; } }
+
+  .card {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    box-shadow: var(--shadow);
+  }
+
+  /* ============ WHEEL ============ */
+  .wheel-card { padding: 26px; display: flex; flex-direction: column; align-items: center; gap: 16px; }
+
+  .wheel-wrap {
+    position: relative;
+    width: min(100%, 540px);
+    aspect-ratio: 1 / 1;
+    display: grid;
+    place-items: center;
+    user-select: none;
+  }
+  #wheel {
+    width: 100%; height: 100%; display: block;
+    border-radius: 50%;
+    cursor: pointer;
+    filter: drop-shadow(0 24px 50px rgba(0, 0, 0, .5));
+    transition: filter .3s;
+  }
+  html[data-theme="light"] #wheel { filter: drop-shadow(0 20px 40px rgba(50, 60, 120, .25)); }
+
+  .pointer {
+    position: absolute; top: -16px; left: 50%;
+    transform: translateX(-50%);
+    width: 38px; height: 48px; z-index: 6;
+    background: linear-gradient(180deg, #ffffff, #ffd93d 60%, #ff9f1c);
+    clip-path: polygon(50% 100%, 0% 0%, 100% 0%);
+    filter: drop-shadow(0 5px 12px rgba(0, 0, 0, .55));
+    transition: transform .08s ease;
+  }
+  .pointer.tick { transform: translateX(-50%) rotate(-7deg); }
+
+  .spin-btn {
+    position: absolute; z-index: 5;
+    width: 26%; aspect-ratio: 1;
+    border-radius: 50%;
+    border: 4px solid rgba(255, 255, 255, .9);
+    background: linear-gradient(145deg, #7c5cff, #ff5c8a);
+    color: #fff;
+    font-family: inherit;
+    font-weight: 800;
+    font-size: clamp(13px, 2.1vw, 19px);
+    letter-spacing: 1.4px;
+    cursor: pointer;
+    box-shadow: 0 12px 32px rgba(124, 92, 255, .55), inset 0 -5px 14px rgba(0,0,0,.28);
+    transition: transform .18s cubic-bezier(.34,1.56,.64,1), box-shadow .25s, filter .25s;
+  }
+  .spin-btn:hover:not(:disabled) { transform: scale(1.07); box-shadow: 0 16px 40px rgba(255, 92, 138, .6), inset 0 -5px 14px rgba(0,0,0,.28); }
+  .spin-btn:active:not(:disabled) { transform: scale(.95); }
+  .spin-btn:disabled { cursor: not-allowed; filter: grayscale(.5) brightness(.8); }
+
+  .wheel-meta {
+    width: 100%; max-width: 540px;
+    display: flex; justify-content: space-between; align-items: center;
+    font-size: 13px; color: var(--muted); padding: 0 6px;
+  }
+  #lastLabel { font-weight: 700; color: var(--text); }
+
+  /* ============ SIDE PANEL ============ */
+  .side { padding: 18px; display: flex; flex-direction: column; gap: 14px; max-height: calc(100vh - 130px); }
+  @media (max-width: 1000px) { .side { max-height: none; } }
+
+  .tabs { display: flex; gap: 6px; background: rgba(127, 127, 180, .12); padding: 5px; border-radius: 14px; }
+  .tab {
+    flex: 1; padding: 9px 6px; border-radius: 10px; border: none;
+    background: transparent; color: var(--muted);
+    font-family: inherit; font-size: 13px; font-weight: 700; cursor: pointer;
+    transition: background .2s, color .2s;
+  }
+  .tab.active { background: var(--panel-solid); color: var(--text); box-shadow: 0 4px 14px rgba(0,0,0,.18); }
+  html[data-theme="light"] .tab.active { box-shadow: 0 4px 14px rgba(60,70,130,.14); }
+
+  .panel { display: none; flex-direction: column; gap: 12px; overflow: hidden; }
+  .panel.active { display: flex; }
+
+  .add-row { display: flex; gap: 8px; }
+  .add-row input {
+    flex: 1; min-width: 0;
+    padding: 11px 14px; border-radius: 12px;
+    border: 1px solid var(--border);
+    background: rgba(127, 127, 180, .10);
+    color: var(--text); font-family: inherit; font-size: 14px;
+    outline: none; transition: border-color .2s, box-shadow .2s;
+  }
+  .add-row input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(124, 92, 255, .18); }
+
+  .toolbar { display: flex; gap: 8px; flex-wrap: wrap; }
+  .toolbar .btn { flex: 1; min-width: 84px; }
+
+  .entries {
+    display: flex; flex-direction: column; gap: 7px;
+    overflow-y: auto; padding-right: 4px;
+    max-height: 320px;
+    scrollbar-width: thin;
+  }
+  .entries::-webkit-scrollbar { width: 7px; }
+  .entries::-webkit-scrollbar-thumb { background: rgba(140, 140, 190, .38); border-radius: 10px; }
+
+  .entry {
+    display: flex; align-items: center; gap: 8px;
+    background: rgba(127, 127, 180, .09);
+    border: 1px solid transparent;
+    border-radius: 12px; padding: 6px 8px;
+    transition: border-color .2s, background .2s, transform .15s;
+    animation: popIn .25s ease backwards;
+  }
+  @keyframes popIn { from { opacity: 0; transform: translateY(-6px) scale(.97); } }
+  .entry:hover { border-color: var(--border); background: rgba(127, 127, 180, .15); }
+  .entry .dot { width: 12px; height: 12px; border-radius: 50%; flex: none; box-shadow: 0 0 0 2px rgba(255,255,255,.12); }
+  .entry .entry-text {
+    flex: 1; min-width: 0; border: none; background: transparent;
+    color: var(--text); font-family: inherit; font-size: 13.5px; font-weight: 600;
+    outline: none; padding: 4px 2px;
+  }
+  .entry .entry-text:focus { border-bottom: 1.5px solid var(--accent); }
+  .entry .entry-weight {
+    width: 46px; flex: none; text-align: center;
+    border: 1px solid var(--border); border-radius: 8px;
+    background: rgba(127, 127, 180, .13);
+    color: var(--text); font-family: inherit; font-size: 12px; font-weight: 700;
+    padding: 4px 2px; outline: none;
+  }
+  .entry .entry-weight:focus { border-color: var(--accent); }
+  .entry .del {
+    width: 28px; height: 28px; border-radius: 8px; flex: none;
+    border: none; background: transparent; color: var(--muted);
+    cursor: pointer; font-size: 14px; line-height: 1;
+    transition: background .2s, color .2s;
+  }
+  .entry .del:hover { background: rgba(255, 92, 108, .18); color: var(--danger); }
+
+  .empty { text-align: center; color: var(--muted); font-size: 13px; padding: 26px 10px; }
+
+  details.bulk { border: 1px solid var(--border); border-radius: 13px; overflow: hidden; }
+  details.bulk summary {
+    padding: 10px 14px; cursor: pointer; font-size: 13px; font-weight: 700;
+    color: var(--muted); list-style: none; user-select: none;
+    transition: color .2s, background .2s;
+  }
+  details.bulk summary::-webkit-details-marker { display: none; }
+  details.bulk summary::before { content: '▸ '; transition: transform .2s; display: inline-block; }
+  details.bulk[open] summary::before { transform: rotate(90deg); }
+  details.bulk summary:hover { color: var(--text); background: rgba(127,127,180,.09); }
+  details.bulk .bulk-body { padding: 0 12px 12px; display: flex; flex-direction: column; gap: 8px; }
+  details.bulk textarea {
+    width: 100%; resize: vertical; min-height: 110px;
+    border-radius: 10px; border: 1px solid var(--border);
+    background: rgba(127, 127, 180, .10);
+    color: var(--text); font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 12.5px; padding: 10px; outline: none; line-height: 1.55;
+  }
+  details.bulk textarea:focus { border-color: var(--accent); }
+
+  /* ============ HISTORY ============ */
+  .history-list { display: flex; flex-direction: column; gap: 7px; overflow-y: auto; max-height: 380px; padding-right: 4px; }
+  .hist-item {
+    display: flex; align-items: center; gap: 10px;
+    background: rgba(127, 127, 180, .09);
+    border-radius: 12px; padding: 10px 12px;
+    font-size: 13px;
+    animation: popIn .25s ease backwards;
+  }
+  .hist-item .idx {
+    width: 24px; height: 24px; border-radius: 50%; flex: none;
+    display: grid; place-items: center;
+    background: linear-gradient(135deg, var(--accent), var(--accent-2));
+    color: #fff; font-size: 11px; font-weight: 800;
+  }
+  .hist-item .txt { flex: 1; min-width: 0; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .hist-item .time { font-size: 11px; color: var(--muted); flex: none; }
+
+  /* ============ SETTINGS ============ */
+  .field { display: flex; flex-direction: column; gap: 9px; padding: 12px 14px; border-radius: 13px; background: rgba(127,127,180,.09); }
+  .field .f-head { display: flex; justify-content: space-between; align-items: center; font-size: 13px; font-weight: 700; }
+  .field .f-head span { color: var(--accent); }
+  input[type="range"] { -webkit-appearance: none; appearance: none; width: 100%; height: 6px; border-radius: 10px; background: rgba(127,127,180,.3); outline: none; }
+  input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none; width: 20px; height: 20px; border-radius: 50%;
+    background: linear-gradient(135deg, var(--accent), var(--accent-2));
+    cursor: pointer; border: 3px solid var(--bg); box-shadow: 0 3px 10px rgba(124,92,255,.5);
+  }
+  input[type="range"]::-moz-range-thumb {
+    width: 16px; height: 16px; border-radius: 50%; border: 3px solid var(--bg);
+    background: var(--accent); cursor: pointer;
+  }
+  .switch {
+    width: 50px; height: 28px; border-radius: 20px; border: none; cursor: pointer;
+    background: rgba(127, 127, 180, .32); position: relative; transition: background .25s;
+    flex: none;
+  }
+  .switch::after {
+    content: ''; position: absolute; top: 3px; left: 3px;
+    width: 22px; height: 22px; border-radius: 50%; background: #fff;
+    transition: transform .25s cubic-bezier(.34,1.56,.64,1);
+    box-shadow: 0 2px 6px rgba(0,0,0,.28);
+  }
+  .switch[aria-pressed="true"] { background: linear-gradient(135deg, var(--accent), var(--accent-2)); }
+  .switch[aria-pressed="true"]::after { transform: translateX(22px); }
+
+  /* ============ MODAL ============ */
+  .modal-backdrop {
+    position: fixed; inset: 0; z-index: 50;
+    background: rgba(6, 8, 18, .72);
+    backdrop-filter: blur(8px);
+    display: grid; place-items: center; padding: 20px;
+    opacity: 0; pointer-events: none; transition: opacity .3s ease;
+  }
+  .modal-backdrop.show { opacity: 1; pointer-events: auto; }
+  .modal {
+    width: min(440px, 100%);
+    background: var(--panel-solid);
+    border: 1px solid var(--border);
+    border-radius: 26px;
+    padding: 34px 28px 26px;
+    text-align: center;
+    box-shadow: 0 30px 80px rgba(0,0,0,.6);
+    transform: scale(.85) translateY(18px);
+    transition: transform .42s cubic-bezier(.34,1.56,.64,1);
+    position: relative; overflow: hidden;
+  }
+  .modal-backdrop.show .modal { transform: scale(1) translateY(0); }
+  .modal::before {
+    content: ''; position: absolute; top: -60%; left: -20%; width: 140%; height: 120%;
+    background: radial-gradient(circle at 50% 0%, rgba(124,92,255,.28), transparent 65%);
+    pointer-events: none;
+  }
+  .modal .kicker { margin: 8px 0 4px; font-size: 12px; letter-spacing: 2.4px; text-transform: uppercase; color: var(--muted); font-weight: 700; }
+  .modal h2 {
+    margin: 6px 0 22px; font-size: 30px; line-height: 1.22; letter-spacing: -0.7px;
+    background: linear-gradient(135deg, var(--accent), var(--accent-2));
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+    word-break: break-word;
+  }
+  .modal-actions { display: flex; flex-direction: column; gap: 9px; position: relative; }
+  .modal-actions .btn { width: 100%; padding: 12px; }
+
+  /* ============ CONFETTI ============ */
+  #confetti { position: fixed; inset: 0; pointer-events: none; z-index: 60; }
+
+  /* ============ MISC ============ */
+  .kbd {
+    display: inline-block; padding: 1px 6px; border-radius: 5px;
+    border: 1px solid var(--border); background: rgba(127,127,180,.16);
+    font-size: 11px; font-family: ui-monospace, monospace;
+  }
+  .hint { font-size: 11.5px; color: var(--muted); text-align: center; }
+  ::selection { background: rgba(124, 92, 255, .4); }
+</style>
+</head>
+<body>
+
+<div class="bg-orbs"><div class="orb a"></div><div class="orb b"></div><div class="orb c"></div></div>
+
+<header class="topbar">
+  <div class="brand">
+    <div class="logo">
+      <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="9" />
+        <line x1="12" y1="3" x2="12" y2="21" />
+        <line x1="3" y1="12" x2="21" y2="12" />
+        <line x1="5.6" y1="5.6" x2="18.4" y2="18.4" />
+        <line x1="5.6" y1="18.4" x2="18.4" y2="5.6" />
+        <circle cx="12" cy="12" r="2" fill="white" />
+      </svg>
+    </div>
+    <div>
+      <h1>Lucky Wheel</h1>
+      <p>Spin your fate — let destiny decide</p>
+    </div>
+  </div>
+  <div class="top-actions">
+    <button class="icon-btn" id="soundBtn" title="Toggle sound" aria-label="Toggle sound"></button>
+    <button class="icon-btn" id="themeBtn" title="Toggle theme" aria-label="Toggle theme"></button>
+  </div>
+</header>
+
+<main>
+  <!-- ============ WHEEL ============ -->
+  <section class="card wheel-card">
+    <div class="wheel-wrap" id="wheelWrap">
+      <div class="pointer" id="pointer"></div>
+      <canvas id="wheel"></canvas>
+      <button class="spin-btn" id="spinBtn">SPIN</button>
+    </div>
+    <div class="wheel-meta">
+      <span id="countLabel">0 entries</span>
+      <span id="lastLabel">—</span>
+    </div>
+    <div class="hint">Press <span class="kbd">Space</span> to spin · Click the wheel too</div>
+  </section>
+
+  <!-- ============ SIDE PANEL ============ -->
+  <aside class="card side">
+    <div class="tabs">
+      <button class="tab active" data-tab="entries">Entries</button>
+      <button class="tab" data-tab="history">History</button>
+      <button class="tab" data-tab="settings">Settings</button>
+    </div>
+
+    <!-- ENTRIES -->
+    <div class="panel active" id="panel-entries">
+      <div class="add-row">
+        <input id="newEntry" type="text" placeholder="Add an option…" maxlength="60" />
+        <button class="btn primary" id="addBtn">Add</button>
+      </div>
+
+      <div class="toolbar">
+        <button class="btn small" id="shuffleBtn">Shuffle</button>
+        <button class="btn small" id="sortBtn">Sort</button>
+        <button class="btn small danger" id="clearBtn">Clear</button>
+      </div>
+
+      <div class="entries" id="entries"></div>
+
+      <details class="bulk">
+        <summary>Bulk edit</summary>
+        <div class="bulk-body">
+          <textarea id="bulkArea" placeholder="One option per line.&#10;Optional weight:  Pizza | 3"></textarea>
+          <div class="toolbar">
+            <button class="btn small primary" id="bulkApply">Apply</button>
+            <button class="btn small" id="bulkLoad">Load current</button>
+          </div>
+        </div>
+      </details>
+
+      <div class="add-row">
+        <select id="presetSelect" class="btn" style="flex:1;text-align:left;padding:10px 12px;">
+          <option value="">Load a preset…</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- HISTORY -->
+    <div class="panel" id="panel-history">
+      <div class="history-list" id="historyList"></div>
+      <button class="btn small danger" id="clearHistory">Clear history</button>
+    </div>
+
+    <!-- SETTINGS -->
+    <div class="panel" id="panel-settings">
+      <div class="field">
+        <div class="f-head"><label for="durRange">Spin duration</label><span id="durVal">5.0s</span></div>
+        <input type="range" id="durRange" min="2" max="10" step="0.5" value="5" />
+      </div>
+      <div class="field" style="flex-direction:row;justify-content:space-between;align-items:center;">
+        <div class="f-head" style="flex:1;">Sound effects</div>
+        <button class="switch" id="soundSwitch" aria-pressed="true"></button>
+      </div>
+      <div class="field" style="flex-direction:row;justify-content:space-between;align-items:center;">
+        <div class="f-head" style="flex:1;">Confetti</div>
+        <button class="switch" id="confettiSwitch" aria-pressed="true"></button>
+      </div>
+      <div class="field" style="flex-direction:row;justify-content:space-between;align-items:center;">
+        <div class="f-head" style="flex:1;">Remove winner automatically</div>
+        <button class="switch" id="removeSwitch" aria-pressed="false"></button>
+      </div>
+      <button class="btn danger" id="resetAll">Reset everything</button>
+      <p class="hint">Everything is saved locally in your browser.</p>
+    </div>
+  </aside>
+</main>
+
+<!-- ============ WINNER MODAL ============ -->
+<div class="modal-backdrop" id="modal">
+  <div class="modal">
+    <p class="kicker">The wheel has spoken</p>
+    <h2 id="winnerText">—</h2>
+    <div class="modal-actions">
+      <button class="btn primary" id="againBtn">Spin again</button>
+      <button class="btn" id="removeBtn">Remove &amp; spin again</button>
+      <button class="btn" id="closeBtn">Close</button>
+    </div>
+  </div>
+</div>
+
+<canvas id="confetti"></canvas>
+
+<script>
+(() => {
+  "use strict";
+
+  /* =========================================================
+     STATE
+  ========================================================= */
+  const STORAGE_KEY = "lucky-wheel-v1";
+
+  const canvas = document.getElementById("wheel");
+  const ctx = canvas.getContext("2d");
+  const confettiCanvas = document.getElementById("confetti");
+  const cctx = confettiCanvas.getContext("2d");
+
+  let CW = 0;                       // canvas CSS size
+  let items = [];                   // {id, text, weight}
+  let rotation = -Math.PI / 2;
+  let spinning = false;
+  let history = [];
+  let uid = 1;
+  let settings = { sound: true, confetti: true, removeWinner: false, duration: 5, theme: "dark" };
+
+  const PRESETS = {
+    food:      ["Pizza","Sushi","Burgers","Tacos","Pasta","Ramen","Salad","Curry"],
+    yesno:     ["Yes","No","Maybe","Definitely!","Absolutely not","Ask again later"],
+    numbers:   ["1","2","3","4","5","6","7","8","9","10"],
+    chores:    ["Dishes","Vacuum","Laundry","Trash","Cook","Bathroom","Windows","Nothing"],
+    truthdare: ["Truth","Dare","Truth","Dare"],
+    compliment:["You're amazing","Great hair","So kind","Very funny","Super smart","Best vibes","Total legend"],
+    coin:      ["Heads","Tails"],
+    days:      ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"],
+    team:      ["Team A","Team B","Team C","Team D"]
+  };
+
+  /* =========================================================
+     ICONS (SVG instead of emoji)
+  ========================================================= */
+  function soundIcon(on) {
+    return on
+      ? `<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" fill="currentColor" stroke="none" />
+          <path d="M15.54 8.46a5 5 0 0 1 0 7.07" />
+          <path d="M19.07 4.93a10 10 0 0 1 0 14.14" />
+        </svg>`
+      : `<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" fill="currentColor" stroke="none" />
+          <line x1="23" y1="9" x2="17" y2="15" />
+          <line x1="17" y1="9" x2="23" y2="15" />
+        </svg>`;
+  }
+
+  function themeIcon(theme) {
+    return theme === 'dark'
+      ? `<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+        </svg>`
+      : `<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="5" />
+          <line x1="12" y1="1" x2="12" y2="3" />
+          <line x1="12" y1="21" x2="12" y2="23" />
+          <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" />
+          <line x1="18.36" y1="18.36" x2="19.78" y2="19.78" />
+          <line x1="1" y1="12" x2="3" y2="12" />
+          <line x1="21" y1="12" x2="23" y2="12" />
+          <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" />
+          <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
+        </svg>`;
+  }
+
+  /* =========================================================
+     PERSISTENCE
+  ========================================================= */
+  function save() {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify({
+        items, history: history.slice(0, 60), settings, uid
+      }));
+    } catch (e) { /* storage might be unavailable */ }
+  }
+
+  function load() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      return raw ? JSON.parse(raw) : null;
+    } catch (e) { return null; }
+  }
+
+  /* =========================================================
+     AUDIO
+  ========================================================= */
+  let audioCtx = null;
+  function ensureAudio() {
+    if (!audioCtx) {
+      const AC = window.AudioContext || window.webkitAudioContext;
+      if (!AC) return null;
+      audioCtx = new AC();
+    }
+    if (audioCtx.state === "suspended") audioCtx.resume();
+    return audioCtx;
+  }
+
+  let lastTickTime = 0;
+  function playTick() {
+    if (!settings.sound) return;
+    const now = performance.now();
+    if (now - lastTickTime < 28) return;   // throttle
+    lastTickTime = now;
+
+    const ac = ensureAudio(); if (!ac) return;
+    const t = ac.currentTime;
+    const osc = ac.createOscillator();
+    const gain = ac.createGain();
+    osc.type = "square";
+    osc.frequency.setValueAtTime(1050 + Math.random() * 180, t);
+    gain.gain.setValueAtTime(0.0001, t);
+    gain.gain.exponentialRampToValueAtTime(0.05, t + 0.003);
+    gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.055);
+    osc.connect(gain).connect(ac.destination);
+    osc.start(t);
+    osc.stop(t + 0.07);
+  }
+
+  function playFanfare() {
+    if (!settings.sound) return;
+    const ac = ensureAudio(); if (!ac) return;
+    const notes = [523.25, 659.25, 783.99, 1046.5];
+    notes.forEach((freq, i) => {
+      const t = ac.currentTime + i * 0.1;
+      const osc = ac.createOscillator();
+      const gain = ac.createGain();
+      osc.type = "triangle";
+      osc.frequency.setValueAtTime(freq, t);
+      gain.gain.setValueAtTime(0.0001, t);
+      gain.gain.exponentialRampToValueAtTime(0.16, t + 0.02);
+      gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.55);
+      osc.connect(gain).connect(ac.destination);
+      osc.start(t);
+      osc.stop(t + 0.6);
+    });
+  }
+
+  /* =========================================================
+     COLORS
+  ========================================================= */
+  function segColor(i, n) {
+    const hue = Math.round((i * 360) / Math.max(n, 1) + 205) % 360;
+    const light = i % 2 === 0 ? 60 : 47;
+    return `hsl(${hue} 72% ${light}%)`;
+  }
+
+  /* =========================================================
+     CANVAS DRAWING
+  ========================================================= */
+  function resizeCanvas() {
+    const rect = canvas.getBoundingClientRect();
+    const size = Math.max(1, Math.round(rect.width));
+    CW = size;
+    const dpr = window.devicePixelRatio || 1;
+    canvas.width = Math.round(size * dpr);
+    canvas.height = Math.round(size * dpr);
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    draw();
+  }
+
+  function draw() {
+    if (!CW) return;
+    const size = CW;
+    const cx = size / 2, cy = size / 2;
+    const r = size / 2 - 8;
+
+    ctx.clearRect(0, 0, size, size);
+
+    // outer rim glow
+    ctx.beginPath();
+    ctx.arc(cx, cy, r + 4, 0, Math.PI * 2);
+    ctx.lineWidth = 8;
+    ctx.strokeStyle = "rgba(255,255,255,0.10)";
+    ctx.stroke();
+
+    const n = items.length;
+
+    if (n === 0) {
+      ctx.beginPath();
+      ctx.arc(cx, cy, r, 0, Math.PI * 2);
+      ctx.fillStyle = "rgba(120,125,170,0.16)";
+      ctx.fill();
+      ctx.fillStyle = "rgba(150,158,200,0.9)";
+      ctx.font = "600 15px ui-sans-serif, system-ui, sans-serif";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillText("Add some options →", cx, cy);
+      return;
+    }
+
+    const seg = (Math.PI * 2) / n;
+    const fontSize = Math.max(9, Math.min(19, (250 / n) * (size / 520)));
+
+    for (let i = 0; i < n; i++) {
+      const a0 = i * seg + rotation;
+      const a1 = a0 + seg;
+
+      ctx.beginPath();
+      ctx.moveTo(cx, cy);
+      ctx.arc(cx, cy, r, a0, a1);
+      ctx.closePath();
+      ctx.fillStyle = segColor(i, n);
+      ctx.fill();
+
+      if (n <= 70) {
+        ctx.lineWidth = 1.4;
+        ctx.strokeStyle = "rgba(0,0,0,0.22)";
+        ctx.stroke();
+      }
+
+      // label
+      ctx.save();
+      ctx.translate(cx, cy);
+      ctx.rotate(a0 + seg / 2);
+      ctx.textAlign = "right";
+      ctx.textBaseline = "middle";
+      ctx.font = `700 ${fontSize}px ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif`;
+      ctx.fillStyle = "#ffffff";
+      ctx.shadowColor = "rgba(0,0,0,0.45)";
+      ctx.shadowBlur = 4;
+
+      let label = String(items[i].text);
+      const maxW = r - 30;
+      if (ctx.measureText(label).width > maxW) {
+        while (label.length > 1 && ctx.measureText(label + "…").width > maxW) {
+          label = label.slice(0, -1);
+        }
+        label += "…";
+      }
+      ctx.fillText(label, r - 16, 0);
+      ctx.restore();
+    }
+
+    // hub
+    ctx.beginPath();
+    ctx.arc(cx, cy, r * 0.185, 0, Math.PI * 2);
+    ctx.fillStyle = "rgba(0,0,0,0.28)";
+    ctx.fill();
+  }
+
+  /* =========================================================
+     SPIN LOGIC
+  ========================================================= */
+  function indexAtPointer() {
+    const n = items.length;
+    if (!n) return -1;
+    const seg = (Math.PI * 2) / n;
+    const pointer = -Math.PI / 2;
+    let a = (pointer - rotation) % (Math.PI * 2);
+    if (a < 0) a += Math.PI * 2;
+    return Math.floor(a / seg) % n;
+  }
+
+  function weightedPick() {
+    const weights = items.map(it => Math.max(0.0001, Number(it.weight) || 1));
+    const total = weights.reduce((a, b) => a + b, 0);
+    let r = Math.random() * total;
+    for (let i = 0; i < items.length; i++) {
+      r -= weights[i];
+      if (r <= 0) return i;
+    }
+    return items.length - 1;
+  }
+
+  function spin() {
+    if (spinning || items.length < 2) return;
+
+    spinning = true;
+    updateSpinButton();
+    ensureAudio();
+
+    const n = items.length;
+    const seg = (Math.PI * 2) / n;
+    const idx = weightedPick();
+
+    const jitter = (Math.random() - 0.5) * seg * 0.72;
+    const targetAngle = -Math.PI / 2 - (idx * seg + seg / 2) + jitter;
+
+    let delta = targetAngle - rotation;
+    delta = ((delta % (Math.PI * 2)) + Math.PI * 2) % (Math.PI * 2);
+
+    const turns = 6 + Math.floor(Math.random() * 3);
+    const totalRotation = delta + turns * Math.PI * 2;
+
+    const startRot = rotation;
+    const duration = settings.duration * 1000;
+    const t0 = performance.now();
+    let lastIdx = -1;
+
+    function frame(now) {
+      const t = Math.min(1, (now - t0) / duration);
+      const eased = 1 - Math.pow(1 - t, 4);      // easeOutQuart
+      rotation = startRot + totalRotation * eased;
+      draw();
+
+      const cur = indexAtPointer();
+      if (cur !== lastIdx) {
+        lastIdx = cur;
+        if (t < 0.97) {
+          playTick();
+          nudgePointer();
+        }
+      }
+
+      if (t < 1) {
+        requestAnimationFrame(frame);
+      } else {
+        rotation = ((rotation % (Math.PI * 2)) + Math.PI * 2) % (Math.PI * 2);
+        spinning = false;
+        updateSpinButton();
+        finishSpin(idx);
+      }
+    }
+    requestAnimationFrame(frame);
+  }
+
+  const pointerEl = document.getElementById("pointer");
+  let pointerTimer = null;
+  function nudgePointer() {
+    pointerEl.classList.add("tick");
+    clearTimeout(pointerTimer);
+    pointerTimer = setTimeout(() => pointerEl.classList.remove("tick"), 55);
+  }
+
+  function finishSpin(idx) {
+    const winner = items[idx];
+    if (!winner) return;
+
+    history.unshift({ text: winner.text, at: Date.now() });
+    if (history.length > 60) history.pop();
+
+    document.getElementById("lastLabel").textContent = winner.text;
+    renderHistory();
+    save();
+
+    showWinner(winner.text);
+    playFanfare();
+    burstConfetti();
+  }
+
+  /* =========================================================
+     WINNER MODAL
+  ========================================================= */
+  const modal = document.getElementById("modal");
+  const winnerTextEl = document.getElementById("winnerText");
+  let currentWinnerText = null;
+
+  function showWinner(text) {
+    currentWinnerText = text;
+    winnerTextEl.textContent = text;
+    modal.classList.add("show");
+  }
+
+  function hideModal() {
+    modal.classList.remove("show");
+  }
+
+  function removeWinnerByName(text) {
+    const i = items.findIndex(it => it.text === text);
+    if (i > -1) {
+      items.splice(i, 1);
+      renderEntries();
+      draw();
+      save();
+    }
+  }
+
+  /* =========================================================
+     CONFETTI
+  ========================================================= */
+  let confettiParticles = [];
+  let confettiRunning = false;
+
+  function resizeConfetti() {
+    const dpr = window.devicePixelRatio || 1;
+    confettiCanvas.width = Math.round(window.innerWidth * dpr);
+    confettiCanvas.height = Math.round(window.innerHeight * dpr);
+    cctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  }
+
+  function burstConfetti() {
+    if (!settings.confetti) return;
+    resizeConfetti();
+
+    const colors = ["#FF6B6B", "#4ECDC4", "#FFD93D", "#7C5CFF", "#FF8C42", "#2EC4B6", "#FF5C8A", "#FFFFFF"];
+    const count = 190;
+    const originX = window.innerWidth / 2;
+    const originY = window.innerHeight * 0.42;
+
+    for (let i = 0; i < count; i++) {
+      confettiParticles.push({
+        x: originX + (Math.random() - 0.5) * 260,
+        y: originY + (Math.random() - 0.5) * 100,
+        vx: (Math.random() - 0.5) * 15,
+        vy: -Math.random() * 17 - 4,
+        g: 0.30 + Math.random() * 0.22,
+        w: 6 + Math.random() * 8,
+        h: 8 + Math.random() * 11,
+        rot: Math.random() * Math.PI * 2,
+        vr: (Math.random() - 0.5) * 0.34,
+        color: colors[(Math.random() * colors.length) | 0],
+        life: 1
+      });
+    }
+
+    if (!confettiRunning) {
+      confettiRunning = true;
+      requestAnimationFrame(confettiLoop);
+    }
+  }
+
+  function confettiLoop() {
+    cctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
+
+    for (let i = confettiParticles.length - 1; i >= 0; i--) {
+      const p = confettiParticles[i];
+      p.vy += p.g;
+      p.x += p.vx;
+      p.y += p.vy;
+      p.vx *= 0.995;
+      p.rot += p.vr;
+      p.life -= 0.0055;
+
+      if (p.y > window.innerHeight + 80 || p.life <= 0) {
+        confettiParticles.splice(i, 1);
+        continue;
+      }
+
+      cctx.save();
+      cctx.translate(p.x, p.y);
+      cctx.rotate(p.rot);
+      cctx.globalAlpha = Math.max(0, Math.min(1, p.life * 1.6));
+      cctx.fillStyle = p.color;
+      cctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
+      cctx.restore();
+    }
+
+    if (confettiParticles.length) {
+      requestAnimationFrame(confettiLoop);
+    } else {
+      confettiRunning = false;
+      cctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
+    }
+  }
+
+  /* =========================================================
+     ENTRIES UI
+  ========================================================= */
+  const entriesEl = document.getElementById("entries");
+  const countLabel = document.getElementById("countLabel");
+  const spinBtn = document.getElementById("spinBtn");
+
+  function escapeAttr(s) {
+    return String(s)
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;");
+  }
+
+  function updateCount() {
+    countLabel.textContent = items.length + (items.length === 1 ? " entry" : " entries");
+  }
+
+  function updateSpinButton() {
+    spinBtn.disabled = spinning || items.length < 2;
+    spinBtn.textContent = spinning ? "…" : "SPIN";
+  }
+
+  function renderEntries() {
+    entriesEl.innerHTML = "";
+
+    if (items.length === 0) {
+      const d = document.createElement("div");
+      d.className = "empty";
+      d.textContent = "No options yet — add one below";
+      entriesEl.appendChild(d);
+    } else {
+      items.forEach((it, i) => {
+        const row = document.createElement("div");
+        row.className = "entry";
+        row.dataset.id = it.id;
+        row.style.animationDelay = Math.min(i * 18, 300) + "ms";
+        row.innerHTML =
+          '<span class="dot" style="background:' + segColor(i, items.length) + '"></span>' +
+          '<input class="entry-text" type="text" maxlength="60" value="' + escapeAttr(it.text) + '" />' +
+          '<input class="entry-weight" type="number" min="1" max="99" value="' + (it.weight || 1) + '" title="Weight — higher = more likely" />' +
+          '<button class="del" title="Remove">✕</button>';
+        entriesEl.appendChild(row);
+      });
+    }
+
+    updateCount();
+    updateSpinButton();
+  }
+
+  entriesEl.addEventListener("input", (e) => {
+    const row = e.target.closest(".entry");
+    if (!row) return;
+    const item = items.find(it => it.id === Number(row.dataset.id));
+    if (!item) return;
+
+    if (e.target.classList.contains("entry-text")) {
+      item.text = e.target.value;
+      draw();
+      save();
+    } else if (e.target.classList.contains("entry-weight")) {
+      let v = parseInt(e.target.value, 10);
+      if (isNaN(v) || v < 1) v = 1;
+      if (v > 99) v = 99;
+      item.weight = v;
+      save();
+    }
+  });
+
+  entriesEl.addEventListener("blur", (e) => {
+    if (e.target.classList.contains("entry-weight")) {
+      e.target.value = Math.max(1, Math.min(99, parseInt(e.target.value, 10) || 1));
+    }
+  }, true);
+
+  entriesEl.addEventListener("click", (e) => {
+    const del = e.target.closest(".del");
+    if (!del) return;
+    const row = del.closest(".entry");
+    const id = Number(row.dataset.id);
+    items = items.filter(it => it.id !== id);
+    renderEntries();
+    draw();
+    save();
+  });
+
+  function addEntry(text) {
+    text = String(text || "").trim();
+    if (!text) return;
+    items.push({ id: uid++, text, weight: 1 });
+    renderEntries();
+    draw();
+    save();
+    // scroll to bottom of list
+    entriesEl.scrollTop = entriesEl.scrollHeight;
+  }
+
+  /* =========================================================
+     TOOLBAR ACTIONS
+  ========================================================= */
+  document.getElementById("addBtn").addEventListener("click", () => {
+    const input = document.getElementById("newEntry");
+    addEntry(input.value);
+    input.value = "";
+    input.focus();
+  });
+
+  document.getElementById("newEntry").addEventListener("keydown", (e) => {
+    if (e.key === "Enter") {
+      addEntry(e.target.value);
+      e.target.value = "";
+    }
+  });
+
+  document.getElementById("shuffleBtn").addEventListener("click", () => {
+    if (spinning) return;
+    for (let i = items.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [items[i], items[j]] = [items[j], items[i]];
+    }
+    renderEntries();
+    draw();
+    save();
+  });
+
+  document.getElementById("sortBtn").addEventListener("click", () => {
+    if (spinning) return;
+    items.sort((a, b) => a.text.localeCompare(b.text, undefined, { sensitivity: "base" }));
+    renderEntries();
+    draw();
+    save();
+  });
+
+  document.getElementById("clearBtn").addEventListener("click", () => {
+    if (spinning || !items.length) return;
+    if (!confirm("Remove all " + items.length + " entries?")) return;
+    items = [];
+    renderEntries();
+    draw();
+    save();
+  });
+
+  /* Bulk edit */
+  const bulkArea = document.getElementById("bulkArea");
+  document.getElementById("bulkLoad").addEventListener("click", () => {
+    bulkArea.value = items.map(it => it.weight > 1 ? it.text + " | " + it.weight : it.text).join("\n");
+  });
+  document.getElementById("bulkApply").addEventListener("click", () => {
+    const lines = bulkArea.value.split("\n").map(l => l.trim()).filter(Boolean);
+    if (!lines.length) { alert("Nothing to apply."); return; }
+    items = lines.map(line => {
+      let text = line, weight = 1;
+      const parts = line.split("|");
+      if (parts.length > 1) {
+        text = parts[0].trim();
+        const w = parseInt(parts[1].trim(), 10);
+        if (!isNaN(w) && w > 0) weight = Math.min(99, w);
+      }
+      return { id: uid++, text: text.slice(0, 60), weight };
+    });
+    renderEntries();
+    draw();
+    save();
+  });
+
+  /* Presets */
+  const presetSelect = document.getElementById("presetSelect");
+  Object.keys(PRESETS).forEach(key => {
+    const opt = document.createElement("option");
+    opt.value = key;
+    opt.textContent = key.charAt(0).toUpperCase() + key.slice(1);
+    presetSelect.appendChild(opt);
+  });
+  presetSelect.addEventListener("change", (e) => {
+    const key = e.target.value;
+    if (!key || !PRESETS[key]) return;
+    if (items.length && !confirm("Replace the current list with the \"" + key + "\" preset?")) {
+      e.target.value = "";
+      return;
+    }
+    items = PRESETS[key].map(t => ({ id: uid++, text: t, weight: 1 }));
+    renderEntries();
+    draw();
+    save();
+    e.target.value = "";
+  });
+
+  /* =========================================================
+     HISTORY
+  ========================================================= */
+  const historyList = document.getElementById("historyList");
+
+  function timeAgo(ts) {
+    const s = Math.floor((Date.now() - ts) / 1000);
+    if (s < 60) return "just now";
+    if (s < 3600) return Math.floor(s / 60) + "m ago";
+    if (s < 86400) return Math.floor(s / 3600) + "h ago";
+    return new Date(ts).toLocaleDateString();
+  }
+
+  function renderHistory() {
+    historyList.innerHTML = "";
+    if (!history.length) {
+      const d = document.createElement("div");
+      d.className = "empty";
+      d.textContent = "No spins yet. Give it a whirl!";
+      historyList.appendChild(d);
+      return;
+    }
+    history.forEach((h, i) => {
+      const el = document.createElement("div");
+      el.className = "hist-item";
+      el.style.animationDelay = Math.min(i * 20, 260) + "ms";
+      el.innerHTML =
+        '<span class="idx">' + (history.length - i) + '</span>' +
+        '<span class="txt">' + escapeAttr(h.text) + '</span>' +
+        '<span class="time">' + timeAgo(h.at) + '</span>';
+      historyList.appendChild(el);
+    });
+  }
+
+  document.getElementById("clearHistory").addEventListener("click", () => {
+    history = [];
+    renderHistory();
+    save();
+  });
+
+  /* =========================================================
+     TABS
+  ========================================================= */
+  document.querySelectorAll(".tab").forEach(tab => {
+    tab.addEventListener("click", () => {
+      document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
+      document.querySelectorAll(".panel").forEach(p => p.classList.remove("active"));
+      tab.classList.add("active");
+      document.getElementById("panel-" + tab.dataset.tab).classList.add("active");
+      if (tab.dataset.tab === "history") renderHistory();
+    });
+  });
+
+  /* =========================================================
+     SETTINGS CONTROLS
+  ========================================================= */
+  const soundBtn = document.getElementById("soundBtn");
+  const themeBtn = document.getElementById("themeBtn");
+  const soundSwitch = document.getElementById("soundSwitch");
+  const confettiSwitch = document.getElementById("confettiSwitch");
+  const removeSwitch = document.getElementById("removeSwitch");
+  const durRange = document.getElementById("durRange");
+  const durVal = document.getElementById("durVal");
+
+  function applyTheme() {
+    document.documentElement.setAttribute("data-theme", settings.theme);
+    themeBtn.innerHTML = themeIcon(settings.theme);
+  }
+
+  function syncUI() {
+    soundBtn.innerHTML = soundIcon(settings.sound);
+    soundBtn.classList.toggle("off", !settings.sound);
+    soundSwitch.setAttribute("aria-pressed", String(settings.sound));
+    confettiSwitch.setAttribute("aria-pressed", String(settings.confetti));
+    removeSwitch.setAttribute("aria-pressed", String(settings.removeWinner));
+    durRange.value = settings.duration;
+    durVal.textContent = Number(settings.duration).toFixed(1) + "s";
+    applyTheme();
+  }
+
+  soundBtn.addEventListener("click", () => {
+    settings.sound = !settings.sound;
+    syncUI(); save();
+    if (settings.sound) playTick();
+  });
+  soundSwitch.addEventListener("click", () => { settings.sound = !settings.sound; syncUI(); save(); });
+
+  themeBtn.addEventListener("click", () => {
+    settings.theme = settings.theme === "dark" ? "light" : "dark";
+    syncUI(); save();
+  });
+
+  confettiSwitch.addEventListener("click", () => {
+    settings.confetti = !settings.confetti;
+    syncUI(); save();
+  });
+
+  removeSwitch.addEventListener("click", () => {
+    settings.removeWinner = !settings.removeWinner;
+    syncUI(); save();
+  });
+
+  durRange.addEventListener("input", (e) => {
+    settings.duration = parseFloat(e.target.value);
+    durVal.textContent = settings.duration.toFixed(1) + "s";
+    save();
+  });
+
+  document.getElementById("resetAll").addEventListener("click", () => {
+    if (!confirm("Reset entries, history and settings to defaults?")) return;
+    localStorage.removeItem(STORAGE_KEY);
+    items = PRESETS.food.map(t => ({ id: uid++, text: t, weight: 1 }));
+    history = [];
+    settings = { sound: true, confetti: true, removeWinner: false, duration: 5, theme: "dark" };
+    rotation = -Math.PI / 2;
+    renderEntries();
+    renderHistory();
+    syncUI();
+    draw();
+    save();
+  });
+
+  /* =========================================================
+     SPIN TRIGGERS
+  ========================================================= */
+  spinBtn.addEventListener("click", (e) => { e.stopPropagation(); spin(); });
+  canvas.addEventListener("click", spin);
+
+  document.addEventListener("keydown", (e) => {
+    const tag = (e.target.tagName || "").toLowerCase();
+    const typing = tag === "input" || tag === "textarea" || tag === "select";
+
+    if (e.code === "Space" && !typing) {
+      e.preventDefault();
+      spin();
+    }
+    if (e.key === "Escape" && modal.classList.contains("show")) {
+      hideModal();
+    }
+  });
+
+  /* =========================================================
+     MODAL ACTIONS
+  ========================================================= */
+  document.getElementById("closeBtn").addEventListener("click", hideModal);
+
+  document.getElementById("againBtn").addEventListener("click", () => {
+    if (settings.removeWinner && currentWinnerText !== null) {
+      removeWinnerByName(currentWinnerText);
+    }
+    hideModal();
+    setTimeout(spin, 320);
+  });
+
+  document.getElementById("removeBtn").addEventListener("click", () => {
+    if (currentWinnerText !== null) removeWinnerByName(currentWinnerText);
+    hideModal();
+    setTimeout(spin, 320);
+  });
+
+  modal.addEventListener("click", (e) => {
+    if (e.target === modal) hideModal();
+  });
+
+  /* =========================================================
+     BOOT
+  ========================================================= */
+  function boot() {
+    const saved = load();
+
+    if (saved && Array.isArray(saved.items)) {
+      items = saved.items.map(it => ({
+        id: Number(it.id) || uid++,
+        text: String(it.text || "").slice(0, 60),
+        weight: Math.max(1, Math.min(99, Number(it.weight) || 1))
+      }));
+      history = Array.isArray(saved.history) ? saved.history : [];
+      settings = Object.assign(settings, saved.settings || {});
+      uid = Math.max(uid, ...items.map(i => i.id), 0) + 1;
+      if (saved.uid) uid = Math.max(uid, saved.uid);
+    } else {
+      items = PRESETS.food.map(t => ({ id: uid++, text: t, weight: 1 }));
+    }
+
+    syncUI();
+    renderEntries();
+    renderHistory();
+    resizeCanvas();
+
+    // Restore last winner label
+    if (history.length) {
+      document.getElementById("lastLabel").textContent = history[0].text;
+    }
+  }
+
+  /* Resize handling */
+  const wheelWrap = document.getElementById("wheelWrap");
+  if (window.ResizeObserver) {
+    new ResizeObserver(() => resizeCanvas()).observe(wheelWrap);
+  }
+  window.addEventListener("resize", () => {
+    resizeCanvas();
+    if (confettiParticles.length) resizeConfetti();
+  });
+
+  boot();
+})();
+</script>
+</body>
+</html>
