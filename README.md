@@ -115,21 +115,36 @@ Replaces the classic timer with a flight simulator. Every focus session is a fli
 - **Weather**: auto-selects clear / cloudy / rain / night based on local time
 - **Cabin announcements**: plays at cruise, top of descent, and prepare-for-landing using the browser's speech synthesis
 - **Live flight**: pulls a real aircraft from OpenSky Network with its call sign, altitude, speed, and heading
+- **Live flight**: pulls a real aircraft from the public
+  [OpenSky Network](https://opensky-network.org/) API with its call sign,
+  altitude, speed, and heading. The button has a 10-second cooldown to
+  avoid hitting OpenSky's anonymous rate limit. If the request fails
+  (network issue or rate limit), it falls back to a simulated flight.
 
 ## Data storage
 
 Everything is stored in `localStorage`, scoped to your browser and domain.
 
-| Key | Contents |
-|---|---|
-| `pomodoro.v6.settings` | Timer settings |
-| `pomodoro.v6.tasks` | Task list |
-| `pomodoro.v6.session` | Current session state |
-| `pomodoro.v6.stats` | Daily stats |
-| `pomodoro.v6.history` | Session history |
-| `pomodoro.v6.reflection` | Reflection log |
-| `study_cards_v1` | Study card data |
+| Key | Contents | Page |
+|---|---|---|
+| `pomodoro.v6.settings` | Timer settings | index.html |
+| `pomodoro.v6.tasks` | Task list | index.html |
+| `pomodoro.v6.session` | Current session state | index.html |
+| `pomodoro.v6.stats` | Daily stats | index.html |
+| `pomodoro.v6.history` | Session history | index.html |
+| `pomodoro.v6.reflection` | Reflection log | index.html |
+| `study_cards_v1` | Study card data | note.html |
 
+**The two pages are isolated.** `index.html` (timer + tasks) and `note.html`
+(study cards) use completely separate storage keys. Data saved in one page
+is not visible to the other. This is intentional — the study card tool is
+designed to work as a standalone app.
+
+**Notes:**
+
+- Clearing browser data will delete all of the above
+- Data does not follow you across browsers, devices, or domains
+- Use the export feature on each page to back things up separately
 **Notes:**
 
 - Clearing browser data will delete all of the above
