@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#050b14">
+<title>Calculator - Tools</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.8.0/math.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<link rel="stylesheet" href="calc.css">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" type="image/svg+xml" href="icon.svg">
+<link rel="apple-touch-icon" href="icon.svg">
+</head>
+<body>
+
+<div class="app">
+
+  <!-- HEADER -->
+  <header class="topbar">
+    <div class="brand">
+      <div class="brand-icon">f(x)</div>
+      <div>
+        <h1>OmniCalc</h1>
+        <p>Scientific, Calculus, Programmer, Stats, Matrix</p>
+      </div>
+    </div>
+    <a href="tools.html" class="back">Back to Tools</a>
+  </header>
+
+  <!-- MODE TABS -->
+  <nav class="tabs" role="tablist">
+    <button class="tab active" data-tab="scientific" role="tab">Scientific</button>
+    <button class="tab" data-tab="calculus" role="tab">Calculus</button>
+    <button class="tab" data-tab="programmer" role="tab">Programmer</button>
+    <button class="tab" data-tab="stats" role="tab">Statistics</button>
+    <button class="tab" data-tab="matrix" role="tab">Matrix</button>
+  </nav>
+
+  <main class="main">
+
+    <!-- LEFT: DISPLAY + MODES -->
+    <div class="left">
+
+      <!-- DISPLAY -->
+      <div class="display">
+        <div class="display-status">
+          <div class="status-left">
+            <span id="angleBadge" class="badge badge-indigo">DEG</span>
+            <span id="memoryBadge" class="badge badge-amber hidden">M</span>
+            <span id="baseBadge" class="badge badge-emerald hidden">DEC</span>
+          </div>
+          <div id="livePreview" class="preview"></div>
+        </div>
+
+        <div id="exprHistory" class="history">0</div>
+
+        <div class="input-row">
+          <span id="evalError" class="error hidden">Syntax Error</span>
+          <input id="mainDisplay" type="text" class="main-input" value="0" placeholder="0" autocomplete="off">
+        </div>
+      </div>
+
+      <!-- SCIENTIFIC -->
+      <section id="view-scientific" class="view">
+        <div class="toolbar">
+          <div class="angle-group">
+            <button class="angle active" data-angle="DEG">DEG</button>
+            <button class="angle" data-angle="RAD">RAD</button>
+            <button class="angle" data-angle="GRAD">GRAD</button>
+          </div>
+          <div class="toggle-group">
+            <button id="btnInv" class="chip">2nd</button>
+            <button id="btnHyp" class="chip">hyp</button>
+            <button class="chip chip-amber" data-mem="clear">MC</button>
+            <button class="chip chip-amber" data-mem="recall">MR</button>
+            <button class="chip chip-amber" data-mem="add">M+</button>
+            <button class="chip chip-amber" data-mem="sub">M-</button>
+          </div>
+        </div>
+
+        <div class="keypad">
+          <!-- Row 1 -->
+          <button class="key key-fn trig-normal" data-func="sin">sin</button>
+          <button class="key key-fn trig-normal" data-func="cos">cos</button>
+          <button class="key key-fn trig-normal" data-func="tan">tan</button>
+          <button class="key key-fn" data-symbol="pi">pi</button>
+          <button class="key key-fn" data-symbol="e">e</button>
+          <button class="key key-danger" data-action="clear">AC</button>
+          <button class="key key-danger-soft" data-action="delete">DEL</button>
+
+          <!-- Row 2 -->
+          <button class="key key-fn trig-inv hidden" data-func="asin">asin</button>
+          <button class="key key-fn trig-inv hidden" data-func="acos">acos</button>
+          <button class="key key-fn trig-inv hidden" data-func="atan">atan</button>
+          <button class="key key-fn" data-func="log">ln</button>
+          <button class="key key-fn" data-func="log10">log</button>
+          <button class="key key-fn" data-op="^">x^y</button>
+          <button class="key key-fn" data-symbol="(">(</button>
+          <button class="key key-fn" data-symbol=")">)</button>
+
+          <!-- Row 3 -->
+          <button class="key key-fn" data-func="sqrt">sqrt</button>
+          <button class="key key-fn" data-op="^2">x2</button>
+          <button class="key key-fn" data-op="^3">x3</button>
+          <button class="key key-num" data-num="7">7</button>
+          <button class="key key-num" data-num="8">8</button>
+          <button class="key key-num" data-num="9">9</button>
+          <button class="key key-op" data-op="/">/</button>
+
+          <!-- Row 4 -->
+          <button class="key key-fn" data-op="!">n!</button>
+          <button class="key key-fn" data-func="abs">abs</button>
+          <button class="key key-fn" data-op="%">%</button>
+          <button class="key key-num" data-num="4">4</button>
+          <button class="key key-num" data-num="5">5</button>
+          <button class="key key-num" data-num="6">6</button>
+          <button class="key key-op" data-op="*">x</button>
+
+          <!-- Row 5 -->
+          <button class="key key-fn" data-symbol="phi">phi</button>
+          <button class="key key-fn" data-func="exp">ex</button>
+          <button class="key key-fn" data-op="mod">mod</button>
+          <button class="key key-num" data-num="1">1</button>
+          <button class="key key-num" data-num="2">2</button>
+          <button class="key key-num" data-num="3">3</button>
+          <button class="key key-op" data-op="-">-</button>
+
+          <!-- Row 6 -->
+          <button class="key key-fn" data-symbol="x">x</button>
+          <button class="key key-fn" data-action="sign">+/-</button>
+          <button class="key key-num" data-num="0">0</button>
+          <button class="key key-num" data-num=".">.</button>
+          <button class="key key-eq" data-action="equals">=</button>
+          <button class="key key-op" data-op="+">+</button>
+        </div>
+      </section>
+
+      <!-- CALCULUS -->
+      <section id="view-calculus" class="view hidden">
+        <h2 class="section-title">Calculus and Graphing</h2>
+
+        <div class="grid-2">
+          <div class="panel">
+            <h3 class="panel-title">Function</h3>
+            <label class="field-label">f(x)</label>
+            <input type="text" id="calcFx" class="field" value="x^3 - 3*x + 2">
+
+            <div class="divider"></div>
+
+            <h3 class="panel-title">Derivative at x</h3>
+            <div class="inline-row">
+              <span class="text-xs">x =</span>
+              <input type="number" id="calcX0" class="field field-sm" value="2" step="any">
+              <button id="btnDeriv" class="btn-primary-purple">d/dx</button>
+            </div>
+            <div id="derivOut" class="result result-purple">Result: -</div>
+
+            <div class="divider"></div>
+
+            <h3 class="panel-title">Definite Integral</h3>
+            <div class="inline-row">
+              <span class="text-xs">a =</span>
+              <input type="number" id="calcA" class="field field-xs" value="0" step="any">
+              <span class="text-xs">b =</span>
+              <input type="number" id="calcB" class="field field-xs" value="3" step="any">
+              <button id="btnIntegral" class="btn-primary-emerald">Integrate</button>
+            </div>
+            <div id="integralOut" class="result result-emerald">Result: -</div>
+          </div>
+
+          <div class="panel">
+            <div class="panel-header">
+              <h3 class="panel-title">Canvas Plot</h3>
+              <button id="btnPlot" class="btn-primary-indigo">Plot f(x)</button>
+            </div>
+            <div class="canvas-wrap">
+              <canvas id="graphCanvas"></canvas>
+            </div>
+            <div class="legend">
+              <span>Blue solid: f(x)</span>
+              <span>Purple dash: f'(x)</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- PROGRAMMER -->
+      <section id="view-programmer" class="view hidden">
+        <h2 class="section-title">Programmer and Bitwise</h2>
+
+        <div class="grid-2">
+          <div class="base-card"><span class="base-label base-hex">HEX</span><span id="hexDisplay" class="base-val">0</span></div>
+          <div class="base-card"><span class="base-label base-dec">DEC</span><span id="decDisplay" class="base-val">0</span></div>
+          <div class="base-card"><span class="base-label base-oct">OCT</span><span id="octDisplay" class="base-val">0</span></div>
+          <div class="base-card"><span class="base-label base-bin">BIN</span><span id="binDisplay" class="base-val base-val-sm">0</span></div>
+        </div>
+
+        <div class="bit-grid">
+          <button class="key key-bw" data-op="&">AND</button>
+          <button class="key key-bw" data-op="|">OR</button>
+          <button class="key key-bw" data-op="xor">XOR</button>
+          <button class="key key-bw" data-func="bitwiseNot">NOT</button>
+          <button class="key key-bw" data-op="<<">LSH</button>
+          <button class="key key-bw" data-op=">>">RSH</button>
+          <button class="key key-bw-info" data-convert="HEX">To Hex</button>
+          <button class="key key-bw-info" data-convert="BIN">To Bin</button>
+        </div>
+      </section>
+
+      <!-- STATS -->
+      <section id="view-stats" class="view hidden">
+        <h2 class="section-title">Statistics and Probability</h2>
+
+        <div class="panel">
+          <label class="field-label">Data set (comma or space separated)</label>
+          <input type="text" id="statsInput" class="field" value="12, 15, 18, 22, 25, 30, 35">
+
+          <button id="btnStats" class="btn-primary-amber mt-2">Calculate Statistics</button>
+
+          <div class="stat-grid">
+            <div class="stat-card"><span class="stat-label">Mean</span><span id="statMean" class="stat-val">-</span></div>
+            <div class="stat-card"><span class="stat-label">Median</span><span id="statMedian" class="stat-val">-</span></div>
+            <div class="stat-card"><span class="stat-label">Std Dev</span><span id="statStd" class="stat-val">-</span></div>
+            <div class="stat-card"><span class="stat-label">Variance</span><span id="statVar" class="stat-val">-</span></div>
+          </div>
+
+          <div class="divider"></div>
+
+          <div class="grid-2">
+            <div class="sub-panel">
+              <h3 class="panel-title">Permutations (nPr)</h3>
+              <div class="inline-row">
+                <input type="number" id="permN" class="field field-sm" placeholder="n">
+                <input type="number" id="permR" class="field field-sm" placeholder="r">
+                <button id="btnPerm" class="btn-outline">nPr</button>
+              </div>
+              <div id="permOut" class="result">Result: -</div>
+            </div>
+
+            <div class="sub-panel">
+              <h3 class="panel-title">Combinations (nCr)</h3>
+              <div class="inline-row">
+                <input type="number" id="combN" class="field field-sm" placeholder="n">
+                <input type="number" id="combR" class="field field-sm" placeholder="r">
+                <button id="btnComb" class="btn-outline">nCr</button>
+              </div>
+              <div id="combOut" class="result">Result: -</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- MATRIX -->
+      <section id="view-matrix" class="view hidden">
+        <h2 class="section-title">Matrix Calculator</h2>
+
+        <div class="inline-row">
+          <button id="btnMat2" class="btn-primary-pink">2x2</button>
+          <button id="btnMat3" class="btn-outline">3x3</button>
+        </div>
+
+        <div class="grid-2">
+          <div class="panel">
+            <h3 class="panel-title">Matrix A</h3>
+            <div id="matrixA" class="matrix-grid"></div>
+          </div>
+          <div class="panel">
+            <h3 class="panel-title">Matrix B</h3>
+            <div id="matrixB" class="matrix-grid"></div>
+          </div>
+        </div>
+
+        <div class="inline-row mt-3">
+          <button class="btn-outline" data-matrix="detA">Det(A)</button>
+          <button class="btn-outline" data-matrix="invA">Inv(A)</button>
+          <button class="btn-outline" data-matrix="add">A + B</button>
+          <button class="btn-outline" data-matrix="mult">A x B</button>
+        </div>
+
+        <div class="panel mt-3">
+          <span class="field-label">Result</span>
+          <div id="matrixOut" class="matrix-out">Run an operation</div>
+        </div>
+      </section>
+
+    </div>
+
+    <!-- RIGHT: HISTORY -->
+    <aside class="right">
+      <div class="panel history-panel">
+        <div class="panel-header">
+          <h3 class="panel-title">History</h3>
+          <button id="btnClearHistory" class="link-danger">Clear</button>
+        </div>
+        <div id="historyList" class="history-list">
+          <div class="history-empty">No calculations yet</div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h4 class="panel-title">Shortcuts</h4>
+        <ul class="tips">
+          <li>Numbers and operators: 0-9 . + - * / ^ ( )</li>
+          <li>Enter evaluates, Esc clears, Backspace deletes</li>
+          <li>In Calculus mode, use x as the variable</li>
+        </ul>
+      </div>
+    </aside>
+
+  </main>
+
+  <footer class="footer">
+    OmniCalc - Powered by MathJS and ChartJS
+  </footer>
+
+</div>
+
+<script src="calc.js"></script>
+</body>
+</html>
