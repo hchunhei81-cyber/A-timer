@@ -1,0 +1,10 @@
+<a class="tool-card" href="your-new-tool.html">
+  <div class="tool-icon">
+    <!-- icon —>
+  </div>
+  <div class="tool-title">Your Tool Name</div>
+  <div class="tool-desc">
+    One sentence describing what it does.
+  </div>
+  <div class="tool-tag">New</div>
+</a>
