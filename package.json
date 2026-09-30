@@ -1,0 +1,24 @@
+{
+  "name": "pomodoro-focus",
+  "version": "1.0.0",
+  "description": "A Pomodoro timer, task manager, and flight deck simulator — plus a standalone study card tool.",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hchunhei81-cyber/pomodoro-focus.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/hchunhei81-cyber/pomodoro-focus/issues"
+  },
+  "homepage": "https://github.com/hchunhei81-cyber/pomodoro-focus#readme",
+  "devDependencies": {
+    "tailwindcss": "^3.4.17"
+  }
+}
