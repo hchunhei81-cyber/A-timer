@@ -427,7 +427,6 @@ class HtmlCompiler {
     initEditor() {
         const textarea = document.getElementById('cmTextarea');
         const hasCloseTagAddon = typeof CodeMirror.commands.closeTag === 'function';
-        const self = this;
 
         this.editor = CodeMirror.fromTextArea(textarea, {
             lineNumbers: true,
@@ -479,7 +478,7 @@ class HtmlCompiler {
             className: 'cm-tag-hints'
         });
 
-        // Auto-close tag fallback
+        // Auto-close tag fallback (only if closetag addon missing)
         if (!hasCloseTagAddon) {
             this.editor.on('beforeChange', (cm, change) => {
                 if (change.origin !== '+input') return;
@@ -514,9 +513,14 @@ class HtmlCompiler {
             });
         }
 
-        // Universal hint trigger for every language
+        // Universal hint trigger — FIXED for Bug 5 (no re-trigger after pick)
         this.editor.on('inputRead', (cm, change) => {
             if (cm.state.completionActive) return;
+            // Bug 5 fix: don't re-trigger after the user picks a suggestion
+            if (change.origin === 'complete') return;
+            // Also don't re-trigger on multi-char input (paste, etc.)
+            if (change.text && (change.text.length > 1 || (change.text[0] && change.text[0].length > 1))) return;
+
             const mode = cm.getOption('mode');
             const provider = window.KeyHints.providerFor(mode);
             if (!provider) return;
@@ -532,7 +536,7 @@ class HtmlCompiler {
                 return;
             }
 
-            // Everywhere else: trigger if the character could start a word
+            // Everywhere else: trigger if character can start a word
             if (!window.KeyHints.shouldTrigger(mode, last)) return;
 
             // Only trigger when there's a partial word (>= 2 chars)
