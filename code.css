@@ -187,7 +187,7 @@ summary::-webkit-details-marker { display: none; }
 }
 
 #settingsDrawer[data-open="false"] {
-    transform: translateX(100%) !important;
+    transform: translateX(320px) !important;
 }
 #settingsDrawer[data-open="true"] {
     transform: translateX(0) !important;

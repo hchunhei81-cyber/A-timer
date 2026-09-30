@@ -1826,7 +1826,7 @@ SELECT * FROM users ORDER BY age;
             if (!el) return;
             const isOpen = el.dataset.open === 'true';
             el.dataset.open = isOpen ? 'false' : 'true';
-            el.style.transform = isOpen ? 'translateX(100%)' : 'translateX(0)';
+            el.style.transform = isOpen ? 'translateX(320px)' : 'translateX(0)';
         }
         showToast(msg, type = 'info') {
             const c = document.getElementById('toastContainer');
@@ -1885,7 +1885,7 @@ SELECT * FROM users ORDER BY age;
                     const drawer = document.getElementById('settingsDrawer');
                     if (drawer) {
                         drawer.dataset.open = 'false';
-                        drawer.style.transform = 'translateX(100%)';
+                        drawer.style.transform = 'translateX(320px)';
                     }
                 }
             });
