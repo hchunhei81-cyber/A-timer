@@ -72,19 +72,12 @@ body {
     width: 8px;
     height: 8px;
 }
-
-::-webkit-scrollbar-track {
-    background: var(--studio-bg);
-}
-
+::-webkit-scrollbar-track { background: var(--studio-bg); }
 ::-webkit-scrollbar-thumb {
     background: var(--studio-border);
     border-radius: 4px;
 }
-
-::-webkit-scrollbar-thumb:hover {
-    background: #484f58;
-}
+::-webkit-scrollbar-thumb:hover { background: #484f58; }
 
 /* ---------- Device frames ---------- */
 .device-iphone {
@@ -95,7 +88,6 @@ body {
     box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
     flex-shrink: 0;
 }
-
 .device-pixel {
     width: 412px;
     height: 915px;
@@ -103,7 +95,6 @@ body {
     border-radius: 28px;
     flex-shrink: 0;
 }
-
 .device-ipad {
     width: 820px;
     height: 1080px;
@@ -120,11 +111,7 @@ body {
     transition: background 0.2s;
     flex-shrink: 0;
 }
-
-.resizer-h:hover,
-.resizer-h.active {
-    background: var(--studio-accent);
-}
+.resizer-h:hover, .resizer-h.active { background: var(--studio-accent); }
 
 .resizer-v {
     cursor: row-resize;
@@ -132,63 +119,37 @@ body {
     background: var(--studio-border);
     transition: background 0.2s;
 }
-
-.resizer-v:hover,
-.resizer-v.active {
-    background: var(--studio-accent);
-}
+.resizer-v:hover, .resizer-v.active { background: var(--studio-accent); }
 
 /* ---------- Toast animation ---------- */
-.toast {
-    animation: slideIn 0.3s ease-out;
-}
-
+.toast { animation: slideIn 0.3s ease-out; }
 @keyframes slideIn {
     from { transform: translateX(120%); opacity: 0; }
     to   { transform: translateX(0);    opacity: 1; }
 }
 
 /* ---------- Console ---------- */
-.console-entry:hover {
-    background: rgba(88, 166, 255, 0.05);
-}
-
+.console-entry:hover { background: rgba(88, 166, 255, 0.05); }
 .console-tree {
     padding-left: 12px;
     border-left: 1px solid var(--studio-border);
     margin-left: 4px;
 }
-
-details > summary {
-    cursor: pointer;
-    list-style: none;
-}
-
+details > summary { cursor: pointer; list-style: none; }
 details > summary::before {
     content: '▶ ';
     color: var(--studio-accent);
     font-size: 10px;
     margin-right: 4px;
 }
-
-details[open] > summary::before {
-    content: '▼ ';
-}
-
-summary::-webkit-details-marker {
-    display: none;
-}
+details[open] > summary::before { content: '▼ '; }
+summary::-webkit-details-marker { display: none; }
 
 /* ---------- Snippets ---------- */
-.snippet-trigger:active {
-    transform: scale(0.98);
-}
+.snippet-trigger:active { transform: scale(0.98); }
 
 /* ---------- Inspector pulse ---------- */
-.pulse-active {
-    animation: pulseBtn 1.5s infinite;
-}
-
+.pulse-active { animation: pulseBtn 1.5s infinite; }
 @keyframes pulseBtn {
     0%, 100% { box-shadow: 0 0 0 0 rgba(88, 166, 255, 0.7); }
     50%      { box-shadow: 0 0 0 8px rgba(88, 166, 255, 0); }
@@ -199,7 +160,6 @@ summary::-webkit-details-marker {
     background: #facc15 !important;
     color: #000 !important;
 }
-
 .search-current {
     background: var(--studio-accent) !important;
     color: #000 !important;
@@ -213,4 +173,49 @@ summary::-webkit-details-marker {
         transform: scale(0.75);
         transform-origin: center;
     }
+}
+
+/* ============================================================
+   HTML TAG AUTOCOMPLETE  (new)
+   ============================================================ */
+.CodeMirror-hints.cm-tag-hints {
+    background: var(--studio-sidebar) !important;
+    border: 1px solid var(--studio-border) !important;
+    border-radius: 8px;
+    box-shadow: 0 12px 30px rgba(0,0,0,.6);
+    font-family: 'Fira Code', monospace;
+    font-size: 13px;
+    padding: 4px 0;
+    z-index: 100;
+    max-height: 260px;
+    overflow-y: auto;
+}
+
+.CodeMirror-hints.cm-tag-hints .CodeMirror-hint {
+    color: var(--studio-text);
+    padding: 4px 12px;
+    border-radius: 4px;
+    margin: 0 4px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    white-space: nowrap;
+}
+
+.CodeMirror-hints.cm-tag-hints .CodeMirror-hint-active {
+    background: #1f6feb !important;
+    color: #fff !important;
+}
+
+.cm-tag-hint-name {
+    color: #7ee787;
+    font-weight: 600;
+}
+.cm-tag-hint-desc {
+    color: var(--studio-muted);
+    font-size: 11px;
+}
+.CodeMirror-hints.cm-tag-hints .CodeMirror-hint-active .cm-tag-hint-desc,
+.CodeMirror-hints.cm-tag-hints .CodeMirror-hint-active .cm-tag-hint-name {
+    color: #cfe9ff;
 }
