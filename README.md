@@ -1,75 +1,91 @@
 # Pomodoro Focus
 
-A Pomodoro timer, task manager, and flight deck simulator — plus a standalone study card tool.
+A single-file Pomodoro timer, task manager, flight deck simulator, and a small collection of study and developer tools.
 
 Built with HTML, Tailwind CSS, and vanilla JavaScript. No build step, no backend, no accounts. All data stays in your browser.
 
 ## Table of contents
 
 - [Live site](#live-site)
-- [Features](#features)
+- [What's inside](#whats-inside)
 - [Keyboard shortcuts](#keyboard-shortcuts)
-- [Flight Deck](#flight-deck)
-- [Study Cards](#study-cards)
 - [Data storage](#data-storage)
 - [Local development](#local-development)
 - [File structure](#file-structure)
 - [Privacy](#privacy)
+- [Disclaimer](#disclaimer)
+- [Browser support](#browser-support)
 - [License](#license)
 
 ## Live site
 
-Open [timer](https://hchunhei81-cyber.github.io/pomodoro-focus/index.html) or [notes](https://hchunhei81-cyber.github.io/A-timer/note.html)
+Open [https://hchunhei81-cyber.github.io/pomodoro-focus/](https://hchunhei81-cyber.github.io/pomodoro-focus/)
 
 No sign-up required. Everything is stored in your own browser.
 
-## Features
+## What's inside
 
-### Pomodoro (index.html)
+### 1. Pomodoro Timer (index.html)
 
-- **Four modes**: Focus / Short Break / Long Break / Stopwatch
-- **Adjustable durations**: focus, short, long, and how many focus sessions before a long break
-- **Progress ring**: SVG ring countdown that changes color by mode
-- **Deep Focus**: full-screen, minimal view with just the timer and your task (press `G`)
-- **Session intent**: asks you to write the one specific thing you'll finish this session
-- **Distraction counter**: tap to log a distraction without pausing the timer
-- **Reflection**: after each session, asks if you finished and gives a landing rating
-- **Daily goal**: set a target number of sessions per day
-- **Ambient sound**: off / brown noise / rain, generated locally with Web Audio, no network
-- **Notifications and vibration**: alert when a session ends
-- **Light / dark theme**: one-tap toggle
-- **Task export / import**: export your task list as JSON
+- Four modes: Focus, Short Break, Long Break, Stopwatch
+- Adjustable durations
+- SVG progress ring that changes color by mode
+- Deep Focus mode: full-screen, minimal, just the timer and your task
+- Session intent: write the one thing you will finish before starting
+- Distraction counter that does not pause the timer
+- Reflection prompt and landing rating after each session
+- Daily goal tracker
+- Ambient sound: off, brown noise, or rain (generated locally)
+- Notifications and vibration
+- Light and dark theme
+- Task list with drag-to-reorder, per-task Pomodoro count, undo delete
+- Export and import tasks as JSON
 
-### Tasks (index.html)
+### 2. Flight Deck (index.html)
 
-- Add, check off, edit, and delete tasks
-- Drag to reorder
-- Set an estimated Pomodoro count per task and track completed ones
-- Link a task to the current timer
-- Search and filter (All / Active / Done)
-- Undo delete (5-second window)
-- Export / import tasks as JSON
+An optional theme that turns each session into a flight.
 
-### Study Cards (note.html)
+- PFD (Primary Flight Display) with attitude indicator, speed tape, altitude tape, heading tape, vertical speed, flight director
+- ND (Navigation Display) with route, waypoints, range rings, TCAS traffic, wind arrow
+- Eight phases: Pre-flight, Taxi, Takeoff, Climb, Cruise, Descent, Approach, Landing
+- Five aircraft types with different cruise altitude, climb rate, and engine behavior
+- Weather that follows local time: clear, cloudy, rain, night
+- Cabin announcements at cruise, top of descent, and prepare-for-landing
+- Live flight tracking via OpenSky Network (with 10-second cooldown)
 
-- **Multiple subjects**: each subject has its own set of cards
-- **Multiple cards per subject**
-- **Got it / Missed**: tracks correct and incorrect responses per card
-- **Flip cards**: tap the question or press `Space`
-- **Highlight**: mark cards that need extra review
-- **Stats**: total cards, got it, missed, accuracy per subject
-- **Export / import**: back up the whole deck library as JSON
+### 3. Tools (tools.html)
 
-## Screenshots
+A small launcher for optional utilities.
 
-### Classic mode
-![Classic mode](screenshots/classic.png)
+#### Study Cards (note.html)
 
-### Flight Deck
-![Flight Deck](screenshots/flight-deck.png)
+- Multiple subjects with their own card decks
+- Per-card stats: got-it and missed counts
+- Flip, highlight, edit, delete
+- Accuracy per subject
+- Export and import the entire deck library as JSON
 
-### Study Cards
-![Study Cards](screenshots/cards.png)
+#### Calculator (calc.html)
+
+- Scientific mode with trig, logs, exponentials, powers, factorial
+- Live preview as you type
+- Calculation history log
+- Calculus mode: derivative, definite integral, canvas plotter
+- Programmer mode: hex, decimal, octal, binary and bitwise operations
+- Statistics mode: mean, median, standard deviation, variance, permutations, combinations
+- Matrix mode: 2x2 and 3x3 determinant, inverse, addition, multiplication
+
+#### Code Playground (code.html)
+
+- Online HTML, CSS, and JavaScript editor
+- Live sandbox preview
+- Multi-file projects
+- Console, network, performance, and test panels
+- Templates: Vanilla, Vue 3, React JSX, Canvas 2D
+- CDN package manager
+- Snapshots and share-by-link (compressed)
+- Export as ZIP or single HTML
+- Command palette and inspector
 
 ## Keyboard shortcuts
 
@@ -77,16 +93,16 @@ No sign-up required. Everything is stored in your own browser.
 
 | Key | Action |
 |---|---|
-| `Space` | Start / pause |
+| `Space` | Start or pause |
 | `G` | Deep Focus mode |
 | `R` | Reset current session |
 | `S` | Skip to next phase |
 | `F` | Fullscreen focus |
-| `D` | Toggle Classic / Flight Deck |
-| `V` | Toggle PFD / ND |
-| `T` | Toggle light / dark theme |
+| `D` | Toggle Classic and Flight Deck |
+| `V` | Toggle PFD and ND |
+| `T` | Toggle light and dark theme |
 | `N` | Jump to new task input |
-| `1` `2` `3` `4` | Focus / Short / Long / Stopwatch |
+| `1` `2` `3` `4` | Focus, Short, Long, Stopwatch |
 | `?` | Open shortcuts help |
 | `Esc` | Close modal or exit focus mode |
 
@@ -95,7 +111,7 @@ No sign-up required. Everything is stored in your own browser.
 | Key | Action |
 |---|---|
 | `Space` | Flip card |
-| `←` `→` | Previous / next card |
+| `Left` `Right` | Previous or next card |
 | `N` | New card |
 | `E` | Edit current card |
 | `D` | Delete current card |
@@ -104,22 +120,13 @@ No sign-up required. Everything is stored in your own browser.
 | `?` | Shortcuts help |
 | `Esc` | Close modal |
 
-## Flight Deck
+### Code Playground
 
-Replaces the classic timer with a flight simulator. Every focus session is a flight.
-
-- **PFD (Primary Flight Display)**: attitude indicator, speed tape, altitude tape, heading tape, vertical speed indicator, flight director
-- **ND (Navigation Display)**: route, waypoints, range rings, TCAS traffic, wind arrow
-- **Eight phases**: Pre-flight → Taxi → Takeoff → Climb → Cruise → Descent → Approach → Landing
-- **Five aircraft**: B737-800 / B787-8 / A320neo / A350-900 / B747-400, each with its own climb rate, cruise altitude, and engine behavior
-- **Weather**: auto-selects clear / cloudy / rain / night based on local time
-- **Cabin announcements**: plays at cruise, top of descent, and prepare-for-landing using the browser's speech synthesis
-- **Live flight**: pulls a real aircraft from OpenSky Network with its call sign, altitude, speed, and heading
-- **Live flight**: pulls a real aircraft from the public
-  [OpenSky Network](https://opensky-network.org/) API with its call sign,
-  altitude, speed, and heading. The button has a 10-second cooldown to
-  avoid hitting OpenSky's anonymous rate limit. If the request fails
-  (network issue or rate limit), it falls back to a simulated flight.
+| Key | Action |
+|---|---|
+| `Ctrl+S` | Run project |
+| `Ctrl+Shift+P` | Open command palette |
+| `Esc` | Close modals and drawers |
 
 ## Data storage
 
@@ -134,62 +141,81 @@ Everything is stored in `localStorage`, scoped to your browser and domain.
 | `pomodoro.v6.history` | Session history | index.html |
 | `pomodoro.v6.reflection` | Reflection log | index.html |
 | `study_cards_v1` | Study card data | note.html |
+| `htmlc_projects` | Code Playground projects | code.html |
+| `htmlc_current_project` | Active project id | code.html |
+| `htmlc_snapshots_*` | Project snapshots | code.html |
+| `htmlc_cdn_*` | Per-project CDN packages | code.html |
 
-**The two pages are isolated.** `index.html` (timer + tasks) and `note.html`
-(study cards) use completely separate storage keys. Data saved in one page
-is not visible to the other. This is intentional — the study card tool is
-designed to work as a standalone app.
+**The pages are isolated.** Each tool uses its own storage keys. Data saved in one page is not visible to another.
 
 **Notes:**
 
 - Clearing browser data will delete all of the above
 - Data does not follow you across browsers, devices, or domains
-- Use the export feature on each page to back things up separately
-**Notes:**
-
-- Clearing browser data will delete all of the above
-- Data does not follow you across browsers, devices, or domains
-- Use the export feature to back things up
+- Use the export feature on each page to back things up
 
 ## Local development
 
 No build tools required.
 
-## File Structure
-├── index.html          
-├── styles.css          
-├── flight.js          
-├── app.js              
+## File structure
+.
+├── index.html          Pomodoro timer and tasks
+├── styles.css
+├── app.js
+├── flight.js           Flight Deck module
 │
-├── note.html          
-├── note.css           
-├── note.js           
+├── tools.html          Tool launcher
+├── tools.css
 │
-└── README.md / LICENSE 
+├── note.html           Study Cards
+├── note.css
+├── note.js
+│
+├── calc.html           Calculator
+├── calc.css
+├── calc.js
+│
+├── code.html           Code Playground
+├── code.css
+├── code.js
+├── config.js
+│
+├── manifest.json
+├── icon.svg
+├── robots.txt
+├── README.md
+└── LICENSE
 
 ## Privacy
 No data is sent to any server
 No cookies
 No analytics
-No third-party scripts except the Tailwind CSS CDN
+No third-party scripts except the CDNs used for Tailwind CSS, Font Awesome, CodeMirror, JSZip, FileSaver, and LZString
 The Flight Deck "live flight" feature sends a geographic bounding box to the public OpenSky Network API, nothing else
-The page includes <meta name="robots" content="noindex, nofollow"> so it won't be indexed by search engines
+The page includes <meta name="robots" content="noindex, nofollow"> so it will not be indexed by search engines
 
-## Disclaimer
+# Disclaimer
+This is a personal project shared as-is. No warranty of any kind.
 
-This software is provided "as is", without warranty of any kind, express or
-implied, including but not limited to the warranties of merchantability,
-fitness for a particular purpose, and noninfringement.
+Flight Deck is a visual simulation for entertainment and focus. It is not a flight training tool and must not be used for real aviation.
 
-In no event shall the author be liable for any claim, damages, or other
-liability arising from, out of, or in connection with the software or the use
-or other dealings in the software.
+Live flight data comes from the public OpenSky Network API. It is provided as-is, without any guarantee of accuracy or availability. Do not use it for any operational purpose.
 
-**Specifically:**
+Data is stored in your browser's localStorage. Clearing browser data will permanently delete your tasks, sessions, study cards, and Code Playground projects. Export regularly if you care about your data.
 
-- The Flight Deck theme is a **visual simulation only**. It is not a real
-  flight training tool and must not be used for actual aviation.
-- The "live flight" feature pulls public data from OpenSky Network. Its
-  accuracy is not guaranteed and it is not suitable for any operational use.
-- Time, task, and study data are stored in your browser. Clearing browser
-  data will delete everything. Export regularly if you care about it.
+Code Playground executes user-written JavaScript inside a sandboxed iframe. Do not paste code from untrusted sources.
+
+## Browser support
+Tested on:
+
+Chrome and Edge 88+
+Firefox 85+
+Safari 14+
+Some features rely on newer Web APIs:
+
+Notifications: requires user permission
+Voice announcements: requires speechSynthesis
+Ambient sound: requires AudioContext
+Share links: requires CompressionStream or falls back to a textarea
+
