@@ -22,7 +22,9 @@
 </head>
 <body class="h-full bg-studio-bg text-studio-text flex flex-col font-sans overflow-hidden select-none">
 
-<!-- TOP HEADER -->
+<!-- ============================================================
+     TOP HEADER
+     ============================================================ -->
 <header class="h-12 bg-studio-sidebar border-b border-studio-border flex items-center justify-between px-3 shrink-0 z-20">
     <div class="flex items-center space-x-3">
         <div class="flex items-center space-x-2">
@@ -63,7 +65,7 @@
         </button>
     </div>
 
-    <!-- LANGUAGE SELECTOR -->
+    <!-- LANGUAGE SELECTOR BAR -->
     <div class="flex items-center space-x-1 overflow-x-auto max-w-[600px] px-2" id="languageBar"></div>
 
     <div class="flex items-center space-x-2">
@@ -115,7 +117,9 @@
     </div>
 </header>
 
-<!-- WORKSPACE -->
+<!-- ============================================================
+     WORKSPACE
+     ============================================================ -->
 <div class="flex-1 flex overflow-hidden relative" id="workspaceContainer">
     <div class="w-12 bg-studio-sidebar border-r border-studio-border flex flex-col items-center py-3 space-y-4 shrink-0 z-10">
         <button onclick="app.switchSidebarTab('files')" id="btnTabFiles" class="p-2 text-blue-400 hover:bg-studio-panel rounded-lg transition" title="Files">
@@ -242,7 +246,9 @@
     </div>
 </div>
 
-<!-- COMMAND PALETTE -->
+<!-- ============================================================
+     COMMAND PALETTE
+     ============================================================ -->
 <div id="commandPaletteModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden items-start justify-center pt-20">
     <div class="bg-studio-sidebar border border-studio-border rounded-xl w-full max-w-xl shadow-2xl overflow-hidden flex flex-col">
         <div class="p-3 border-b border-studio-border flex items-center space-x-2">
@@ -254,7 +260,9 @@
     </div>
 </div>
 
-<!-- SETTINGS DRAWER -->
+<!-- ============================================================
+     SETTINGS DRAWER
+     ============================================================ -->
 <div id="settingsDrawer" class="fixed inset-y-0 right-0 w-80 bg-studio-sidebar border-l border-studio-border z-40 transform translate-x-full transition-transform duration-300 p-4 flex flex-col space-y-4 shadow-2xl">
     <div class="flex items-center justify-between border-b border-studio-border pb-3">
         <h3 class="font-bold text-white text-sm flex items-center space-x-2">
@@ -305,7 +313,9 @@
     </div>
 </div>
 
-<!-- TEMPLATES MODAL -->
+<!-- ============================================================
+     TEMPLATES MODAL  (FIXED — all keys match DEFAULT_PROJECTS)
+     ============================================================ -->
 <div id="templatesModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
     <div class="bg-studio-sidebar border border-studio-border rounded-xl w-full max-w-3xl p-5 shadow-2xl flex flex-col space-y-4">
         <div class="flex items-center justify-between border-b border-studio-border pb-3">
@@ -314,66 +324,77 @@
             </h3>
             <button onclick="app.closeModal('templatesModal')" class="text-studio-muted hover:text-white"><i class="fa-solid fa-xmark"></i></button>
         </div>
+
         <div class="grid grid-cols-3 gap-3 max-h-96 overflow-y-auto">
-            <div onclick="app.loadTemplate('vanilla')" class="bg-studio-panel border border-studio-border hover:border-amber-500 p-3 rounded-lg cursor-pointer transition flex flex-col justify-between space-y-2">
+            <div onclick="app.loadTemplate('html')" class="bg-studio-panel border border-studio-border hover:border-amber-500 p-3 rounded-lg cursor-pointer transition flex flex-col justify-between space-y-2">
                 <div class="flex items-center space-x-2 text-amber-400 font-bold text-sm">
-                    <i class="fa-brands fa-html5 text-lg"></i><span>Vanilla HTML</span>
+                    <i class="fa-brands fa-html5 text-lg"></i><span>HTML</span>
                 </div>
-                <p class="text-xs text-studio-muted">Standard boilerplate with Tailwind CSS.</p>
+                <p class="text-xs text-studio-muted">Standard HTML boilerplate.</p>
             </div>
-            <div onclick="app.loadTemplate('vue')" class="bg-studio-panel border border-studio-border hover:border-emerald-500 p-3 rounded-lg cursor-pointer transition flex flex-col justify-between space-y-2">
-                <div class="flex items-center space-x-2 text-emerald-400 font-bold text-sm">
-                    <i class="fa-brands fa-vuejs text-lg"></i><span>Vue 3</span>
-                </div>
-                <p class="text-xs text-studio-muted">Reactive composition API.</p>
-            </div>
-            <div onclick="app.loadTemplate('react')" class="bg-studio-panel border border-studio-border hover:border-blue-400 p-3 rounded-lg cursor-pointer transition flex flex-col justify-between space-y-2">
-                <div class="flex items-center space-x-2 text-blue-400 font-bold text-sm">
-                    <i class="fa-brands fa-react text-lg"></i><span>React JSX</span>
-                </div>
-                <p class="text-xs text-studio-muted">Babel inline transformed JSX.</p>
-            </div>
+
             <div onclick="app.loadTemplate('python')" class="bg-studio-panel border border-studio-border hover:border-yellow-400 p-3 rounded-lg cursor-pointer transition flex flex-col justify-between space-y-2">
                 <div class="flex items-center space-x-2 text-yellow-400 font-bold text-sm">
                     <i class="fa-brands fa-python text-lg"></i><span>Python</span>
                 </div>
                 <p class="text-xs text-studio-muted">Real CPython via Pyodide.</p>
             </div>
+
             <div onclick="app.loadTemplate('c')" class="bg-studio-panel border border-studio-border hover:border-blue-500 p-3 rounded-lg cursor-pointer transition flex flex-col justify-between space-y-2">
                 <div class="flex items-center space-x-2 text-blue-500 font-bold text-sm">
                     <i class="fa-solid fa-c text-lg"></i><span>C</span>
                 </div>
                 <p class="text-xs text-studio-muted">GCC compile via Wandbox.</p>
             </div>
+
             <div onclick="app.loadTemplate('cpp')" class="bg-studio-panel border border-studio-border hover:border-indigo-500 p-3 rounded-lg cursor-pointer transition flex flex-col justify-between space-y-2">
                 <div class="flex items-center space-x-2 text-indigo-400 font-bold text-sm">
                     <i class="fa-solid fa-code text-lg"></i><span>C++</span>
                 </div>
                 <p class="text-xs text-studio-muted">G++ / iostream support.</p>
             </div>
+
             <div onclick="app.loadTemplate('rust')" class="bg-studio-panel border border-studio-border hover:border-orange-500 p-3 rounded-lg cursor-pointer transition flex flex-col justify-between space-y-2">
                 <div class="flex items-center space-x-2 text-orange-400 font-bold text-sm">
                     <i class="fa-brands fa-rust text-lg"></i><span>Rust</span>
                 </div>
-                <p class="text-xs text-studio-muted">Rustc via Playground API.</p>
+                <p class="text-xs text-studio-muted">Rustc via Wandbox API.</p>
             </div>
+
             <div onclick="app.loadTemplate('go')" class="bg-studio-panel border border-studio-border hover:border-cyan-400 p-3 rounded-lg cursor-pointer transition flex flex-col justify-between space-y-2">
                 <div class="flex items-center space-x-2 text-cyan-400 font-bold text-sm">
                     <i class="fa-solid fa-g text-lg"></i><span>Go</span>
                 </div>
                 <p class="text-xs text-studio-muted">go.dev/play compile API.</p>
             </div>
-            <div onclick="app.loadTemplate('asm')" class="bg-studio-panel border border-studio-border hover:border-pink-500 p-3 rounded-lg cursor-pointer transition flex flex-col justify-between space-y-2">
+
+            <div onclick="app.loadTemplate('assembly')" class="bg-studio-panel border border-studio-border hover:border-pink-500 p-3 rounded-lg cursor-pointer transition flex flex-col justify-between space-y-2">
                 <div class="flex items-center space-x-2 text-pink-400 font-bold text-sm">
-                    <i class="fa-solid fa-microchip text-lg"></i><span>x86-64 Assembly</span>
+                    <i class="fa-solid fa-microchip text-lg"></i><span>x86-64 ASM</span>
                 </div>
                 <p class="text-xs text-studio-muted">NASM syntax via Wandbox.</p>
+            </div>
+
+            <div onclick="app.loadTemplate('lua')" class="bg-studio-panel border border-studio-border hover:border-blue-300 p-3 rounded-lg cursor-pointer transition flex flex-col justify-between space-y-2">
+                <div class="flex items-center space-x-2 text-blue-300 font-bold text-sm">
+                    <i class="fa-solid fa-moon text-lg"></i><span>Lua</span>
+                </div>
+                <p class="text-xs text-studio-muted">Fengari (Lua 5.3 in JS).</p>
+            </div>
+
+            <div onclick="app.loadTemplate('sql')" class="bg-studio-panel border border-studio-border hover:border-teal-400 p-3 rounded-lg cursor-pointer transition flex flex-col justify-between space-y-2">
+                <div class="flex items-center space-x-2 text-teal-400 font-bold text-sm">
+                    <i class="fa-solid fa-database text-lg"></i><span>SQL</span>
+                </div>
+                <p class="text-xs text-studio-muted">SQLite via sql.js.</p>
             </div>
         </div>
     </div>
 </div>
 
-<!-- TOOLS MODAL -->
+<!-- ============================================================
+     TOOLS MODAL
+     ============================================================ -->
 <div id="toolsModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
     <div class="bg-studio-sidebar border border-studio-border rounded-xl w-full max-w-3xl p-5 shadow-2xl flex flex-col space-y-4 max-h-[85vh] overflow-y-auto">
         <div class="flex items-center justify-between border-b border-studio-border pb-3">
@@ -382,11 +403,13 @@
             </h3>
             <button onclick="app.closeModal('toolsModal')" class="text-studio-muted hover:text-white"><i class="fa-solid fa-xmark"></i></button>
         </div>
+
         <div class="flex space-x-4 border-b border-studio-border pb-2 text-xs">
             <button onclick="app.switchToolTab('palette')" id="toolTabPalette" class="text-blue-400 font-bold">Color Ramp</button>
             <button onclick="app.switchToolTab('keyframes')" id="toolTabKeyframes" class="text-studio-muted hover:text-white">Keyframes Builder</button>
             <button onclick="app.switchToolTab('icons')" id="toolTabIcons" class="text-studio-muted hover:text-white">Icon Picker</button>
         </div>
+
         <div id="toolViewPalette" class="space-y-3">
             <div class="flex items-center space-x-3">
                 <label class="text-xs text-studio-muted">Base Color:</label>
@@ -396,6 +419,7 @@
             </div>
             <div id="paletteRamp" class="grid grid-cols-5 gap-2"></div>
         </div>
+
         <div id="toolViewKeyframes" class="hidden space-y-3">
             <div class="space-y-2 text-xs">
                 <label class="text-studio-muted">Translate X: <span id="kfTxVal">20</span>px</label>
@@ -411,6 +435,7 @@
             </div>
             <button onclick="app.insertKeyframeIntoSnippet()" class="text-xs bg-blue-600 hover:bg-blue-500 text-white px-3 py-1.5 rounded">Insert into Current File</button>
         </div>
+
         <div id="toolViewIcons" class="hidden space-y-3">
             <input type="text" id="iconSearch" placeholder="Search icon name..." oninput="app.filterIcons(this.value)" class="w-full bg-studio-panel border border-studio-border text-xs rounded p-2 text-white">
             <div id="iconGrid" class="grid grid-cols-8 gap-2 max-h-64 overflow-y-auto text-center"></div>
@@ -418,11 +443,15 @@
     </div>
 </div>
 
+<!-- ============================================================
+     TOAST CONTAINER
+     ============================================================ -->
 <div id="toastContainer" class="fixed bottom-8 right-8 z-[60] flex flex-col space-y-2 pointer-events-none"></div>
 
 <!-- ============================================================
      SCRIPTS
      ============================================================ -->
+
 <!-- CodeMirror core -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/codemirror.min.js"></script>
 
@@ -431,12 +460,12 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/javascript/javascript.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/css/css.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/htmlmixed/htmlmixed.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/vue/vue.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/jsx/jsx.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65..min13/mode/vue/vue.min.js.js"></script>
+<script src="https://"></cdnjsscript.cloudflare.com/ajax/libs/codemir>
+ror/5.<script65.13/mode/jsx/jsx.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/markdown/markdown.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/python/python.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/clike/clike.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/rust/rust.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/clike/clike src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/rust/rust.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/go/go.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/shell/shell.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/yaml/yaml.min.js"></script>
@@ -465,10 +494,11 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
 
-<!-- Multi-language runtime: Pyodide (loaded lazily by code.js) -->
-<!-- sql.js (SQLite WASM) — also lazy loaded -->
+<!-- Key database + autocomplete engine (must come BEFORE code.js) -->
 <script src="key.js"></script>
+
 <!-- Main app -->
 <script src="code.js"></script>
+
 </body>
 </html>
