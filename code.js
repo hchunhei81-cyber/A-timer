@@ -43,12 +43,12 @@
         assembly: { name: 'Assembly', icon: 'fa-solid fa-microchip', color: '#6e4c13', mode: 'gas', ext: '.s', runner: 'wandbox', wandbox: 'nasm-head' },
         lua: { name: 'Lua', icon: 'fa-solid fa-moon', color: '#000080', mode: 'lua', ext: '.lua', runner: 'fengari' },
         sql: { name: 'SQL', icon: 'fa-solid fa-database', color: '#00758f', mode: 'sql', ext: '.sql', runner: 'sqljs' },
-        ruby:    { name: 'Ruby',    icon: 'fa-solid fa-gem',        color: '#cc342d', mode: 'ruby',         ext: '.rb', runner: 'wandbox', wandbox: 'ruby-head' },
-        php:     { name: 'PHP',     icon: 'fa-brands fa-php',       color: '#777bb4', mode: 'php',          ext: '.php', runner: 'wandbox', wandbox: 'php-head' },
-        haskell: { name: 'Haskell', icon: 'fa-solid fa-square-root-variable', color: '#5e5086', mode: 'haskell', ext: '.hs', runner: 'wandbox', wandbox: 'ghc-head' },
-        kotlin:  { name: 'Kotlin',  icon: 'fa-solid fa-k',          color: '#7f52ff', mode: 'text/x-kotlin', ext: '.kt', runner: 'wandbox', wandbox: 'kotlin-head' },
-        swift:   { name: 'Swift',   icon: 'fa-brands fa-swift',     color: '#fa7343', mode: 'swift',        ext: '.swift', runner: 'wandbox', wandbox: 'swift-head' },
-        bash:    { name: 'Bash',    icon: 'fa-solid fa-terminal',   color: '#4eaa25', mode: 'shell',        ext: '.sh', runner: 'wandbox', wandbox: 'bash' }
+        ruby:    { name: 'Ruby',    icon: 'fa-solid fa-gem',        color: '#cc342d', mode: 'ruby',          ext: '.rb',    runner: 'wandbox', wandbox: 'ruby-3.4.9' },
+        php:     { name: 'PHP',     icon: 'fa-brands fa-php',       color: '#777bb4', mode: 'php',           ext: '.php',   runner: 'wandbox', wandbox: 'php-8.3.12' },
+        haskell: { name: 'Haskell', icon: 'fa-solid fa-square-root-variable', color: '#5e5086', mode: 'haskell', ext: '.hs', runner: 'wandbox', wandbox: 'ghc-9.10.1' },
+        kotlin:  { name: 'Kotlin',  icon: 'fa-solid fa-k',          color: '#7f52ff', mode: 'text/x-kotlin', ext: '.kt',    runner: 'piston',  piston: 'kotlin',  pistonVersion: '1.8.20' },
+        swift:   { name: 'Swift',   icon: 'fa-brands fa-swift',     color: '#fa7343', mode: 'swift',         ext: '.swift', runner: 'wandbox', wandbox: 'swift-6.0.1' },
+        bash:    { name: 'Bash',    icon: 'fa-solid fa-terminal',   color: '#4eaa25', mode: 'shell',         ext: '.sh',    runner: 'wandbox', wandbox: 'bash' },
     };
 
     /* ============================================================
@@ -341,28 +341,70 @@ SELECT * FROM users ORDER BY age;
        ============================================================ */
     const Wandbox = {
         async run(compiler, code, stdin) {
-            const controller = new AbortController();
-            const timeout = setTimeout(() => controller.abort(), 30000);
-            try {
-                const res = await fetch('https://wandbox.org/api/compile.json', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ compiler, code, stdin: stdin || '', options: '', save: false }),
-                    signal: controller.signal
-                });
-                if (!res.ok) throw new Error(`Wandbox HTTP ${res.status}`);
-                const data = await res.json();
-                return {
-                    ok: !data.compiler_error && data.status === '0',
-                    stdout: data.program_output || '',
-                    stderr: data.program_error || data.compiler_error || '',
-                    exitCode: data.status
-                };
-            } finally {
-                clearTimeout(timeout);
+            let lastErr;
+            for (let attempt = 1; attempt <= 3; attempt++) {
+                const controller = new AbortController();
+                const timeout = setTimeout(() => controller.abort(), 30000);
+                try {
+                    const res = await fetch('https://wandbox.org/api/compile.json', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ compiler, code, stdin: stdin || '', options: '', save: false }),
+                        signal: controller.signal
+                    });
+                    clearTimeout(timeout);
+                    if (res.status >= 500 && attempt < 3) {
+                        await new Promise(r => setTimeout(r, 1200 * attempt));
+                        continue;
+                    }
+                    if (!res.ok) throw new Error(`Wandbox HTTP ${res.status}`);
+                    const data = await res.json();
+                    return {
+                        ok: !data.compiler_error && data.status === '0',
+                        stdout: data.program_output || '',
+                        stderr: data.program_error || data.compiler_error || '',
+                        exitCode: data.status
+                    };
+                } catch (err) {
+                    clearTimeout(timeout);
+                    lastErr = err;
+                    if (attempt < 3) await new Promise(r => setTimeout(r, 1200 * attempt));
+                }
             }
+            throw lastErr;
         }
     };
+
+    const Piston = {
+    async run(language, version, code, stdin) {
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), 30000);
+        try {
+            const res = await fetch('https://emkc.org/api/v2/piston/execute', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    language,
+                    version,
+                    files: [{ content: code }],
+                    stdin: stdin || ''
+                }),
+                signal: controller.signal
+            });
+            if (!res.ok) throw new Error(`Piston HTTP ${res.status}`);
+            const data = await res.json();
+            const run = data.run || {};
+            return {
+                ok: run.code === 0,
+                stdout: run.stdout || '',
+                stderr: run.stderr || (data.compile && data.compile.stderr) || '',
+                exitCode: run.code
+            };
+        } finally {
+            clearTimeout(timeout);
+        }
+    }
+};
 
     const GoPlay = {
         async run(code) {
@@ -1204,11 +1246,12 @@ SELECT * FROM users ORDER BY age;
                 const ldef = LANGUAGES[lang];
                 if (!ldef) { this.showToast('Unknown language', 'error'); return; }
                 if (ldef.runner === 'web' || ldef.runner === 'ts') await this.runWeb();
-                else if (ldef.runner === 'pyodide') await this.runPython(code);
-                else if (ldef.runner === 'wandbox') await this.runWandbox(ldef.wandbox, code);
-                else if (ldef.runner === 'go') await this.runGo(code);
-                else if (ldef.runner === 'fengari') await this.runLua(code);
-                else if (ldef.runner === 'sqljs') await this.runSql(code);
+            else if (ldef.runner === 'pyodide') await this.runPython(code);
+            else if (ldef.runner === 'wandbox') await this.runWandbox(ldef.wandbox, code);
+            else if (ldef.runner === 'piston') await this.runPiston(ldef.piston, ldef.pistonVersion, code);
+            else if (ldef.runner === 'go') await this.runGo(code);
+            else if (ldef.runner === 'fengari') await this.runLua(code);
+            else if (ldef.runner === 'sqljs') await this.runSql(code);
             } catch (err) {
                 this.addConsoleLog('error', ['Run failed: ' + (err.message || err)]);
             } finally {
@@ -1399,6 +1442,15 @@ SELECT * FROM users ORDER BY age;
             this.addConsoleLog('info', ['Exit: ' + result.exitCode]);
         }
 
+        async runPiston(lang, version, code) {
+            this.addConsoleLog('info', [`Running with Piston (${lang} ${version})...`]);
+            const result = await Piston.run(lang, version, code, '');
+            if (result.stdout) result.stdout.split('\n').forEach(l => this.addConsoleLog('log', [l]));
+            if (result.stderr) result.stderr.split('\n').forEach(l => this.addConsoleLog('error', [l]));
+            if (!result.stdout && !result.stderr) this.addConsoleLog('info', ['(no output)']);
+            this.addConsoleLog('info', ['Exit: ' + result.exitCode]);
+        }
+
         async runGo(code) {
             this.addConsoleLog('info', ['Compiling Go...']);
             const result = await GoPlay.run(code);
@@ -1447,7 +1499,7 @@ SELECT * FROM users ORDER BY age;
                         'print = function(...) local args = {...}; local s = ""; for i,v in ipairs(args) do s = s .. tostring(v) .. "\\t" end; io.write(s .. "\\n") end'
                     );
                     if (fengari.lauxlib.luaL_dostring(lua, code) !== 0) {
-                        const err = fengari.lauxlib.luaL_tostring(lua, -1);
+                        const err = fengari.lua.lua_tojsstring(lua, -1);
                         if (out) out.textContent += 'Error: ' + err + '\n';
                     }
                 } catch (err) {
