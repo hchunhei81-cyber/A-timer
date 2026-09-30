@@ -1,5 +1,5 @@
 /* ============================================================
-   Code Playground — Multi-Language Edition (uses key.js)
+   Code Playground - Multi-Language Edition (uses key.js)
    Requires: window.KeyHints (loaded from key.js)
    ============================================================ */
 
@@ -22,14 +22,13 @@
             throw new Error('Missing dependencies: ' + missing.join(', '));
         }
 
-        // key.js is optional — warn but don't crash. Autocomplete will be disabled.
         if (typeof window.KeyHints === 'undefined') {
-            console.warn('[Code Playground] key.js is missing — autocomplete will be disabled.');
+            console.warn('[Code Playground] key.js is missing - autocomplete will be disabled.');
         }
     })();
 
     /* ============================================================
-       LANGUAGE DEFINITIONS (for the toolbar / runner dispatch)
+       LANGUAGE DEFINITIONS
        ============================================================ */
     const LANGUAGES = {
         html: { name: 'HTML', icon: 'fa-brands fa-html5', color: '#e34c26', mode: 'htmlmixed', ext: '.html', runner: 'web' },
@@ -492,7 +491,6 @@ SELECT * FROM users ORDER BY age;
                 }
             });
 
-            // Dynamic, mode-aware hint provider from key.js (optional)
             if (hasHints) {
                 this.editor.setOption('hintOptions', {
                     hint: (cm) => {
@@ -509,7 +507,6 @@ SELECT * FROM users ORDER BY age;
                 });
             }
 
-            // Auto-close tag fallback (only if closetag addon missing)
             if (!hasCloseTagAddon) {
                 this.editor.on('beforeChange', (cm, change) => {
                     if (change.origin !== '+input') return;
@@ -544,7 +541,6 @@ SELECT * FROM users ORDER BY age;
                 });
             }
 
-            // Auto hint trigger on typing — unified path via hintOptions.hint
             if (hasHints) {
                 this.editor.on('inputRead', (cm, change) => {
                     if (cm.state.completionActive) return;
@@ -557,7 +553,6 @@ SELECT * FROM users ORDER BY age;
                     const text = change.text[0] || '';
                     const last = text[text.length - 1];
 
-                    // HTML: trigger on "<" or letters
                     if (mode === 'htmlmixed' || mode === 'xml' || mode === 'vue') {
                         if (last === '<' || /[a-zA-Z-]/.test(last)) {
                             cm.showHint({ completeSingle: false });
@@ -565,10 +560,8 @@ SELECT * FROM users ORDER BY age;
                         return;
                     }
 
-                    // Everywhere else: trigger if character can start a word
                     if (!window.KeyHints.shouldTrigger(mode, last)) return;
 
-                    // Only trigger when there's a partial word (>= 2 chars)
                     const cur = cm.getCursor();
                     const line = cm.getLine(cur.line);
                     const before = line.slice(0, cur.ch);
@@ -1015,6 +1008,7 @@ SELECT * FROM users ORDER BY age;
             if (!confirm(`Restore "${snaps[i].label}"? Current changes will be lost.`)) return;
             this.project = structuredClone(snaps[i].project);
             this.project.id = this.currentProjectId;
+            this._persistCurrentIntoProjects();
             this.updateProjectName();
             this.renderLanguageBar();
             this.renderTabs();
@@ -1143,7 +1137,7 @@ SELECT * FROM users ORDER BY age;
             const cdnList = this._getActiveCdn();
             const cdnTags = cdnList.map(url => url.endsWith('.css') ? `<link rel="stylesheet" href="${url}">` : `<script src="${url}"><\/script>`).join('\n');
             iframe.srcdoc = this._wrapSandbox(html, cdnTags);
-            this.addConsoleLog('info', ['▶ Sandbox reloaded']);
+            this.addConsoleLog('info', ['Sandbox reloaded']);
         }
 
         _wrapSandbox(bodyHTML, extraHead = '') {
@@ -1226,53 +1220,53 @@ SELECT * FROM users ORDER BY age;
             }, true);
         })();
         <\/script>`;
-            return `<!DOCTYPE html>\n<html class="${this.sandboxTheme}">\n<head>\n<meta charset="UTF-8">\n${bridge}\n${extraHead}\n</head>\n<body>\n${bodyHTML}\n</body>\n</html>`;
+            return `<!DOCTYPE html>\n<html class="${this.sandboxTheme}">\n<head>\n<meta charset="UTF-8">\n<style>html.dark{background:#0d1117;color:#c9d1d9}html.light{background:#ffffff;color:#24292f}</style>\n${bridge}\n${extraHead}\n</head>\n<body>\n${bodyHTML}\n</body>\n</html>`;
         }
 
         async runPython(code) {
             const iframe = document.getElementById('sandboxIframe');
             const html = `
             <div id="status" style="font-family:system-ui;padding:20px;color:#58a6ff">
-                ⏳ Loading Python runtime (Pyodide)… this can take 10-20s the first time.
+                Loading Python runtime (Pyodide)... this can take 10-20s the first time.
             </div>
             <pre id="out" style="font-family:monospace;padding:20px;color:#c9d1d9;white-space:pre-wrap"></pre>
         `;
             const pyCode = `
-                (async () => {
+            (async () => {
                 const status = document.getElementById('status');
-            const out = document.getElementById('out');
-            try {
-                const py = await window.loadPyodide({ indexURL: 'https://cdn.jsdelivr.net/pyodide/v0.25.0/full/' });
-                if (status) status.textContent = '✔ Python ready. Running…';
-                py.setStdout({ batched: (s) => { if (out) out.textContent += s + '\\n'; } });
-                py.setStderr({ batched: (s) => { if (out) out.textContent += s + '\\n'; } });
-                await py.runPythonAsync(${JSON.stringify(code)});
-                if (status) status.textContent = '✔ Finished.';
-            } catch (err) {
-                if (status) status.textContent = '✖ Error';
-                if (out) out.textContent += '\\n' + (err && err.message ? err.message : String(err));
-             }
-        })();
+                const out = document.getElementById('out');
+                try {
+                    const py = await window.loadPyodide({ indexURL: 'https://cdn.jsdelivr.net/pyodide/v0.25.0/full/' });
+                    if (status) status.textContent = 'Python ready. Running...';
+                    py.setStdout({ batched: (s) => { if (out) out.textContent += s + '\\n'; } });
+                    py.setStderr({ batched: (s) => { if (out) out.textContent += s + '\\n'; } });
+                    await py.runPythonAsync(${JSON.stringify(code)});
+                    if (status) status.textContent = 'Finished.';
+                } catch (err) {
+                    if (status) status.textContent = 'Error';
+                    if (out) out.textContent += '\\n' + (err && err.message ? err.message : String(err));
+                }
+            })();
         `;
             const headExtras = `
-                < script src = "https://cdn.jsdelivr.net/pyodide/v0.25.0/full/pyodide.js" ><\/script>
-                    < script > ${pyCode}<\/script>
-                        `;
+            <script src="https://cdn.jsdelivr.net/pyodide/v0.25.0/full/pyodide.js"><\/script>
+            <script>${pyCode}<\/script>
+        `;
             iframe.srcdoc = this._wrapSandbox(html, headExtras);
-            this.addConsoleLog('info', ['▶ Loading Python…']);
+            this.addConsoleLog('info', ['Loading Python...']);
         }
 
         async runWandbox(compiler, code) {
-            this.addConsoleLog('info', ['▶ Compiling with Wandbox (' + compiler + ')…']);
+            this.addConsoleLog('info', ['Compiling with Wandbox (' + compiler + ')...']);
             const result = await Wandbox.run(compiler, code, '');
             if (result.stdout) result.stdout.split('\n').forEach(l => this.addConsoleLog('log', [l]));
             if (result.stderr) result.stderr.split('\n').forEach(l => this.addConsoleLog('error', [l]));
             if (!result.stdout && !result.stderr) this.addConsoleLog('info', ['(no output)']);
-            this.addConsoleLog('info', ['✔ Exit: ' + result.exitCode]);
+            this.addConsoleLog('info', ['Exit: ' + result.exitCode]);
         }
 
         async runGo(code) {
-            this.addConsoleLog('info', ['▶ Compiling Go…']);
+            this.addConsoleLog('info', ['Compiling Go...']);
             const result = await GoPlay.run(code);
             if (result.stdout) result.stdout.split('\n').forEach(l => this.addConsoleLog('log', [l]));
             if (result.stderr) result.stderr.split('\n').forEach(l => this.addConsoleLog('error', [l]));
@@ -1281,57 +1275,55 @@ SELECT * FROM users ORDER BY age;
 
         async runLua(code) {
             const iframe = document.getElementById('sandboxIframe');
-            const html = `< pre id = "out" style = "font-family:monospace;padding:20px;color:#c9d1d9;white-space:pre-wrap" ></pre > `;
+            const html = `<pre id="out" style="font-family:monospace;padding:20px;color:#c9d1d9;white-space:pre-wrap"></pre>`;
             const headExtras = `
-                < script src = "https://cdn.jsdelivr.net/npm/fengari-web@0.1.4/dist/fengari-web.js" ><\/script>
-                    < script >
-                    (function () {
-                        const out = document.getElementById('out');
-                        const userCode = ${JSON.stringify(code)
-                };
-            setTimeout(() => {
-                try {
-                    const originalWrite = console.log;
-                    console.log = function () {
-                        const s = Array.from(arguments).join(' ');
-                        out.textContent += s + '\\n';
-                        originalWrite.apply(console, arguments);
-                    };
-                    const fengari = window.fengari;
-                    const lua = fengari.lauxlib.luaL_newstate();
-                    fengari.lualib.luaL_openlibs(lua);
-                    fengari.lauxlib.luaL_dostring(lua,
-                        'print = function(...) local args = {...}; local s = ""; for i,v in ipairs(args) do s = s .. tostring(v) .. "\\\\t" end; io.write(s .. "\\\\n") end'
-                    );
-                    if (fengari.lauxlib.luaL_dostring(lua, userCode) !== 0) {
-                        const err = fengari.lauxlib.lua_tostring(lua, -1);
-                        out.textContent += 'Error: ' + err + '\\n';
-                    }
-                } catch (err) {
-                    out.textContent += 'Fengari error: ' + (err.message || err) + '\\n';
-                }
-            }, 200);
-        })();
+            <script src="https://cdn.jsdelivr.net/npm/fengari-web@0.1.4/dist/fengari-web.js"><\/script>
+            <script>
+                (function() {
+                    const out = document.getElementById('out');
+                    const userCode = ${JSON.stringify(code)};
+                    setTimeout(() => {
+                        try {
+                            const originalWrite = console.log;
+                            console.log = function() {
+                                const s = Array.from(arguments).join(' ');
+                                out.textContent += s + '\\n';
+                                originalWrite.apply(console, arguments);
+                            };
+                            const fengari = window.fengari;
+                            const lua = fengari.lauxlib.luaL_newstate();
+                            fengari.lualib.luaL_openlibs(lua);
+                            fengari.lauxlib.luaL_dostring(lua,
+                                'print = function(...) local args = {...}; local s = ""; for i,v in ipairs(args) do s = s .. tostring(v) .. "\\\\t" end; io.write(s .. "\\\\n") end'
+                            );
+                            if (fengari.lauxlib.luaL_dostring(lua, userCode) !== 0) {
+                                const err = fengari.lauxlib.luaL_tostring(lua, -1);
+                                out.textContent += 'Error: ' + err + '\\n';
+                            }
+                        } catch (err) {
+                            out.textContent += 'Fengari error: ' + (err.message || err) + '\\n';
+                        }
+                    }, 200);
+                })();
             <\/script>
         `;
             iframe.srcdoc = this._wrapSandbox(html, headExtras);
-            this.addConsoleLog('info', ['▶ Loading Lua…']);
+            this.addConsoleLog('info', ['Loading Lua...']);
         }
-
         async runSql(code) {
-            this.addConsoleLog('info', ['▶ Loading SQLite (sql.js)…']);
+            this.addConsoleLog('info', ['Loading SQLite (sql.js)...']);
             const SQL = await loadSqlRuntime();
             const db = new SQL.Database();
             try {
                 const result = db.exec(code);
-                if (!result.length) this.addConsoleLog('log', ['(query ok — no rows returned)']);
+                if (!result.length) this.addConsoleLog('log', ['(query ok - no rows returned)']);
                 else result.forEach(rs => {
                     const cols = rs.columns.join(' | ');
                     this.addConsoleLog('log', [cols]);
                     this.addConsoleLog('log', ['-'.repeat(cols.length)]);
                     rs.values.forEach(row => this.addConsoleLog('log', [row.map(v => v === null ? 'NULL' : String(v)).join(' | ')]));
                 });
-                this.addConsoleLog('info', ['✔ Query executed']);
+                this.addConsoleLog('info', ['Query executed']);
             } catch (err) {
                 this.addConsoleLog('error', [err.message || String(err)]);
             } finally {
@@ -1399,10 +1391,10 @@ SELECT * FROM users ORDER BY age;
             if (level === 'error') color = 'text-red-400 bg-red-950/20';
             if (level === 'warn') color = 'text-amber-400';
             if (level === 'info') color = 'text-blue-400';
-            line.className = `console - entry flex items - start space - x - 2 font - mono text - xs ${color} py - 0.5 px - 1 rounded`;
+            line.className = `console-entry flex items-start space-x-2 font-mono text-xs ${color} py-0.5 px-1 rounded`;
             const time = new Date().toLocaleTimeString();
             const content = args.map(a => this._renderLogArg(a)).join(' ');
-            line.innerHTML = `< span class="text-studio-muted text-[10px] shrink-0" > [${time}]</span > <div class="flex-1 break-all">${content}</div>`;
+            line.innerHTML = `<span class="text-studio-muted text-[10px] shrink-0">[${time}]</span><div class="flex-1 break-all">${content}</div>`;
             stream.appendChild(line);
             stream.scrollTop = stream.scrollHeight;
             const badge = document.getElementById('consoleBadge');
@@ -1417,21 +1409,23 @@ SELECT * FROM users ORDER BY age;
             return this._escape(arg);
         }
         _jsonTree(obj, depth) {
-            if (depth > 5) return '<span class="text-studio-muted">…</span>';
+            if (depth > 5) return '<span class="text-studio-muted">...</span>';
             if (obj === null) return '<span class="text-purple-400">null</span>';
             if (obj === undefined) return '<span class="text-purple-400">undefined</span>';
-            if (typeof obj === 'number') return `< span class="text-amber-300" > ${obj}</span > `;
-            if (typeof obj === 'boolean') return `< span class="text-purple-400" > ${obj}</span > `;
-            if (typeof obj === 'string') return `< span class="text-emerald-400" > "${this._escape(obj)}"</span > `;
+            if (typeof obj === 'number') return `<span class="text-amber-300">${obj}</span>`;
+            if (typeof obj === 'boolean') return `<span class="text-purple-400">${obj}</span>`;
+            if (typeof obj === 'string') return `<span class="text-emerald-400">"${this._escape(obj)}"</span>`;
             if (Array.isArray(obj)) {
                 if (!obj.length) return '<span class="text-studio-muted">[]</span>';
-                return `< span class="text-studio-muted" > [</span > ${obj.slice(0, 20).map(v => this._jsonTree(v, depth + 1)).join(', ')}${obj.length > 20 ? ', …' : ''} < span class= "text-studio-muted" >]</span > `;
+                return `<span class="text-studio-muted">[</span>${obj.slice(0, 20).map(v => this._jsonTree(v, depth + 1)).join(', ')}${obj.length > 20 ? ', ...' : ''}<span class="text-studio-muted">]</span>`;
             }
             if (typeof obj === 'object') {
                 const entries = Object.entries(obj);
                 if (!entries.length) return '<span class="text-studio-muted">{}</span>';
-                const inner = entries.slice(0, 30).map(([k, v]) => `< div ><span class="text-sky-400">${this._escape(k)}</span><span class="text-studio-muted">:</span> ${this._jsonTree(v, depth + 1)}</div > `).join('');
-                return `< details ${depth < 2 ? 'open' : ''}><summary class="text-studio-muted inline-block">{${entries.length}}</summary><div class="console-tree">${inner}</div></details > `;
+                const inner = entries.slice(0, 30).map(([k, v]) =>
+                    `<div><span class="text-sky-400">${this._escape(k)}</span><span class="text-studio-muted">:</span> ${this._jsonTree(v, depth + 1)}</div>`
+                ).join('');
+                return `<details ${depth < 2 ? 'open' : ''}><summary class="text-studio-muted inline-block">{${entries.length}}</summary><div class="console-tree">${inner}</div></details>`;
             }
             return this._escape(String(obj));
         }
@@ -1441,7 +1435,7 @@ SELECT * FROM users ORDER BY age;
             const row = document.createElement('tr');
             row.className = 'border-b border-studio-border/50 text-xs hover:bg-studio-panel';
             const statusClass = (data.status >= 200 && data.status < 300) ? 'text-emerald-400' : data.status === 'ERR' ? 'text-red-400' : 'text-amber-400';
-            row.innerHTML = `< td class="py-1 px-2 font-bold text-amber-400" > ${this._escape(String(data.method))}</td ><td class="truncate max-w-[180px] text-studio-muted px-2" title="${this._escape(data.url)}">${this._escape(data.url)}</td><td class="${statusClass} px-2">${this._escape(String(data.status))}</td><td class="text-studio-muted px-2">${this._escape(String(data.duration))}ms</td>`;
+            row.innerHTML = `<td class="py-1 px-2 font-bold text-amber-400">${this._escape(String(data.method))}</td><td class="truncate max-w-[180px] text-studio-muted px-2" title="${this._escape(data.url)}">${this._escape(data.url)}</td><td class="${statusClass} px-2">${this._escape(String(data.status))}</td><td class="text-studio-muted px-2">${this._escape(String(data.duration))}ms</td>`;
             body.appendChild(row);
         }
         clearConsole() {
@@ -1480,7 +1474,7 @@ SELECT * FROM users ORDER BY age;
                         if (doc) { const dom = document.getElementById('domGauge'); if (dom) dom.innerText = doc.getElementsByTagName('*').length; }
                     } catch (_) { }
                     const mem = document.getElementById('memGauge');
-                    if (mem) mem.innerText = performance.memory ? (performance.memory.usedJSHeapSize / 1048576).toFixed(1) + ' MB' : '—';
+                    if (mem) mem.innerText = performance.memory ? (performance.memory.usedJSHeapSize / 1048576).toFixed(1) + ' MB' : '-';
                 }
                 this._fpsRaf = requestAnimationFrame(tick);
             };
@@ -1505,8 +1499,8 @@ SELECT * FROM users ORDER BY age;
                 try { ok = !!t.run(); } catch (_) { ok = false; }
                 if (ok) passed++;
                 const row = document.createElement('div');
-                row.className = `flex items - center space - x - 2 text - xs p - 1.5 rounded ${ok ? 'bg-emerald-900/20 text-emerald-400' : 'bg-red-900/20 text-red-400'} `;
-                row.innerHTML = `< i class="fa-solid ${ok ? 'fa-circle-check' : 'fa-circle-xmark'}" ></i > <span>${this._escape(t.name)}</span>`;
+                row.className = `flex items-center space-x-2 text-xs p-1.5 rounded ${ok ? 'bg-emerald-900/20 text-emerald-400' : 'bg-red-900/20 text-red-400'}`;
+                row.innerHTML = `<i class="fa-solid ${ok ? 'fa-circle-check' : 'fa-circle-xmark'}"></i><span>${this._escape(t.name)}</span>`;
                 out.appendChild(row);
             });
             const summary = document.createElement('div');
@@ -1529,9 +1523,9 @@ SELECT * FROM users ORDER BY age;
             const iframe = document.getElementById('sandboxIframe');
             const res = document.getElementById('previewResolution');
             iframe.className = 'bg-white shadow-2xl transition-all';
-            if (device === 'iphone') { iframe.classList.add('device-iphone'); res.innerText = '(390 × 844)'; }
-            else if (device === 'pixel') { iframe.classList.add('device-pixel'); res.innerText = '(412 × 915)'; }
-            else if (device === 'ipad') { iframe.classList.add('device-ipad'); res.innerText = '(820 × 1080)'; }
+            if (device === 'iphone') { iframe.classList.add('device-iphone'); res.innerText = '(390 x 844)'; }
+            else if (device === 'pixel') { iframe.classList.add('device-pixel'); res.innerText = '(412 x 915)'; }
+            else if (device === 'ipad') { iframe.classList.add('device-ipad'); res.innerText = '(820 x 1080)'; }
             else { iframe.classList.add('w-full', 'h-full', 'rounded'); res.innerText = '(100% Responsive)'; }
         }
         toggleSandboxTheme() {
@@ -1548,7 +1542,13 @@ SELECT * FROM users ORDER BY age;
             Object.entries(files).forEach(([name, f]) => {
                 if (name === entry) return;
                 if (name.endsWith('.css')) html = html.replace(new RegExp(`<link[^>]*href=["']${escapeRe(name)}["'][^>]*>`, 'gi'), `<style>${f.content}</style>`);
-                if (name.endsWith('.js')) html = html.replace(new RegExp(`<script[^>]*src=["']${escapeRe(name)}["'][^>]*><\\/script>`, 'gi'), `<script>${f.content}<\/script>`);
+                if (name.endsWith('.js')) {
+                    const re = new RegExp(`<script[^>]*src=["']${escapeRe(name)}["'][^>]*><\\/script>`, 'gi');
+                    const match = html.match(re);
+                    const isModule = match && /type=["']module["']/.test(match[0]);
+                    const attrs = isModule ? ' type="module"' : '';
+                    html = html.replace(re, `<script${attrs}>${f.content}<\/script>`);
+                }
             });
             const w = window.open('', '_blank');
             if (!w) { this.showToast('Popup blocked', 'error'); return; }
@@ -1575,6 +1575,7 @@ SELECT * FROM users ORDER BY age;
                 { label: 'Open Settings', action: () => this.toggleDrawer('settingsDrawer'), icon: 'fa-gear' }
             ];
             const input = document.getElementById('cmdInput');
+            if (!input) return;
             input.addEventListener('input', e => this._filterCommands(e.target.value));
             input.addEventListener('keydown', e => {
                 if (e.key === 'Escape') this.closeModal('commandPaletteModal');
@@ -1584,11 +1585,13 @@ SELECT * FROM users ORDER BY age;
         openCommandPalette() {
             this.openModal('commandPaletteModal');
             const input = document.getElementById('cmdInput');
+            if (!input) return;
             input.value = ''; input.focus();
             this._filterCommands('');
         }
         _filterCommands(q) {
             const results = document.getElementById('cmdResults');
+            if (!results) return;
             const query = q.toLowerCase();
             const fileHits = Object.keys(this.project.files).filter(f => f.toLowerCase().includes(query));
             const cmdHits = this._cmdCommands.filter(c => c.label.toLowerCase().includes(query));
@@ -1662,7 +1665,13 @@ SELECT * FROM users ORDER BY age;
                 Object.entries(files).forEach(([name, f]) => {
                     if (name === entry) return;
                     if (name.endsWith('.css')) html = html.replace(new RegExp(`<link[^>]*href=["']${escapeRe(name)}["'][^>]*>`, 'gi'), `<style>${f.content}</style>`);
-                    if (name.endsWith('.js')) html = html.replace(new RegExp(`<script[^>]*src=["']${escapeRe(name)}["'][^>]*><\\/script>`, 'gi'), `<script>${f.content}<\/script>`);
+                    if (name.endsWith('.js')) {
+                        const re = new RegExp(`<script[^>]*src=["']${escapeRe(name)}["'][^>]*><\\/script>`, 'gi');
+                        const match = html.match(re);
+                        const isModule = match && /type=["']module["']/.test(match[0]);
+                        const attrs = isModule ? ' type="module"' : '';
+                        html = html.replace(re, `<script${attrs}>${f.content}<\/script>`);
+                    }
                 });
                 saveAs(new Blob([html], { type: 'text/html' }), 'index.html');
                 this.showToast('Downloaded HTML', 'success');
@@ -1670,7 +1679,7 @@ SELECT * FROM users ORDER BY age;
         }
         async shareProject() {
             const encoded = LZString.compressToEncodedURIComponent(JSON.stringify(this.project));
-            const url = `${location.origin}${location.pathname}#project=${encoded}`;
+            const url = `${location.href.split('#')[0]}#project=${encoded}`;
             try {
                 if (navigator.clipboard && window.isSecureContext) {
                     await navigator.clipboard.writeText(url);
@@ -1704,7 +1713,9 @@ SELECT * FROM users ORDER BY age;
             if (btn) btn.className = 'text-blue-400 font-bold';
         }
         generatePalette() {
-            const base = document.getElementById('paletteBaseColor').value;
+            const baseEl = document.getElementById('paletteBaseColor');
+            if (!baseEl) return;
+            const base = baseEl.value;
             document.getElementById('paletteHexText').innerText = base;
             const hsl = this._hexToHsl(base);
             const container = document.getElementById('paletteRamp');
@@ -1749,7 +1760,9 @@ SELECT * FROM users ORDER BY age;
             return '#' + toHex(f(0)) + toHex(f(8)) + toHex(f(4));
         }
         updateKeyframePreview() {
-            const tx = document.getElementById('kfTranslateX').value;
+            const txEl = document.getElementById('kfTranslateX');
+            if (!txEl) return;
+            const tx = txEl.value;
             const sc = document.getElementById('kfScale').value;
             const rt = document.getElementById('kfRotate').value;
             document.getElementById('kfTxVal').innerText = tx;
@@ -1767,6 +1780,7 @@ SELECT * FROM users ORDER BY age;
         _initIcons() {
             const icons = ['fa-house', 'fa-user', 'fa-gear', 'fa-heart', 'fa-star', 'fa-bell', 'fa-envelope', 'fa-search', 'fa-camera', 'fa-image', 'fa-video', 'fa-music', 'fa-cloud', 'fa-sun', 'fa-moon', 'fa-fire', 'fa-bolt', 'fa-leaf', 'fa-tree', 'fa-rocket', 'fa-plane', 'fa-car', 'fa-bicycle', 'fa-book', 'fa-graduation-cap', 'fa-code', 'fa-terminal', 'fa-database', 'fa-server', 'fa-lock', 'fa-key', 'fa-shield', 'fa-download', 'fa-upload', 'fa-share', 'fa-link', 'fa-paperclip', 'fa-tag', 'fa-bookmark', 'fa-comment', 'fa-comments', 'fa-thumbs-up', 'fa-thumbs-down', 'fa-eye', 'fa-eye-slash', 'fa-trash', 'fa-edit', 'fa-copy', 'fa-paste', 'fa-cut', 'fa-save', 'fa-folder', 'fa-file', 'fa-folder-open', 'fa-file-code', 'fa-file-image', 'fa-file-pdf', 'fa-play', 'fa-pause', 'fa-stop', 'fa-forward', 'fa-backward', 'fa-step-forward', 'fa-step-backward', 'fa-random', 'fa-repeat', 'fa-sync', 'fa-power-off', 'fa-wifi', 'fa-signal', 'fa-battery-full', 'fa-plug', 'fa-microchip', 'fa-memory', 'fa-hdd', 'fa-sd-card', 'fa-usb', 'fa-mobile', 'fa-tablet', 'fa-laptop', 'fa-desktop', 'fa-tv', 'fa-gamepad', 'fa-headphones', 'fa-microphone'];
             const grid = document.getElementById('iconGrid');
+            if (!grid) return;
             grid.innerHTML = '';
             icons.forEach(i => {
                 const btn = document.createElement('button');
@@ -1820,8 +1834,8 @@ SELECT * FROM users ORDER BY age;
         /* ============================================================
            MODALS / DRAWERS / TOASTS
            ============================================================ */
-        openModal(id) { const el = document.getElementById(id); el.classList.remove('hidden'); el.classList.add('flex'); }
-        closeModal(id) { const el = document.getElementById(id); el.classList.add('hidden'); el.classList.remove('flex'); }
+        openModal(id) { const el = document.getElementById(id); if (!el) return; el.classList.remove('hidden'); el.classList.add('flex'); }
+        closeModal(id) { const el = document.getElementById(id); if (!el) return; el.classList.add('hidden'); el.classList.remove('flex'); }
         toggleDrawer(id) {
             const el = document.getElementById(id);
             if (!el) return;
@@ -1831,6 +1845,7 @@ SELECT * FROM users ORDER BY age;
         }
         showToast(msg, type = 'info') {
             const c = document.getElementById('toastContainer');
+            if (!c) return;
             const t = document.createElement('div');
             const colors = { error: 'bg-red-600', success: 'bg-emerald-600', info: 'bg-blue-600', warn: 'bg-amber-600' };
             t.className = `toast px-3 py-2 rounded-lg text-xs font-medium shadow-xl flex items-center space-x-2 text-white pointer-events-auto ${colors[type] || colors.info}`;
