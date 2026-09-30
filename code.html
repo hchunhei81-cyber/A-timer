@@ -480,6 +480,53 @@
                     </div>
                     <p class="text-xs text-studio-muted">SQLite via sql.js.</p>
                 </div>
+                <div onclick="app.loadTemplate('ruby')"
+                    class="bg-studio-panel border border-studio-border hover:border-red-500 p-3 rounded-lg cursor-pointer transition flex flex-col justify-between space-y-2">
+                    <div class="flex items-center space-x-2 text-red-400 font-bold text-sm">
+                        <i class="fa-solid fa-gem text-lg"></i><span>Ruby</span>
+                    </div>
+                    <p class="text-xs text-studio-muted">Ruby via Wandbox.</p>
+                </div>
+
+                <div onclick="app.loadTemplate('php')"
+                    class="bg-studio-panel border border-studio-border hover:border-purple-500 p-3 rounded-lg cursor-pointer transition flex flex-col justify-between space-y-2">
+                    <div class="flex items-center space-x-2 text-purple-400 font-bold text-sm">
+                        <i class="fa-brands fa-php text-lg"></i><span>PHP</span>
+                    </div>
+                    <p class="text-xs text-studio-muted">PHP 8 via Wandbox.</p>
+                </div>
+
+                <div onclick="app.loadTemplate('haskell')"
+                    class="bg-studio-panel border border-studio-border hover:border-purple-400 p-3 rounded-lg cursor-pointer transition flex flex-col justify-between space-y-2">
+                    <div class="flex items-center space-x-2 text-purple-300 font-bold text-sm">
+                        <i class="fa-solid fa-square-root-variable text-lg"></i><span>Haskell</span>
+                    </div>
+                    <p class="text-xs text-studio-muted">GHC via Wandbox.</p>
+                </div>
+
+                <div onclick="app.loadTemplate('kotlin')"
+                    class="bg-studio-panel border border-studio-border hover:border-purple-500 p-3 rounded-lg cursor-pointer transition flex flex-col justify-between space-y-2">
+                    <div class="flex items-center space-x-2 text-purple-400 font-bold text-sm">
+                        <i class="fa-solid fa-k text-lg"></i><span>Kotlin</span>
+                    </div>
+                    <p class="text-xs text-studio-muted">Kotlin/JVM via Wandbox.</p>
+                </div>
+
+                <div onclick="app.loadTemplate('swift')"
+                    class="bg-studio-panel border border-studio-border hover:border-orange-500 p-3 rounded-lg cursor-pointer transition flex flex-col justify-between space-y-2">
+                    <div class="flex items-center space-x-2 text-orange-400 font-bold text-sm">
+                        <i class="fa-brands fa-swift text-lg"></i><span>Swift</span>
+                    </div>
+                    <p class="text-xs text-studio-muted">Swift via Wandbox.</p>
+                </div>
+
+                <div onclick="app.loadTemplate('bash')"
+                    class="bg-studio-panel border border-studio-border hover:border-emerald-500 p-3 rounded-lg cursor-pointer transition flex flex-col justify-between space-y-2">
+                    <div class="flex items-center space-x-2 text-emerald-400 font-bold text-sm">
+                        <i class="fa-solid fa-terminal text-lg"></i><span>Bash</span>
+                    </div>
+                    <p class="text-xs text-studio-muted">Shell script via Wandbox.</p>
+                </div>
             </div>
         </div>
     </div>
@@ -598,6 +645,10 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/addon/hint/anyword-hint.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/keymap/vim.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/keymap/emacs.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/ruby/ruby.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/php/php.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/haskell/haskell.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/swift/swift.min.js"></script>
 
     <!-- Utilities -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/lz-string/1.4.4/lz-string.min.js"></script>

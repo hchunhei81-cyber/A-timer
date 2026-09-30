@@ -865,7 +865,7 @@ const LANGS = {
         modules: PY_MODULES,
         snippets: PY_SNIPPETS,
         trigger: /[A-Za-z_]/,
-        word: /[A-Za-z_][\w.]*$/,   // ← 支持模块属性（math.sqrt）
+        word: /[A-Za-z_][\w.]*$/,
         contexts: ['code']
     },
     c: {
@@ -933,6 +933,192 @@ const LANGS = {
         trigger: /[A-Za-z@-]/,
         word: /[A-Za-z@\-][\w-]*$/,
         contexts: ['code']
+    },
+
+    /* ---------- New languages ---------- */
+    ruby: {
+        keywords: [
+            'def','end','class','module','if','elsif','else','unless','while','until','for','in','do',
+            'begin','rescue','ensure','raise','retry','return','yield','block_given?','lambda','proc',
+            'nil','true','false','self','super','and','or','not','then','case','when','break','next','redo',
+            'require','require_relative','load','include','extend','prepend','attr_accessor','attr_reader','attr_writer',
+            'puts','print','p','pp','warn','gets','chomp','strip','split','join','map','select','reject',
+            'reduce','inject','each','each_with_index','each_with_object','times','upto','downto','step',
+            'to_s','to_i','to_f','to_a','to_h','to_sym','inspect','freeze','frozen?','nil?','empty?','respond_to?',
+            'is_a?','kind_of?','instance_of?','send','public_send','new','initialize','method_missing',
+            'Enumerable','Comparable','Object','Array','Hash','String','Symbol','Integer','Float','Numeric',
+            'Range','Proc','Struct','OpenStruct','Set'
+        ],
+        snippets: [
+            { label: 'def', text: 'def ${1:name}(${2:args})\n    ${3}\nend', desc: 'Method definition' },
+            { label: 'def self', text: 'def self.${1:name}(${2:args})\n    ${3}\nend', desc: 'Class method' },
+            { label: 'class', text: 'class ${1:Name}\n    def initialize(${2:args})\n        ${3}\n    end\nend', desc: 'Class' },
+            { label: 'module', text: 'module ${1:Name}\n    ${2}\nend', desc: 'Module' },
+            { label: 'each', text: '${1:items}.each do |${2:item}|\n    ${3}\nend', desc: 'Each block' },
+            { label: 'map', text: '${1:items}.map { |${2:item}| ${3:item} }', desc: 'Map' },
+            { label: 'begin rescue', text: 'begin\n    ${1}\nrescue ${2:StandardError} => e\n    ${3:warn e}\nend', desc: 'Begin/rescue' },
+            { label: 'if', text: 'if ${1:condition}\n    ${2}\nend', desc: 'If' },
+            { label: 'unless', text: 'unless ${1:condition}\n    ${2}\nend', desc: 'Unless' },
+            { label: 'case', text: 'case ${1:value}\nwhen ${2:pattern}\n    ${3}\nelse\n    ${4}\nend', desc: 'Case' },
+            { label: 'puts', text: 'puts "${1:Hello}"', desc: 'Puts' }
+        ],
+        trigger: /[A-Za-z_@$]/,
+        word: /[A-Za-z_@$][\w!?]*$/,
+        contexts: ['code']
+    },
+
+    php: {
+        keywords: [
+            'echo','print','printf','var_dump','print_r','isset','unset','empty','list',
+            'function','return','if','else','elseif','endif','while','endwhile','for','endfor','foreach','endforeach',
+            'switch','case','default','break','continue','do','match','try','catch','finally','throw',
+            'class','interface','trait','enum','extends','implements','public','private','protected','static',
+            'abstract','final','const','readonly','namespace','use','as','new','clone','instanceof','this','parent','self',
+            'true','false','null','array','callable','iterable','int','float','string','bool','void','mixed','never',
+            'require','require_once','include','include_once','die','exit','yield','fn',
+            'count','strlen','str_replace','str_contains','str_starts_with','str_ends_with','substr','explode','implode',
+            'array_map','array_filter','array_reduce','array_keys','array_values','array_merge','array_push','array_pop',
+            'array_shift','array_unshift','array_slice','array_splice','array_search','in_array','sort','usort',
+            'json_encode','json_decode','file_get_contents','file_put_contents','preg_match','preg_replace',
+            'intval','floatval','strval','is_array','is_string','is_int','is_null','is_callable'
+        ],
+        snippets: [
+            { label: 'php tag', text: '<?php\n${1}\n', desc: 'PHP open tag' },
+            { label: 'function', text: 'function ${1:name}(${2:args}) {\n    ${3}\n}', desc: 'Function' },
+            { label: 'class', text: 'class ${1:Name}\n{\n    public function __construct(${2})\n    {\n        ${3}\n    }\n}', desc: 'Class' },
+            { label: 'echo', text: 'echo "${1:Hello}";', desc: 'Echo' },
+            { label: 'foreach', text: 'foreach ($${1:items} as $${2:item}) {\n    ${3}\n}', desc: 'Foreach' },
+            { label: 'foreach k=>v', text: 'foreach ($${1:items} as $${2:key} => $${3:value}) {\n    ${4}\n}', desc: 'Foreach kv' },
+            { label: 'if', text: 'if (${1:$condition}) {\n    ${2}\n}', desc: 'If' },
+            { label: 'if/else', text: 'if (${1:$condition}) {\n    ${2}\n} else {\n    ${3}\n}', desc: 'If/else' },
+            { label: 'try/catch', text: 'try {\n    ${1}\n} catch (\\Throwable $e) {\n    ${2}\n}', desc: 'Try/catch' },
+            { label: 'match', text: '$result = match ($${1:value}) {\n    ${2:1} => ${3:\'one\'},\n    default => ${4:\'other\'},\n};', desc: 'Match' }
+        ],
+        trigger: /[A-Za-z_$\\]/,
+        word: /[A-Za-z_$\\][\w]*$/,
+        contexts: ['code']
+    },
+
+    haskell: {
+        keywords: [
+            'module','where','import','qualified','hiding','as','data','newtype','type','class','instance','deriving',
+            'let','in','do','case','of','if','then','else','infixl','infixr','infix','default','foreign',
+            'IO','String','Int','Integer','Float','Double','Bool','Char','Maybe','Just','Nothing','Either','Left','Right',
+            'Ordering','LT','EQ','GT','Show','Eq','Ord','Enum','Bounded','Num','Read','Functor','Applicative','Monad',
+            'pure','return','fmap','map','filter','foldr','foldl','foldl1','foldr1','scanl','scanr','zip','zipWith','unzip',
+            'head','tail','init','last','null','length','reverse','take','drop','takeWhile','dropWhile','span','break',
+            'elem','notElem','lookup','concat','concatMap','and','or','any','all','sum','product','maximum','minimum',
+            'sort','sortBy','nub','group','partition','replicate','repeat','cycle','iterate','putStrLn','putStr','print',
+            'getLine','read','show','error','undefined','otherwise','id','const','flip','curry','uncurry','apply',
+            'traverse','sequence','sequenceA','when','unless','forever','mapM','mapM_','forM','forM_'
+        ],
+        snippets: [
+            { label: 'main', text: 'main :: IO ()\nmain = do\n    ${1:putStrLn "Hello, World!"}', desc: 'Main' },
+            { label: 'function', text: '${1:name} :: ${2:Type}\n${1:name} ${3:args} = ${4:body}', desc: 'Function' },
+            { label: 'data', text: 'data ${1:Name} = ${2:Constructor} ${3:Type}', desc: 'Data' },
+            { label: 'data record', text: 'data ${1:Name} = ${1:Name}\n    { ${2:field} :: ${3:Type}\n    } deriving (Show, Eq)', desc: 'Record' },
+            { label: 'instance', text: 'instance ${1:Show} ${2:Type} where\n    show ${3:x} = ${4:...}', desc: 'Instance' },
+            { label: 'case', text: 'case ${1:value} of\n    ${2:pattern} -> ${3:result}\n    _ -> ${4:default}', desc: 'Case' },
+            { label: 'let in', text: 'let ${1:name} = ${2:value}\nin ${3:expression}', desc: 'Let-in' },
+            { label: 'where', text: '${1:function} = ${2:body}\n  where\n    ${3:helper} = ${4:...}', desc: 'Where' },
+            { label: 'do', text: 'do\n    ${1:x <- action}\n    ${2:return x}', desc: 'Do block' }
+        ],
+        trigger: /[A-Za-z_']/,
+        word: /[A-Za-z_'][\w']*$/,
+        contexts: ['code']
+    },
+
+    kotlin: {
+        keywords: [
+            'fun','val','var','class','object','interface','enum','data','sealed','annotation','companion',
+            'if','else','when','for','while','do','return','break','continue','try','catch','finally','throw',
+            'import','package','as','is','in','this','super','null','true','false','by','where',
+            'out','vararg','lateinit','const','suspend','inline','noinline','crossinline','reified','operator',
+            'infix','external','abstract','open','final','override','private','protected','public','internal',
+            'init','constructor','get','set','field','it','typealias','expect','actual','tailrec',
+            'Int','Long','Short','Byte','Float','Double','Boolean','Char','String','Unit','Any','Nothing','Array',
+            'List','MutableList','Set','MutableSet','Map','MutableMap','Pair','Triple','Sequence','Range','IntRange',
+            'println','print','readLine','readln','arrayOf','listOf','mutableListOf','setOf','mutableSetOf',
+            'mapOf','mutableMapOf','emptyList','emptyMap','emptySet','require','check','assert','error',
+            'let','run','with','apply','also','takeIf','takeUnless','forEach','map','filter','reduce','fold',
+            'mapNotNull','flatMap','sortedBy','groupBy','associateBy','associateWith','zip','toList','toSet','toMap',
+            'toInt','toLong','toDouble','toString','toFloat','sum','sumOf','count','any','all','none','find','first',
+            'last','firstOrNull','lastOrNull','getOrNull','getOrDefault','isEmpty','isNotEmpty','isBlank','isNotBlank'
+        ],
+        snippets: [
+            { label: 'main', text: 'fun main() {\n    ${1:println("Hello, World!")}\n}', desc: 'Main' },
+            { label: 'fun', text: 'fun ${1:name}(${2:args}): ${3:Unit} {\n    ${4}\n}', desc: 'Function' },
+            { label: 'class', text: 'class ${1:Name}(${2:val x: Int}) {\n    ${3}\n}', desc: 'Class' },
+            { label: 'data class', text: 'data class ${1:Name}(\n    val ${2:field}: ${3:Type}\n)', desc: 'Data class' },
+            { label: 'when', text: 'when (${1:value}) {\n    ${2:pattern} -> ${3:result}\n    else -> ${4:default}\n}', desc: 'When' },
+            { label: 'for', text: 'for (${1:item} in ${2:collection}) {\n    ${3}\n}', desc: 'For' },
+            { label: 'elvis', text: 'val ${1:x} = ${2:maybe} ?: return', desc: 'Elvis operator' },
+            { label: 'try/catch', text: 'try {\n    ${1}\n} catch (e: Exception) {\n    ${2}\n}', desc: 'Try/catch' }
+        ],
+        trigger: /[A-Za-z_]/,
+        word: /[A-Za-z_][\w]*$/,
+        contexts: ['code']
+    },
+
+    swift: {
+        keywords: [
+            'func','var','let','class','struct','enum','protocol','extension','init','deinit','subscript','typealias',
+            'if','else','guard','switch','case','default','for','while','repeat','in','where','break','continue',
+            'return','try','catch','throw','throws','rethrows','defer','do','as','is','super','self','Self',
+            'import','public','private','fileprivate','internal','open','final','static','mutating','nonmutating',
+            'override','required','convenience','lazy','weak','unowned','indirect','dynamic','optional','some','any',
+            'nil','true','false','async','await','actor','nonisolated','inout','_','#available','#selector','#keyPath',
+            'Int','Int8','Int16','Int32','Int64','UInt','UInt8','UInt16','UInt32','UInt64','Float','Double','Bool',
+            'String','Character','Array','Dictionary','Set','Optional','Result','Any','AnyObject','Void','Never',
+            'print','debugPrint','dump','fatalError','assert','precondition','min','max','abs','stride','zip',
+            'map','filter','reduce','compactMap','flatMap','forEach','sorted','contains','first','last',
+            'firstIndex','lastIndex','prefix','suffix','dropFirst','dropLast','joined','split','reversed','enumerated',
+            'append','insert','remove','removeAll','removeFirst','removeLast','isEmpty','count','indices'
+        ],
+        snippets: [
+            { label: 'func', text: 'func ${1:name}(${2:args}) -> ${3:Void} {\n    ${4}\n}', desc: 'Function' },
+            { label: 'class', text: 'class ${1:Name} {\n    init(${2}) {\n        ${3}\n    }\n}', desc: 'Class' },
+            { label: 'struct', text: 'struct ${1:Name} {\n    let ${2:field}: ${3:Type}\n}', desc: 'Struct' },
+            { label: 'enum', text: 'enum ${1:Name} {\n    case ${2:value}\n}', desc: 'Enum' },
+            { label: 'guard let', text: 'guard let ${1:x} = ${2:optional} else {\n    return\n}', desc: 'Guard let' },
+            { label: 'if let', text: 'if let ${1:x} = ${2:optional} {\n    ${3}\n}', desc: 'If let' },
+            { label: 'for', text: 'for ${1:item} in ${2:collection} {\n    ${3}\n}', desc: 'For-in' },
+            { label: 'switch', text: 'switch ${1:value} {\ncase ${2:pattern}:\n    ${3}\ndefault:\n    ${4}\n}', desc: 'Switch' },
+            { label: 'try/catch', text: 'do {\n    try ${1}\n} catch {\n    ${2:print(error)}\n}', desc: 'Try/catch' }
+        ],
+        trigger: /[A-Za-z_@#]/,
+        word: /[A-Za-z_@#][\w]*$/,
+        contexts: ['code']
+    },
+
+    bash: {
+        keywords: [
+            'if','then','else','elif','fi','case','esac','for','while','until','do','done','in','function',
+            'select','time','return','exit','break','continue','local','export','readonly','declare','typeset',
+            'unset','shift','source','eval','exec','trap','set','shopt','alias','unalias','hash','type','command',
+            'echo','printf','read','test','pwd','cd','pushd','popd','dirs',
+            'ls','cat','head','tail','less','grep','egrep','fgrep','sed','awk','cut','sort','uniq','wc','tr',
+            'find','xargs','locate','which','whereis','basename','dirname','realpath','readlink','stat',
+            'mkdir','rmdir','rm','cp','mv','ln','touch','chmod','chown','chgrp','umask','file','tar','gzip','zip','unzip',
+            'ps','top','kill','killall','jobs','bg','fg','wait','sleep','date','uptime','whoami','id','hostname','uname',
+            'df','du','free','mount','umount','env','printenv','history','clear','man','curl','wget'
+        ],
+        snippets: [
+            { label: 'shebang', text: '#!/usr/bin/env bash\nset -euo pipefail\n\n${1}', desc: 'Shebang + strict mode' },
+            { label: 'if', text: 'if [[ ${1:condition} ]]; then\n    ${2}\nfi', desc: 'If' },
+            { label: 'if/else', text: 'if [[ ${1:condition} ]]; then\n    ${2}\nelse\n    ${3}\nfi', desc: 'If/else' },
+            { label: 'for', text: 'for ${1:item} in ${2:list}; do\n    ${3}\ndone', desc: 'For' },
+            { label: 'for range', text: 'for ((i = 0; i < ${1:n}; i++)); do\n    ${2}\ndone', desc: 'C-style for' },
+            { label: 'while', text: 'while [[ ${1:condition} ]]; do\n    ${2}\ndone', desc: 'While' },
+            { label: 'case', text: 'case "$${1:var}" in\n    ${2:pattern})\n        ${3}\n        ;;\n    *)\n        ${4}\n        ;;\nesac', desc: 'Case' },
+            { label: 'function', text: '${1:name}() {\n    ${2}\n}', desc: 'Function' },
+            { label: 'var', text: '${1:NAME}=${2:value}', desc: 'Assign' },
+            { label: 'read', text: 'read -r ${1:var}', desc: 'Read stdin' },
+            { label: 'trap', text: 'trap \'${1:cleanup}\' EXIT ERR', desc: 'Trap' }
+        ],
+        trigger: /[A-Za-z_$]/,
+        word: /[A-Za-z_$][\w]*$/,
+        contexts: ['code']
     }
 };
 
@@ -950,17 +1136,27 @@ const MODE_MAP = {
     'lua': 'lua',
     'sql': 'sql',
     'javascript': 'javascript',
-    'jsx': 'javascript',                     // ← 新增
+    'jsx': 'javascript',
     'text/javascript': 'javascript',
     'application/json': 'javascript',
     'text/typescript': 'javascript',
-    'typescript': 'javascript',              // ← 新增
-    'application/typescript': 'javascript',  // ← 新增
+    'typescript': 'javascript',
+    'application/typescript': 'javascript',
     'text/jsx': 'javascript',
     'css': 'css',
     'htmlmixed': 'html',
     'xml': 'html',
-    'vue': 'html'
+    'vue': 'html',
+
+    // new languages
+    'ruby': 'ruby',
+    'php': 'php',
+    'haskell': 'haskell',
+    'text/x-kotlin': 'kotlin',
+    'kotlin': 'kotlin',
+    'swift': 'swift',
+    'shell': 'bash',
+    'bash': 'bash'
 };
 
 /* ============================================================
@@ -996,7 +1192,13 @@ function detectContext(cm, langKey) {
         sql: ['--'],
         javascript: ['//'],
         css: [],
-        html: []
+        html: [],
+        ruby: ['#'],
+        php: ['//', '#'],
+        haskell: ['--'],
+        kotlin: ['//'],
+        swift: ['//'],
+        bash: ['#']
     };
     const lcTokens = lineCommentTokens[langKey] || [];
     for (const tok of lcTokens) {
@@ -1010,16 +1212,20 @@ function detectContext(cm, langKey) {
         }
     }
 
-    // --- Block comment check (C-family, JS, CSS, Lua --[[ ]]) ---
+    // --- Block comment check ---
     const blockOpen = (langKey === 'css') ? '/*'
                     : (langKey === 'html') ? '<!--'
                     : (langKey === 'lua') ? '--[['
+                    : (langKey === 'haskell') ? '{-'
+                    : (langKey === 'ruby' || langKey === 'bash') ? null
                     : '/*';
     const blockClose = (langKey === 'css') ? '*/'
                      : (langKey === 'html') ? '-->'
                      : (langKey === 'lua') ? ']]'
+                     : (langKey === 'haskell') ? '-}'
+                     : (langKey === 'ruby' || langKey === 'bash') ? null
                      : '*/';
-    if (['c','cpp','rust','go','javascript','css','html','lua'].includes(langKey)) {
+    if (blockOpen && blockClose && ['c','cpp','rust','go','javascript','css','html','lua','haskell','php','kotlin','swift'].includes(langKey)) {
         const doc = cm.getValue();
         const beforeCursor = doc.slice(0, cm.indexFromPos(cur));
         const lastOpen = beforeCursor.lastIndexOf(blockOpen);
@@ -1030,7 +1236,7 @@ function detectContext(cm, langKey) {
         }
     }
 
-    // --- String literal check: char-by-char scan, skip comments ---
+    // --- String literal check: char-by-char scan ---
     let inStr = false;
     let strChar = null;
     for (let i = 0; i < before.length; i++) {
@@ -1043,7 +1249,7 @@ function detectContext(cm, langKey) {
             // Stop scanning at line-comment token
             if (lcTokens.some(tok => before.startsWith(tok, i))) break;
         } else {
-            if (c === '\\') { i++; continue; } // skip escaped char
+            if (c === '\\') { i++; continue; }
             if (c === strChar) { inStr = false; strChar = null; }
         }
     }
@@ -1077,7 +1283,6 @@ function countUnescaped(str, ch) {
     let count = 0;
     for (let i = 0; i < str.length; i++) {
         if (str[i] !== ch) continue;
-        // Count preceding backslashes; if odd, this char is escaped.
         let bs = 0, j = i - 1;
         while (j >= 0 && str[j] === '\\') { bs++; j--; }
         if (bs % 2 === 0) count++;
@@ -1104,7 +1309,7 @@ function getTagOpenContext(cm) {
     return { start: { line: cur.line, ch: lt }, partial: after };
 }
 
-/* 自定义渲染：标签条目显示为 <name>  +  描述 */
+/* Custom rendering: show tags as <name> + description */
 function renderTagHint(el, data) {
     if (data.tagName) {
         const name = document.createElement('span');
@@ -1134,9 +1339,7 @@ function htmlTagHint(cm) {
     if (ltIdx > gtIdx) {
         const tagContent = before.slice(ltIdx + 1);
         const m = tagContent.match(/([a-zA-Z-]+)\s*=?\s*["'][^"']*$/);
-        // If inside an attribute value, don't suggest
         if (m) return null;
-        // Match current partial attribute
         const attrMatch = tagContent.match(/([a-zA-Z-]+)$/);
         if (attrMatch) {
             const partial = attrMatch[1].toLowerCase();
@@ -1191,7 +1394,6 @@ function makeHintProvider(langKey) {
         const before = line.slice(0, cur.ch);
         const ctx = detectContext(cm, langKey);
 
-        // Skip suggestions inside strings or comments
         if (ctx.inString || ctx.inComment) return null;
 
         // ---- Special case: C/C++ #include <...> ----
@@ -1246,23 +1448,20 @@ function makeHintProvider(langKey) {
 
         // ---- 2. Keywords matching ----
         for (const kw of lang.keywords) {
-            const kwCmp = lang.caseInsensitive ? kw.toLowerCase() : kw;
-            const wordCmp = lang.caseInsensitive ? wordLower : wordLower;
+            const kwCmp = kw.toLowerCase();
+            const wordCmp = wordLower;
 
-            // exact prefix
-            if (kwCmp.toLowerCase().startsWith(wordCmp)) {
+            if (kwCmp.startsWith(wordCmp)) {
                 list.push({
                     text: kw,
                     displayText: kw,
                     kind: 'keyword',
-                    _rank: kwCmp.toLowerCase() === wordCmp ? 0 :
-                           kwCmp.toLowerCase().startsWith(wordCmp) ? 1 : 2
+                    _rank: kwCmp === wordCmp ? 0 : 1
                 });
                 continue;
             }
 
-            // fuzzy: characters of word appear in order within kw
-            if (word.length >= 3 && fuzzyMatch(kwCmp.toLowerCase(), wordCmp)) {
+            if (word.length >= 3 && fuzzyMatch(kwCmp, wordCmp)) {
                 list.push({
                     text: kw,
                     displayText: kw,
@@ -1317,8 +1516,6 @@ function makeHintProvider(langKey) {
         const trimmed = unique.slice(0, 40);
         trimmed.forEach(h => delete h._rank);
 
-        // For snippets, still use default rendering (CodeMirror will show text).
-        // Use default rendering for non-HTML languages.
         return { list: trimmed, from, to: cur };
     };
 }
@@ -1341,23 +1538,18 @@ Object.keys(LANGS).forEach(name => {
 });
 
 window.KeyHints = {
-    /** Main entry: get a hint provider for the current CodeMirror mode. */
     providerFor(mode) {
         const key = MODE_MAP[mode] || mode;
         if (key === 'html') return htmlTagHint;
         return providers[key] || null;
     },
 
-    /** Direct HTML tag hint (compat). */
     html: htmlTagHint,
 
-    /** Whether a language is registered. */
     has(langKey) { return !!LANGS[langKey]; },
 
-    /** Get the raw database entry for a language. */
     db(langKey) { return LANGS[langKey]; },
 
-    /** Register a new language at runtime. */
     register(langKey, config) {
         LANGS[langKey] = Object.assign({
             keywords: [], snippets: [], trigger: /[A-Za-z_]/, word: /[A-Za-z_][\w]*$/,
@@ -1366,12 +1558,10 @@ window.KeyHints = {
         providers[langKey] = makeHintProvider(langKey);
     },
 
-    /** Register an alias: mode → langKey. */
     alias(mode, langKey) {
         MODE_MAP[mode] = langKey;
     },
 
-    /** Should the hint widget trigger on this typed character? */
     shouldTrigger(mode, ch) {
         const key = MODE_MAP[mode] || mode;
         if (key === 'html') return ch === '<' || /[a-zA-Z-]/.test(ch);
@@ -1380,7 +1570,6 @@ window.KeyHints = {
         return lang.trigger.test(ch);
     },
 
-    /** Helper exports for advanced callers. */
     getTagOpenContext,
     VOID_TAGS,
     TAG_MAP,

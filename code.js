@@ -42,7 +42,13 @@
         go: { name: 'Go', icon: 'fa-solid fa-g', color: '#00add8', mode: 'go', ext: '.go', runner: 'go' },
         assembly: { name: 'Assembly', icon: 'fa-solid fa-microchip', color: '#6e4c13', mode: 'gas', ext: '.s', runner: 'wandbox', wandbox: 'nasm-head' },
         lua: { name: 'Lua', icon: 'fa-solid fa-moon', color: '#000080', mode: 'lua', ext: '.lua', runner: 'fengari' },
-        sql: { name: 'SQL', icon: 'fa-solid fa-database', color: '#00758f', mode: 'sql', ext: '.sql', runner: 'sqljs' }
+        sql: { name: 'SQL', icon: 'fa-solid fa-database', color: '#00758f', mode: 'sql', ext: '.sql', runner: 'sqljs' },
+        ruby:    { name: 'Ruby',    icon: 'fa-solid fa-gem',        color: '#cc342d', mode: 'ruby',         ext: '.rb', runner: 'wandbox', wandbox: 'ruby-head' },
+        php:     { name: 'PHP',     icon: 'fa-brands fa-php',       color: '#777bb4', mode: 'php',          ext: '.php', runner: 'wandbox', wandbox: 'php-head' },
+        haskell: { name: 'Haskell', icon: 'fa-solid fa-square-root-variable', color: '#5e5086', mode: 'haskell', ext: '.hs', runner: 'wandbox', wandbox: 'ghc-head' },
+        kotlin:  { name: 'Kotlin',  icon: 'fa-solid fa-k',          color: '#7f52ff', mode: 'text/x-kotlin', ext: '.kt', runner: 'wandbox', wandbox: 'kotlin-head' },
+        swift:   { name: 'Swift',   icon: 'fa-brands fa-swift',     color: '#fa7343', mode: 'swift',        ext: '.swift', runner: 'wandbox', wandbox: 'swift-head' },
+        bash:    { name: 'Bash',    icon: 'fa-solid fa-terminal',   color: '#4eaa25', mode: 'shell',        ext: '.sh', runner: 'wandbox', wandbox: 'bash' }
     };
 
     /* ============================================================
@@ -66,6 +72,99 @@
 </html>` }
             }
         },
+        ruby: {
+    name: 'Ruby', language: 'ruby', activeFile: 'main.rb',
+    files: {
+        'main.rb': { name: 'main.rb', content: `# frozen_string_literal: true
+
+puts "Hello from Ruby!"
+
+(1..5).each do |i|
+  puts "  #{i} squared = #{i ** 2}"
+end
+
+nums = (1..5).map { |x| x * 2 }
+puts "Doubled: #{nums.inspect}"
+` }
+    }
+},
+php: {
+    name: 'PHP', language: 'php', activeFile: 'main.php',
+    files: {
+        'main.php': { name: 'main.php', content: `<?php
+echo "Hello from PHP!\\n";
+
+for ($i = 1; $i <= 5; $i++) {
+    echo "  {$i} squared = " . ($i * $i) . "\\n";
+}
+
+$langs = ["PHP", "Ruby", "Haskell"];
+echo "Languages: " . implode(", ", $langs) . "\\n";
+` }
+    }
+},
+haskell: {
+    name: 'Haskell', language: 'haskell', activeFile: 'Main.hs',
+    files: {
+        'Main.hs': { name: 'Main.hs', content: `module Main where
+
+main :: IO ()
+main = do
+    putStrLn "Hello from Haskell!"
+    mapM_ (\i -> putStrLn ("  " ++ show i ++ " squared = " ++ show (i * i))) [1..5]
+    print (map (* 2) [1..5])
+` }
+    }
+},
+kotlin: {
+    name: 'Kotlin', language: 'kotlin', activeFile: 'main.kt',
+    files: {
+        'main.kt': { name: 'main.kt', content: `fun main() {
+    println("Hello from Kotlin!")
+
+    for (i in 1..5) {
+        println("  \$i squared = \${i * i}")
+    }
+
+    val langs = listOf("Kotlin", "Swift", "Ruby")
+    println("Languages: \${langs.joinToString(", ")}")
+}
+` }
+    }
+},
+swift: {
+    name: 'Swift', language: 'swift', activeFile: 'main.swift',
+    files: {
+        'main.swift': { name: 'main.swift', content: `import Foundation
+
+print("Hello from Swift!")
+
+for i in 1...5 {
+    print("  \\(i) squared = \\(i * i)")
+}
+
+let langs = ["Swift", "Kotlin", "Haskell"]
+print("Languages: \\(langs.joined(separator: ", "))")
+` }
+    }
+},
+bash: {
+    name: 'Bash', language: 'bash', activeFile: 'main.sh',
+    files: {
+        'main.sh': { name: 'main.sh', content: `#!/usr/bin/env bash
+set -euo pipefail
+
+echo "Hello from Bash!"
+
+for i in 1 2 3 4 5; do
+    echo "  $i squared = $((i * i))"
+done
+
+langs=(Bash Ruby Haskell)
+echo "Languages: \${langs[*]}"
+` }
+    }
+},
         python: {
             name: 'Python', language: 'python', activeFile: 'main.py',
             files: {
@@ -356,8 +455,10 @@ SELECT * FROM users ORDER BY age;
                 const raw = localStorage.getItem('htmlc_projects');
                 if (raw) { const arr = JSON.parse(raw); if (Array.isArray(arr) && arr.length) return arr; }
             } catch (_) { }
-            return [structuredClone(DEFAULT_PROJECTS.html)];
-        }
+                const seeded = structuredClone(DEFAULT_PROJECTS.html);
+                seeded.id = 'proj_' + Date.now();
+                return [seeded];
+            }
         _saveProjects() {
             if (!this._autoSaveEnabled) return;
             clearTimeout(this._saveTimer);
@@ -894,6 +995,12 @@ SELECT * FROM users ORDER BY age;
             if (name.endsWith('.vue')) return 'fa-brands fa-vuejs text-emerald-400';
             if (name.endsWith('.jsx')) return 'fa-brands fa-react text-cyan-400';
             if (name.endsWith('.md')) return 'fa-brands fa-markdown text-studio-text';
+            if (name.endsWith('.rb'))    return 'fa-solid fa-gem text-red-400';
+            if (name.endsWith('.php'))   return 'fa-brands fa-php text-purple-400';
+            if (name.endsWith('.hs'))    return 'fa-solid fa-square-root-variable text-purple-300';
+            if (name.endsWith('.kt') || name.endsWith('.kts')) return 'fa-solid fa-k text-purple-400';
+            if (name.endsWith('.swift')) return 'fa-brands fa-swift text-orange-400';
+            if (name.endsWith('.sh'))    return 'fa-solid fa-terminal text-emerald-400';
             return 'fa-regular fa-file text-studio-muted';
         }
 
