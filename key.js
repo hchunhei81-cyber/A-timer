@@ -222,6 +222,28 @@ const CPP_HEADERS = [
     'cstring','ctime','cwchar','cwctype','filesystem','memory_resource','span'
 ];
 
+const CPP_SNIPPETS = [
+    { label: 'main', text: 'int main() {\n    ${1:std::cout << "Hello!" << std::endl;}\n    return 0;\n}', desc: 'Main function' },
+    { label: 'include', text: '#include <${1:iostream}>', desc: 'Include header' },
+    { label: 'using namespace', text: 'using namespace std;', desc: 'Using namespace std' },
+    { label: 'cout', text: 'std::cout << ${1:value} << std::endl;', desc: 'Print to stdout' },
+    { label: 'cin', text: 'std::cin >> ${1:variable};', desc: 'Read from stdin' },
+    { label: 'vector', text: 'std::vector<${1:int}> ${2:v} = {${3}};', desc: 'Vector declaration' },
+    { label: 'for', text: 'for (int ${1:i} = 0; ${1:i} < ${2:n}; ++${1:i}) {\n    ${3}\n}', desc: 'For loop' },
+    { label: 'for range', text: 'for (const auto& ${1:item} : ${2:container}) {\n    ${3}\n}', desc: 'Range-based for' },
+    { label: 'while', text: 'while (${1:condition}) {\n    ${2}\n}', desc: 'While loop' },
+    { label: 'if', text: 'if (${1:condition}) {\n    ${2}\n}', desc: 'If' },
+    { label: 'if else', text: 'if (${1:condition}) {\n    ${2}\n} else {\n    ${3}\n}', desc: 'If/else' },
+    { label: 'try catch', text: 'try {\n    ${1}\n} catch (const std::exception& e) {\n    std::cerr << e.what() << std::endl;\n}', desc: 'Try/catch' },
+    { label: 'class', text: 'class ${1:Name} {\npublic:\n    ${1:Name}(${2:args}) {\n        ${3}\n    }\nprivate:\n    ${4}\n};', desc: 'Class' },
+    { label: 'struct', text: 'struct ${1:Name} {\n    ${2:int field;};\n};', desc: 'Struct' },
+    { label: 'template', text: 'template <typename ${1:T}>\n${2:T} ${3:function}(${4:args}) {\n    ${5}\n}', desc: 'Template function' },
+    { label: 'lambda', text: 'auto ${1:f} = [${2}](${3:args}) {\n    ${4}\n};', desc: 'Lambda' },
+    { label: 'endl', text: 'std::endl', desc: 'Endl manipulator' },
+    { label: 'sort', text: 'std::sort(${1:v}.begin(), ${1:v}.end());', desc: 'Sort vector' },
+    { label: 'find', text: 'auto it = std::find(${1:v}.begin(), ${1:v}.end(), ${2:value});', desc: 'Find in vector' }
+];
+
 const RUST_KEYWORDS = [
     'fn','let','mut','const','static','struct','enum','trait','impl','for','while',
     'loop','if','else','match','return','break','continue','use','mod','pub','crate',
