@@ -16,12 +16,16 @@
     if (typeof JSZip === 'undefined')     missing.push('JSZip');
     if (typeof saveAs === 'undefined')    missing.push('FileSaver');
     if (typeof tailwind === 'undefined')  missing.push('Tailwind');
-    if (typeof window.KeyHints === 'undefined') missing.push('key.js');
 
     if (missing.length > 0) {
         document.body.innerHTML =
             '<div style="position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:#0d1117;color:#c9d1d9;font-family:Inter,sans-serif;padding:24px;text-align:center;z-index:9999"><div style="max-width:520px"><h1 style="font-size:20px;font-weight:700;margin-bottom:10px">Code Playground could not start</h1><p style="font-size:13px;color:#8b949e;line-height:1.6;margin-bottom:14px">One or more required libraries failed to load.</p><div style="font-family:ui-monospace,monospace;font-size:12px;background:#161b22;border:1px solid #30363d;border-radius:10px;padding:12px;text-align:left;color:#f0883e">Missing: ' + missing.join(', ') + '</div><button onclick="location.reload()" style="margin-top:16px;background:#1f6feb;color:#fff;border:none;padding:10px 18px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer">Reload</button></div></div>';
         throw new Error('Missing dependencies: ' + missing.join(', '));
+    }
+
+    // key.js is optional — warn but don't crash. Autocomplete will be disabled.
+    if (typeof window.KeyHints === 'undefined') {
+        console.warn('[Code Playground] key.js is missing — autocomplete will be disabled.');
     }
 })();
 
@@ -231,35 +235,49 @@ SELECT * FROM users ORDER BY age;
    ============================================================ */
 const Wandbox = {
     async run(compiler, code, stdin) {
-        const res = await fetch('https://wandbox.org/api/compile.json', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ compiler, code, stdin: stdin || '', options: '', save: false })
-        });
-        if (!res.ok) throw new Error(`Wandbox HTTP ${res.status}`);
-        const data = await res.json();
-        return {
-            ok: !data.compiler_error && data.status === '0',
-            stdout: data.program_output || '',
-            stderr: data.program_error || data.compiler_error || '',
-            exitCode: data.status
-        };
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), 30000);
+        try {
+            const res = await fetch('https://wandbox.org/api/compile.json', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ compiler, code, stdin: stdin || '', options: '', save: false }),
+                signal: controller.signal
+            });
+            if (!res.ok) throw new Error(`Wandbox HTTP ${res.status}`);
+            const data = await res.json();
+            return {
+                ok: !data.compiler_error && data.status === '0',
+                stdout: data.program_output || '',
+                stderr: data.program_error || data.compiler_error || '',
+                exitCode: data.status
+            };
+        } finally {
+            clearTimeout(timeout);
+        }
     }
 };
 
 const GoPlay = {
     async run(code) {
-        const res = await fetch('https://play.golang.org/compile', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-            body: 'version=2&body=' + encodeURIComponent(code)
-        });
-        if (!res.ok) throw new Error(`Go HTTP ${res.status}`);
-        const data = await res.json();
-        const ev = data.Events || [];
-        const stdout = ev.filter(e => e.Kind === 'stdout').map(e => e.Message).join('');
-        const stderr = ev.filter(e => e.Kind === 'stderr').map(e => e.Message).join('');
-        return { ok: !data.Errors, stdout, stderr: stderr + (data.Errors || ''), exitCode: data.Errors ? 1 : 0 };
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), 30000);
+        try {
+            const res = await fetch('https://play.golang.org/compile', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: 'version=2&body=' + encodeURIComponent(code),
+                signal: controller.signal
+            });
+            if (!res.ok) throw new Error(`Go HTTP ${res.status}`);
+            const data = await res.json();
+            const ev = data.Events || [];
+            const stdout = ev.filter(e => e.Kind === 'stdout').map(e => e.Message).join('');
+            const stderr = ev.filter(e => e.Kind === 'stderr').map(e => e.Message).join('');
+            return { ok: !data.Errors, stdout, stderr: stderr + (data.Errors || ''), exitCode: data.Errors ? 1 : 0 };
+        } finally {
+            clearTimeout(timeout);
+        }
     }
 };
 
@@ -355,6 +373,7 @@ class HtmlCompiler {
     }
     toggleProjectMenu() {
         const menu = document.getElementById('projectMenu');
+        if (!menu) return;
         const wasHidden = menu.classList.contains('hidden');
         this._renderProjectList();
         menu.classList.toggle('hidden');
@@ -427,6 +446,7 @@ class HtmlCompiler {
     initEditor() {
         const textarea = document.getElementById('cmTextarea');
         const hasCloseTagAddon = typeof CodeMirror.commands.closeTag === 'function';
+        const hasHints = typeof window.KeyHints !== 'undefined';
 
         this.editor = CodeMirror.fromTextArea(textarea, {
             lineNumbers: true,
@@ -441,8 +461,8 @@ class HtmlCompiler {
             foldGutter: true,
             gutters: ['CodeMirror-linenumbers', 'CodeMirror-foldgutter'],
             extraKeys: {
-                "Ctrl-Space": (cm) => { cm.showHint({ completeSingle: false }); },
-                "Cmd-Space":  (cm) => { cm.showHint({ completeSingle: false }); },
+                "Ctrl-Space": (cm) => { if (hasHints) cm.showHint({ completeSingle: false }); },
+                "Cmd-Space":  (cm) => { if (hasHints) cm.showHint({ completeSingle: false }); },
                 "Tab": (cm) => {
                     if (cm.state.completionActive && cm.state.completionActive.widget) {
                         cm.state.completionActive.widget.pick();
@@ -464,19 +484,22 @@ class HtmlCompiler {
             }
         });
 
-        // Dynamic, mode-aware hint provider from key.js
-        this.editor.setOption('hintOptions', {
-            hint: (cm) => {
-                const mode = cm.getOption('mode');
-                const provider = window.KeyHints.providerFor(mode);
-                if (!provider) return null;
-                return provider(cm);
-            },
-            completeSingle: false,
-            closeOnUnfocus: true,
-            alignWithWord: true,
-            className: 'cm-tag-hints'
-        });
+        // Dynamic, mode-aware hint provider from key.js (optional)
+        if (hasHints) {
+            this.editor.setOption('hintOptions', {
+                hint: (cm) => {
+                    if (!window.KeyHints) return null;
+                    const mode = cm.getOption('mode');
+                    const provider = window.KeyHints.providerFor(mode);
+                    if (!provider) return null;
+                    return provider(cm);
+                },
+                completeSingle: false,
+                closeOnUnfocus: true,
+                alignWithWord: true,
+                className: 'cm-tag-hints'
+            });
+        }
 
         // Auto-close tag fallback (only if closetag addon missing)
         if (!hasCloseTagAddon) {
@@ -500,7 +523,7 @@ class HtmlCompiler {
                 const match = after.match(/^([a-zA-Z][a-zA-Z0-9-]*)/);
                 if (!match) return;
                 const tagName = match[1].toLowerCase();
-                if (window.KeyHints.VOID_TAGS.has(tagName)) return;
+                if (hasHints && window.KeyHints.VOID_TAGS.has(tagName)) return;
 
                 setTimeout(() => {
                     const c = cm.getCursor();
@@ -513,41 +536,40 @@ class HtmlCompiler {
             });
         }
 
-        // Universal hint trigger — FIXED for Bug 5 (no re-trigger after pick)
-        this.editor.on('inputRead', (cm, change) => {
-            if (cm.state.completionActive) return;
-            // Bug 5 fix: don't re-trigger after the user picks a suggestion
-            if (change.origin === 'complete') return;
-            // Also don't re-trigger on multi-char input (paste, etc.)
-            if (change.text && (change.text.length > 1 || (change.text[0] && change.text[0].length > 1))) return;
+        // Auto hint trigger on typing — unified path via hintOptions.hint
+        if (hasHints) {
+            this.editor.on('inputRead', (cm, change) => {
+                if (cm.state.completionActive) return;
+                if (change.origin === 'complete') return;
+                if (change.text && (change.text.length > 1 || (change.text[0] && change.text[0].length > 1))) return;
 
-            const mode = cm.getOption('mode');
-            const provider = window.KeyHints.providerFor(mode);
-            if (!provider) return;
+                const mode = cm.getOption('mode');
+                if (!window.KeyHints || !window.KeyHints.providerFor(mode)) return;
 
-            const text = change.text[0] || '';
-            const last = text[text.length - 1];
+                const text = change.text[0] || '';
+                const last = text[text.length - 1];
 
-            // HTML: trigger on "<" or letters
-            if (mode === 'htmlmixed' || mode === 'xml' || mode === 'vue') {
-                if (last === '<' || /[a-zA-Z-]/.test(last)) {
-                    cm.showHint({ hint: provider, completeSingle: false });
+                // HTML: trigger on "<" or letters
+                if (mode === 'htmlmixed' || mode === 'xml' || mode === 'vue') {
+                    if (last === '<' || /[a-zA-Z-]/.test(last)) {
+                        cm.showHint({ completeSingle: false });
+                    }
+                    return;
                 }
-                return;
-            }
 
-            // Everywhere else: trigger if character can start a word
-            if (!window.KeyHints.shouldTrigger(mode, last)) return;
+                // Everywhere else: trigger if character can start a word
+                if (!window.KeyHints.shouldTrigger(mode, last)) return;
 
-            // Only trigger when there's a partial word (>= 2 chars)
-            const cur = cm.getCursor();
-            const line = cm.getLine(cur.line);
-            const before = line.slice(0, cur.ch);
-            const m = before.match(/[A-Za-z_$][\w$.:\-!#@]*$/);
-            if (m && m[0].length >= 2) {
-                cm.showHint({ hint: provider, completeSingle: false });
-            }
-        });
+                // Only trigger when there's a partial word (>= 2 chars)
+                const cur = cm.getCursor();
+                const line = cm.getLine(cur.line);
+                const before = line.slice(0, cur.ch);
+                const m = before.match(/[A-Za-z_$][\w$.:\-!#@]*$/);
+                if (m && m[0].length >= 2) {
+                    cm.showHint({ completeSingle: false });
+                }
+            });
+        }
 
         this.openFile(this.project.activeFile || Object.keys(this.project.files)[0]);
 
@@ -1342,14 +1364,21 @@ class HtmlCompiler {
        CONSOLE
        ============================================================ */
     switchConsoleTab(tab) {
-        ['console','network','perf','tests'].forEach(t => {
-            const pane = document.getElementById('pane' + t.charAt(0).toUpperCase() + t.slice(1));
-            const btn = document.getElementById('tabBtn' + t.charAt(0).toUpperCase() + t.slice(1));
-            if (pane) pane.classList.add('hidden');
-            if (btn) btn.className = 'text-studio-muted hover:text-white flex items-center space-x-1.5 pb-1';
+        const map = {
+            console: { pane: 'paneConsole', btn: 'tabBtnConsole' },
+            network: { pane: 'paneNetwork', btn: 'tabBtnNetwork' },
+            perf:    { pane: 'panePerf',    btn: 'tabBtnPerf' },
+            tests:   { pane: 'paneTests',   btn: 'tabBtnTests' }
+        };
+        if (!map[tab]) return;
+        Object.values(map).forEach(({ pane, btn }) => {
+            const p = document.getElementById(pane);
+            const b = document.getElementById(btn);
+            if (p) p.classList.add('hidden');
+            if (b) b.className = 'text-studio-muted hover:text-white flex items-center space-x-1.5 pb-1';
         });
-        const ap = document.getElementById('pane' + tab.charAt(0).toUpperCase() + tab.slice(1));
-        const ab = document.getElementById('tabBtn' + tab.charAt(0).toUpperCase() + tab.slice(1));
+        const ap = document.getElementById(map[tab].pane);
+        const ab = document.getElementById(map[tab].btn);
         if (ap) ap.classList.remove('hidden');
         if (ab) ab.className = 'text-white font-semibold flex items-center space-x-1.5 border-b-2 border-blue-500 pb-1';
     }
@@ -1373,7 +1402,7 @@ class HtmlCompiler {
     _renderLogArg(arg) {
         if (typeof arg !== 'string') return this._escape(String(arg));
         const t = arg.trim();
-        if ((t.startsWith('{') && t.endsWith('}')) || (t.startsWith('[') && t.endsWith(']'))) {
+        if (t.length < 10000 && ((t.startsWith('{') && t.endsWith('}')) || (t.startsWith('[') && t.endsWith(']')))) {
             try { return this._jsonTree(JSON.parse(t), 0); } catch (_) {}
         }
         return this._escape(arg);
@@ -1407,16 +1436,19 @@ class HtmlCompiler {
         body.appendChild(row);
     }
     clearConsole() {
-        document.getElementById('paneConsole').innerHTML = '';
-        document.getElementById('networkTableBody').innerHTML = '';
-        document.getElementById('testOutput').innerHTML = '';
+        const pane = document.getElementById('paneConsole');
+        const net = document.getElementById('networkTableBody');
+        const test = document.getElementById('testOutput');
+        if (pane) pane.innerHTML = '';
+        if (net) net.innerHTML = '';
+        if (test) test.innerHTML = '';
         const badge = document.getElementById('consoleBadge');
-        badge.classList.add('hidden');
-        badge.innerText = '0';
+        if (badge) { badge.classList.add('hidden'); badge.innerText = '0'; }
     }
     toggleConsoleCollapse() {
         const drawer = document.getElementById('consoleDrawer');
         const icon = document.getElementById('consoleCollapseIcon');
+        if (!drawer || !icon) return;
         if (drawer.style.height === '32px') { drawer.style.height = '192px'; icon.className = 'fa-solid fa-chevron-down'; }
         else { drawer.style.height = '32px'; icon.className = 'fa-solid fa-chevron-up'; }
     }
@@ -1804,7 +1836,12 @@ class HtmlCompiler {
             if (!r || !prev) return;
             let startX = 0, startW = 0;
             const move = e => { prev.style.width = Math.max(150, Math.min(600, startW + (e.clientX - startX))) + 'px'; };
-            const up = () => { r.classList.remove('active'); document.removeEventListener('mousemove', move); document.removeEventListener('mouseup', up); };
+            const up = () => {
+                r.classList.remove('active');
+                document.removeEventListener('mousemove', move);
+                document.removeEventListener('mouseup', up);
+                if (this.editor) this.editor.refresh();
+            };
             r.addEventListener('mousedown', e => { startX = e.clientX; startW = prev.getBoundingClientRect().width; r.classList.add('active'); document.addEventListener('mousemove', move); document.addEventListener('mouseup', up); e.preventDefault(); });
         };
         const makeResizableV = (id, prevId) => {
