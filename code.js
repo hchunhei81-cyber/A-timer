@@ -1238,26 +1238,26 @@ SELECT * FROM users ORDER BY age;
             <pre id="out" style="font-family:monospace;padding:20px;color:#c9d1d9;white-space:pre-wrap"></pre>
         `;
             const pyCode = `
-            (async () => {
+                (async () => {
                 const status = document.getElementById('status');
-                const out = document.getElementById('out');
-                try {
-                    const py = await window.loadPyodide({ indexURL: 'https://cdn.jsdelivr.net/pyodide/v0.25.0/full/' });
-                    status.textContent = '✔ Python ready. Running…';
-                    py.setStdout({ batched: (s) => { out.textContent += s + '\\n'; } });
-                    py.setStderr({ batched: (s) => { out.textContent += s + '\\n'; } });
-                    await py.runPythonAsync(${JSON.stringify(code)});
-                    status.textContent = '✔ Finished.';
-                } catch (err) {
-                    status.textContent = '✖ Error';
-                    out.textContent += '\\n' + (err && err.message ? err.message : String(err));
-                }
-            })();
+            const out = document.getElementById('out');
+            try {
+                const py = await window.loadPyodide({ indexURL: 'https://cdn.jsdelivr.net/pyodide/v0.25.0/full/' });
+                if (status) status.textContent = '✔ Python ready. Running…';
+                py.setStdout({ batched: (s) => { if (out) out.textContent += s + '\\n'; } });
+                py.setStderr({ batched: (s) => { if (out) out.textContent += s + '\\n'; } });
+                await py.runPythonAsync(${JSON.stringify(code)});
+                if (status) status.textContent = '✔ Finished.';
+            } catch (err) {
+                if (status) status.textContent = '✖ Error';
+                if (out) out.textContent += '\\n' + (err && err.message ? err.message : String(err));
+             }
+        })();
         `;
             const headExtras = `
-            <script src="https://cdn.jsdelivr.net/pyodide/v0.25.0/full/pyodide.js"><\/script>
-            <script>${pyCode}<\/script>
-        `;
+                < script src = "https://cdn.jsdelivr.net/pyodide/v0.25.0/full/pyodide.js" ><\/script>
+                    < script > ${pyCode}<\/script>
+                        `;
             iframe.srcdoc = this._wrapSandbox(html, headExtras);
             this.addConsoleLog('info', ['▶ Loading Python…']);
         }
@@ -1281,36 +1281,37 @@ SELECT * FROM users ORDER BY age;
 
         async runLua(code) {
             const iframe = document.getElementById('sandboxIframe');
-            const html = `<pre id="out" style="font-family:monospace;padding:20px;color:#c9d1d9;white-space:pre-wrap"></pre>`;
+            const html = `< pre id = "out" style = "font-family:monospace;padding:20px;color:#c9d1d9;white-space:pre-wrap" ></pre > `;
             const headExtras = `
-            <script src="https://cdn.jsdelivr.net/npm/fengari-web@0.1.4/dist/fengari-web.js"><\/script>
-            <script>
-                (function() {
-                    const out = document.getElementById('out');
-                    const userCode = ${JSON.stringify(code)};
-                    setTimeout(() => {
-                        try {
-                            const originalWrite = console.log;
-                            console.log = function() {
-                                const s = Array.from(arguments).join(' ');
-                                out.textContent += s + '\\n';
-                                originalWrite.apply(console, arguments);
-                            };
-                            const fengari = window.fengari;
-                            const lua = fengari.lauxlib.luaL_newstate();
-                            fengari.lualib.luaL_openlibs(lua);
-                            fengari.lauxlib.luaL_dostring(lua,
-                                'print = function(...) local args = {...}; local s = ""; for i,v in ipairs(args) do s = s .. tostring(v) .. "\\\\t" end; io.write(s .. "\\\\n") end'
-                            );
-                            if (fengari.lauxlib.luaL_dostring(lua, userCode) !== 0) {
-                                const err = fengari.lauxlib.lua_tostring(lua, -1);
-                                out.textContent += 'Error: ' + err + '\\n';
-                            }
-                        } catch (err) {
-                            out.textContent += 'Fengari error: ' + (err.message || err) + '\\n';
-                        }
-                    }, 200);
-                })();
+                < script src = "https://cdn.jsdelivr.net/npm/fengari-web@0.1.4/dist/fengari-web.js" ><\/script>
+                    < script >
+                    (function () {
+                        const out = document.getElementById('out');
+                        const userCode = ${JSON.stringify(code)
+                };
+            setTimeout(() => {
+                try {
+                    const originalWrite = console.log;
+                    console.log = function () {
+                        const s = Array.from(arguments).join(' ');
+                        out.textContent += s + '\\n';
+                        originalWrite.apply(console, arguments);
+                    };
+                    const fengari = window.fengari;
+                    const lua = fengari.lauxlib.luaL_newstate();
+                    fengari.lualib.luaL_openlibs(lua);
+                    fengari.lauxlib.luaL_dostring(lua,
+                        'print = function(...) local args = {...}; local s = ""; for i,v in ipairs(args) do s = s .. tostring(v) .. "\\\\t" end; io.write(s .. "\\\\n") end'
+                    );
+                    if (fengari.lauxlib.luaL_dostring(lua, userCode) !== 0) {
+                        const err = fengari.lauxlib.lua_tostring(lua, -1);
+                        out.textContent += 'Error: ' + err + '\\n';
+                    }
+                } catch (err) {
+                    out.textContent += 'Fengari error: ' + (err.message || err) + '\\n';
+                }
+            }, 200);
+        })();
             <\/script>
         `;
             iframe.srcdoc = this._wrapSandbox(html, headExtras);
@@ -1398,10 +1399,10 @@ SELECT * FROM users ORDER BY age;
             if (level === 'error') color = 'text-red-400 bg-red-950/20';
             if (level === 'warn') color = 'text-amber-400';
             if (level === 'info') color = 'text-blue-400';
-            line.className = `console-entry flex items-start space-x-2 font-mono text-xs ${color} py-0.5 px-1 rounded`;
+            line.className = `console - entry flex items - start space - x - 2 font - mono text - xs ${color} py - 0.5 px - 1 rounded`;
             const time = new Date().toLocaleTimeString();
             const content = args.map(a => this._renderLogArg(a)).join(' ');
-            line.innerHTML = `<span class="text-studio-muted text-[10px] shrink-0">[${time}]</span><div class="flex-1 break-all">${content}</div>`;
+            line.innerHTML = `< span class="text-studio-muted text-[10px] shrink-0" > [${time}]</span > <div class="flex-1 break-all">${content}</div>`;
             stream.appendChild(line);
             stream.scrollTop = stream.scrollHeight;
             const badge = document.getElementById('consoleBadge');
@@ -1419,18 +1420,18 @@ SELECT * FROM users ORDER BY age;
             if (depth > 5) return '<span class="text-studio-muted">…</span>';
             if (obj === null) return '<span class="text-purple-400">null</span>';
             if (obj === undefined) return '<span class="text-purple-400">undefined</span>';
-            if (typeof obj === 'number') return `<span class="text-amber-300">${obj}</span>`;
-            if (typeof obj === 'boolean') return `<span class="text-purple-400">${obj}</span>`;
-            if (typeof obj === 'string') return `<span class="text-emerald-400">"${this._escape(obj)}"</span>`;
+            if (typeof obj === 'number') return `< span class="text-amber-300" > ${obj}</span > `;
+            if (typeof obj === 'boolean') return `< span class="text-purple-400" > ${obj}</span > `;
+            if (typeof obj === 'string') return `< span class="text-emerald-400" > "${this._escape(obj)}"</span > `;
             if (Array.isArray(obj)) {
                 if (!obj.length) return '<span class="text-studio-muted">[]</span>';
-                return `<span class="text-studio-muted">[</span>${obj.slice(0, 20).map(v => this._jsonTree(v, depth + 1)).join(', ')}${obj.length > 20 ? ', …' : ''}<span class="text-studio-muted">]</span>`;
+                return `< span class="text-studio-muted" > [</span > ${obj.slice(0, 20).map(v => this._jsonTree(v, depth + 1)).join(', ')}${obj.length > 20 ? ', …' : ''} < span class= "text-studio-muted" >]</span > `;
             }
             if (typeof obj === 'object') {
                 const entries = Object.entries(obj);
                 if (!entries.length) return '<span class="text-studio-muted">{}</span>';
-                const inner = entries.slice(0, 30).map(([k, v]) => `<div><span class="text-sky-400">${this._escape(k)}</span><span class="text-studio-muted">:</span> ${this._jsonTree(v, depth + 1)}</div>`).join('');
-                return `<details ${depth < 2 ? 'open' : ''}><summary class="text-studio-muted inline-block">{${entries.length}}</summary><div class="console-tree">${inner}</div></details>`;
+                const inner = entries.slice(0, 30).map(([k, v]) => `< div ><span class="text-sky-400">${this._escape(k)}</span><span class="text-studio-muted">:</span> ${this._jsonTree(v, depth + 1)}</div > `).join('');
+                return `< details ${depth < 2 ? 'open' : ''}><summary class="text-studio-muted inline-block">{${entries.length}}</summary><div class="console-tree">${inner}</div></details > `;
             }
             return this._escape(String(obj));
         }
@@ -1440,7 +1441,7 @@ SELECT * FROM users ORDER BY age;
             const row = document.createElement('tr');
             row.className = 'border-b border-studio-border/50 text-xs hover:bg-studio-panel';
             const statusClass = (data.status >= 200 && data.status < 300) ? 'text-emerald-400' : data.status === 'ERR' ? 'text-red-400' : 'text-amber-400';
-            row.innerHTML = `<td class="py-1 px-2 font-bold text-amber-400">${this._escape(String(data.method))}</td><td class="truncate max-w-[180px] text-studio-muted px-2" title="${this._escape(data.url)}">${this._escape(data.url)}</td><td class="${statusClass} px-2">${this._escape(String(data.status))}</td><td class="text-studio-muted px-2">${this._escape(String(data.duration))}ms</td>`;
+            row.innerHTML = `< td class="py-1 px-2 font-bold text-amber-400" > ${this._escape(String(data.method))}</td ><td class="truncate max-w-[180px] text-studio-muted px-2" title="${this._escape(data.url)}">${this._escape(data.url)}</td><td class="${statusClass} px-2">${this._escape(String(data.status))}</td><td class="text-studio-muted px-2">${this._escape(String(data.duration))}ms</td>`;
             body.appendChild(row);
         }
         clearConsole() {
@@ -1504,8 +1505,8 @@ SELECT * FROM users ORDER BY age;
                 try { ok = !!t.run(); } catch (_) { ok = false; }
                 if (ok) passed++;
                 const row = document.createElement('div');
-                row.className = `flex items-center space-x-2 text-xs p-1.5 rounded ${ok ? 'bg-emerald-900/20 text-emerald-400' : 'bg-red-900/20 text-red-400'}`;
-                row.innerHTML = `<i class="fa-solid ${ok ? 'fa-circle-check' : 'fa-circle-xmark'}"></i><span>${this._escape(t.name)}</span>`;
+                row.className = `flex items - center space - x - 2 text - xs p - 1.5 rounded ${ok ? 'bg-emerald-900/20 text-emerald-400' : 'bg-red-900/20 text-red-400'} `;
+                row.innerHTML = `< i class="fa-solid ${ok ? 'fa-circle-check' : 'fa-circle-xmark'}" ></i > <span>${this._escape(t.name)}</span>`;
                 out.appendChild(row);
             });
             const summary = document.createElement('div');
