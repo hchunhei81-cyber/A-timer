@@ -45,7 +45,7 @@
 'use strict';
 
 /* ------------------------------------------------------------
-   Default project: minimal Hello World
+   Default project
    ------------------------------------------------------------ */
 const DEFAULT_PROJECT = {
     id: 'proj_default',
@@ -69,10 +69,9 @@ const DEFAULT_PROJECT = {
 };
 
 /* ------------------------------------------------------------
-   HTML TAG DATABASE  (used for autocomplete)
+   HTML TAG DATABASE
    ------------------------------------------------------------ */
 const HTML_TAGS = [
-    // Document / metadata
     { tag: 'html',   desc: 'Root element',           attrs: ' lang="en"',           type: 'paired' },
     { tag: 'head',   desc: 'Document head',          attrs: '',                     type: 'paired' },
     { tag: 'body',   desc: 'Document body',          attrs: '',                     type: 'paired' },
@@ -83,7 +82,6 @@ const HTML_TAGS = [
     { tag: 'script', desc: 'Inline / external JS',   attrs: '',                     type: 'paired' },
     { tag: 'base',   desc: 'Base URL',               attrs: ' href=""',             type: 'void'   },
 
-    // Sections
     { tag: 'header', desc: 'Header section',         attrs: '',                     type: 'paired' },
     { tag: 'footer', desc: 'Footer section',         attrs: '',                     type: 'paired' },
     { tag: 'nav',    desc: 'Navigation',             attrs: '',                     type: 'paired' },
@@ -93,7 +91,6 @@ const HTML_TAGS = [
     { tag: 'aside',  desc: 'Sidebar',                attrs: '',                     type: 'paired' },
     { tag: 'div',    desc: 'Block container',        attrs: '',                     type: 'paired' },
 
-    // Headings
     { tag: 'h1', desc: 'Heading level 1', attrs: '', type: 'paired' },
     { tag: 'h2', desc: 'Heading level 2', attrs: '', type: 'paired' },
     { tag: 'h3', desc: 'Heading level 3', attrs: '', type: 'paired' },
@@ -102,7 +99,6 @@ const HTML_TAGS = [
     { tag: 'h6', desc: 'Heading level 6', attrs: '', type: 'paired' },
     { tag: 'hgroup', desc: 'Heading group', attrs: '', type: 'paired' },
 
-    // Text content
     { tag: 'p',      desc: 'Paragraph',              attrs: '', type: 'paired' },
     { tag: 'span',   desc: 'Inline container',       attrs: '', type: 'paired' },
     { tag: 'a',      desc: 'Hyperlink',              attrs: ' href=""', type: 'paired' },
@@ -129,7 +125,6 @@ const HTML_TAGS = [
     { tag: 'hr',     desc: 'Thematic break',         attrs: '', type: 'void'   },
     { tag: 'wbr',    desc: 'Word break opportunity', attrs: '', type: 'void'   },
 
-    // Lists
     { tag: 'ul', desc: 'Unordered list', attrs: '', type: 'paired' },
     { tag: 'ol', desc: 'Ordered list',   attrs: '', type: 'paired' },
     { tag: 'li', desc: 'List item',      attrs: '', type: 'paired' },
@@ -137,7 +132,6 @@ const HTML_TAGS = [
     { tag: 'dt', desc: 'Description term', attrs: '', type: 'paired' },
     { tag: 'dd', desc: 'Description details', attrs: '', type: 'paired' },
 
-    // Media
     { tag: 'img',    desc: 'Image',      attrs: ' src="" alt=""', type: 'void'   },
     { tag: 'picture',desc: 'Picture',    attrs: '', type: 'paired' },
     { tag: 'source', desc: 'Media source', attrs: ' srcset=""', type: 'void'   },
@@ -152,7 +146,6 @@ const HTML_TAGS = [
     { tag: 'map',    desc: 'Image map',  attrs: ' name=""', type: 'paired' },
     { tag: 'area',   desc: 'Image map area', attrs: '', type: 'void' },
 
-    // Tables
     { tag: 'table',   desc: 'Table',           attrs: '', type: 'paired' },
     { tag: 'caption', desc: 'Table caption',   attrs: '', type: 'paired' },
     { tag: 'thead',   desc: 'Table head',      attrs: '', type: 'paired' },
@@ -164,7 +157,6 @@ const HTML_TAGS = [
     { tag: 'colgroup',desc: 'Column group',    attrs: '', type: 'paired' },
     { tag: 'col',     desc: 'Column',          attrs: '', type: 'void' },
 
-    // Forms
     { tag: 'form',    desc: 'Form',            attrs: ' action="" method="post"', type: 'paired' },
     { tag: 'label',   desc: 'Label',           attrs: ' for=""', type: 'paired' },
     { tag: 'input',   desc: 'Input field',     attrs: ' type="text" name=""', type: 'void' },
@@ -180,7 +172,6 @@ const HTML_TAGS = [
     { tag: 'fieldset',desc: 'Fieldset',        attrs: '', type: 'paired' },
     { tag: 'legend',  desc: 'Legend',          attrs: '', type: 'paired' },
 
-    // Details / interactive
     { tag: 'details', desc: 'Disclosure',      attrs: '', type: 'paired' },
     { tag: 'summary', desc: 'Disclosure summary', attrs: '', type: 'paired' },
     { tag: 'dialog',  desc: 'Dialog',          attrs: '', type: 'paired' },
@@ -188,9 +179,6 @@ const HTML_TAGS = [
     { tag: 'slot',    desc: 'Web component slot', attrs: '', type: 'paired' },
 ];
 
-/* ------------------------------------------------------------
-   HTML TAG AUTOCOMPLETE HELPERS
-   ------------------------------------------------------------ */
 const TAG_DEFS = (() => {
     const map = {};
     HTML_TAGS.forEach(t => { map[t.tag] = t; });
@@ -203,73 +191,25 @@ const VOID_TAGS = new Set(
 
 /**
  * Detect an HTML tag-open context before the cursor.
- * Returns { start: absolute cursor pos where "<" begins,
- *           partial: the tag name typed so far } or null.
  */
 function getTagOpenContext(cm) {
     const cur = cm.getCursor();
     const line = cm.getLine(cur.line);
     const before = line.slice(0, cur.ch);
 
-    // Find the last "<" on this line
     const lt = before.lastIndexOf('<');
     if (lt === -1) return null;
 
     const after = before.slice(lt + 1);
 
-    // Must look like: <tagname   (letters/digits/hyphen, optionally trailing space)
-    // Disallow if there's a ">" between "<" and cursor
     if (after.includes('>')) return null;
-    if (!/^[a-zA-Z][a-zA-Z0-9-]*$/.test(after)) return null;
-
-    // Ignore closing tags: "<" followed by "/"
     if (after.startsWith('/')) return null;
+    if (!/^[a-zA-Z][a-zA-Z0-9-]*$/.test(after)) return null;
 
     return {
         start: { line: cur.line, ch: lt },
         partial: after
     };
-}
-
-/**
- * Insert a paired tag at the cursor, replacing the partial "<tag" text.
- */
-function insertTagPair(cm, tagName) {
-    const def = TAG_DEFS[tagName];
-    if (!def) return;
-
-    const ctx = getTagOpenContext(cm);
-    if (!ctx) return;
-
-    const cur = cm.getCursor();
-    const attrs = def.attrs || '';
-
-    if (def.type === 'void') {
-        // <img src="" alt="" />
-        const snippet = `<${tagName}${attrs}>`;
-        cm.replaceRange(snippet, ctx.start, cur);
-
-        // Put cursor inside the first "" if there is one, else after the tag
-        const afterInsert = cm.getCursor();
-        const line = cm.getLine(afterInsert.line);
-        const eq = line.lastIndexOf('="', afterInsert.ch);
-        if (eq !== -1) {
-            cm.setCursor({ line: afterInsert.line, ch: eq + 2 });
-        }
-        return;
-    }
-
-    // Paired tag with "cursor anchor" between tags.
-    const snippet = `<${tagName}${attrs}>$</${tagName}>`;
-    cm.replaceRange(snippet, ctx.start, cur);
-
-    // Find the "$" we just inserted and place cursor there, removing it.
-    const doc = cm.getValue();
-    // We can compute the position directly: cursor moves to after ">"
-    const pos = { line: ctx.start.line, ch: ctx.start.ch + `<${tagName}${attrs}>`.length };
-    // Remove the "$" that was placed
-    cm.replaceRange('', pos, { line: pos.line, ch: pos.ch + 1 });
-    cm.setCursor(pos);
 }
 
 /**
@@ -294,26 +234,8 @@ function htmlTagHint(cm) {
     return {
         list,
         from: { line: ctx.start.line, ch: ctx.start.ch },
-        to: cm.getCursor(),
-        // Custom render
-        _tagContext: true
+        to: cm.getCursor()
     };
-}
-
-/* Custom rendering of hint items (with colored tag name + description) */
-function renderTagHintElement(elt, data) {
-    // elt is the hint item; data is our hint object
-    elt.innerHTML = '';
-    const nameSpan = document.createElement('span');
-    nameSpan.className = 'cm-tag-hint-name';
-    nameSpan.textContent = `<${data.tagName}>`;
-
-    const descSpan = document.createElement('span');
-    descSpan.className = 'cm-tag-hint-desc';
-    descSpan.textContent = data.desc;
-
-    elt.appendChild(nameSpan);
-    elt.appendChild(descSpan);
 }
 
 /* ------------------------------------------------------------
@@ -390,16 +312,6 @@ class HtmlCompiler {
         return this.projects.find(p => p.id === this.currentProjectId);
     }
 
-    _tryLoadFromHash() {
-        try {
-            const m = location.hash.match(/#project=(.+)/);
-            if (!m) return null;
-            const json = LZString.decompressFromEncodedURIComponent(m[1]);
-            if (!json) return null;
-            return JSON.parse(json);
-        } catch (_) { return null; }
-    }
-
     updateProjectName() {
         const el = document.getElementById('currentProjectName');
         if (el) el.innerText = this.project.name || 'Untitled';
@@ -433,7 +345,6 @@ class HtmlCompiler {
                 ${p.id === this.currentProjectId ? '<i class="fa-solid fa-check text-[10px]"></i>' : ''}
             </button>
         `).join('');
-        // Delegated clicks
         el.querySelectorAll('.project-item').forEach(btn => {
             btn.addEventListener('click', () => this.switchProject(btn.dataset.projectId));
         });
@@ -501,13 +412,17 @@ class HtmlCompiler {
        ============================================================ */
     initEditor() {
         const textarea = document.getElementById('cmTextarea');
+
+        // Detect if closetag addon is loaded
+        const hasCloseTagAddon = typeof CodeMirror.commands.closeTag === 'function';
+
         this.editor = CodeMirror.fromTextArea(textarea, {
             lineNumbers: true,
             mode: 'htmlmixed',
             theme: 'dracula',
             matchBrackets: true,
             autoCloseBrackets: true,
-            autoCloseTags: true,
+            autoCloseTags: hasCloseTagAddon,   // only enable if addon present
             tabSize: 2,
             lineWrapping: false,
             styleActiveLine: true,
@@ -516,19 +431,15 @@ class HtmlCompiler {
             extraKeys: {
                 "Ctrl-Space": "autocomplete",
                 "Cmd-Space": "autocomplete",
-                // Tab → accept active hint, else indent
                 "Tab": (cm) => {
-                    if (cm.state.completionActive &&
-                        cm.state.completionActive.widget) {
+                    if (cm.state.completionActive && cm.state.completionActive.widget) {
                         cm.state.completionActive.widget.pick();
                     } else {
                         cm.execCommand("defaultTab");
                     }
                 },
-                // Enter → accept hint if list is visible, else newline
                 "Enter": (cm) => {
-                    if (cm.state.completionActive &&
-                        cm.state.completionActive.widget) {
+                    if (cm.state.completionActive && cm.state.completionActive.widget) {
                         cm.state.completionActive.widget.pick();
                     } else {
                         cm.execCommand("newlineAndIndent");
@@ -539,7 +450,7 @@ class HtmlCompiler {
             }
         });
 
-        // Custom hint options (for HTML autocomplete)
+        // HTML tag hint provider
         this.editor.setOption('hintOptions', {
             hint: htmlTagHint,
             completeSingle: false,
@@ -548,41 +459,70 @@ class HtmlCompiler {
             className: 'cm-tag-hints'
         });
 
-        // Auto-trigger HTML tag hints on "<" followed by letters
+        // ---- Auto-pair tags on typing ">" --------------------------
+        // Only active if the closetag addon is NOT available.
+        if (!hasCloseTagAddon) {
+            this.editor.on('beforeChange', (cm, change) => {
+                if (change.origin !== '+input') return;
+                if (change.text.length !== 1) return;
+                if (change.text[0] !== '>') return;
+                if (change.removed && change.removed.length > 0) return;
+
+                const mode = cm.getOption('mode');
+                if (typeof mode === 'string' &&
+                    mode !== 'htmlmixed' && mode !== 'xml' && mode !== 'vue') {
+                    return;
+                }
+
+                const cur = cm.getCursor();
+                const line = cm.getLine(cur.line);
+                const before = line.slice(0, cur.ch);
+                const lt = before.lastIndexOf('<');
+                if (lt === -1) return;
+                const after = before.slice(lt + 1);
+                if (after.includes('>')) return;
+                if (!/^[a-zA-Z][a-zA-Z0-9-]*/.test(after)) return;
+
+                const match = after.match(/^([a-zA-Z][a-zA-Z0-9-]*)/);
+                if (!match) return;
+                const tagName = match[1].toLowerCase();
+                if (VOID_TAGS.has(tagName)) return;
+
+                setTimeout(() => {
+                    const c = cm.getCursor();
+                    const l = cm.getLine(c.line);
+                    if (l.charAt(c.ch - 1) !== '>') return;
+                    const rest = l.slice(c.ch);
+                    if (rest.startsWith('</')) return;
+                    cm.replaceRange(`</${tagName}>`, c);
+                    cm.setCursor(c);
+                }, 0);
+            });
+        }
+
+        // ---- Show hint list on "<" or "<partial" -------------------
         this.editor.on('inputRead', (cm, change) => {
             if (cm.state.completionActive) return;
-            const text = change.text[0] || '';
-            const last = text[text.length - 1];
 
-            // Trigger only in HTML-ish modes
             const mode = cm.getOption('mode');
-            if (typeof mode === 'string' && mode !== 'htmlmixed' && mode !== 'xml' && mode !== 'vue') {
+            if (typeof mode === 'string' &&
+                mode !== 'htmlmixed' && mode !== 'xml' && mode !== 'vue') {
                 return;
             }
 
+            const text = change.text[0] || '';
+            const last = text[text.length - 1];
+
             if (last === '<') {
-                // show full list after "<"
                 cm.showHint({ hint: htmlTagHint, completeSingle: false });
                 return;
             }
 
-            // Show/refresh if we're in "<partial" context
             const ctx = getTagOpenContext(cm);
             if (ctx && ctx.partial.length >= 1) {
                 cm.showHint({ hint: htmlTagHint, completeSingle: false });
             }
         });
-
-        // Custom render for hints (colored tag + description)
-        this.editor.on('startCompletion', (cm) => {
-            // Ensure our custom rendering is applied via the global hook
-        });
-
-        // Patch CodeMirror hint rendering once (global)
-        if (CodeMirror.registerHelper) {
-            // hint render helper (used by show-hint addon)
-            CodeMirror.registerHelper('hint', 'htmlTags', htmlTagHint);
-        }
 
         this.openFile(this.project.activeFile || 'index.html');
 
@@ -649,7 +589,6 @@ class HtmlCompiler {
         event?.stopPropagation();
         const newName = prompt(`Rename "${filename}" to:`, filename);
         if (!newName || newName === filename) return;
-        // Sanitize: no slashes, no null bytes, no leading/trailing dots-only
         const safe = newName.replace(/[\/\\\0]/g, '_').trim();
         if (!safe) { this.showToast('Invalid name', 'error'); return; }
         if (this.project.files[safe]) { this.showToast('Name already in use', 'error'); return; }
@@ -1939,11 +1878,10 @@ class HtmlCompiler {
 }
 
 /* ============================================================
-   BOOT — hash check happens BEFORE construction
+   BOOT
    ============================================================ */
 window.addEventListener('load', function () {
     try {
-        // Check for a shared project hash first
         let shared = null;
         try {
             const m = location.hash.match(/#project=(.+)/);
