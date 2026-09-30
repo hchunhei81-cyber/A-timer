@@ -27,7 +27,7 @@ const PY_KEYWORDS = [
     'append','extend','insert','remove','pop','clear','index','count','sort',
     'reverse','copy','keys','values','items','get','update','setdefault','split',
     'join','strip','replace','lower','upper','title','capitalize','startswith',
-    'endswith','find','rfind','format','encode','decode','splitlines','zfill',
+    'endswith','find','rfind','encode','decode','splitlines','zfill',
     '__init__','__str__','__repr__','__len__','__getitem__','__setitem__',
     '__iter__','__next__','__enter__','__exit__','__call__','__eq__','__hash__'
 ];
@@ -110,7 +110,7 @@ const C_KEYWORDS = [
     'fscanf','sscanf','puts','fputs','putchar','fputc','getchar','fgetc','gets',
     'fgets','fopen','fclose','fread','fwrite','fseek','ftell','rewind','feof',
     'ferror','fflush','clearerr','perror','remove','rename','tmpfile','setbuf',
-    'setvbuf','printf','SEEK_SET','SEEK_CUR','SEEK_END','EOF','stdin','stdout','stderr',
+    'setvbuf','SEEK_SET','SEEK_CUR','SEEK_END','EOF','stdin','stdout','stderr',
     // stdlib
     'malloc','calloc','realloc','free','atoi','atof','atol','atoll','strtol','strtoul',
     'strtod','strtof','abs','labs','llabs','div','ldiv','rand','srand','exit','abort',
@@ -241,18 +241,18 @@ const RUST_KEYWORDS = [
     'cfg!','compile_error!','file!','line!','column!','module_path!',
     // Common methods
     'len','is_empty','push','push_str','pop','insert','remove','clear','retain',
-    'iter','iter_mut','into_iter','iter_mut','drain','split_off','truncate',
+    'iter','iter_mut','into_iter','drain','split_off','truncate',
     'map','filter','filter_map','flat_map','fold','reduce','for_each','any','all',
     'find','find_map','position','count','sum','product','min','max','min_by','max_by',
     'collect','chain','zip','enumerate','take','skip','take_while','skip_while',
     'peekable','rev','cycle','step_by','windows','chunks',
     'unwrap','expect','unwrap_or','unwrap_or_else','unwrap_or_default','ok','err',
     'is_ok','is_err','is_some','is_none','and_then','or_else','map_err',
-    'to_string','to_owned','to_vec','into_iter','as_ref','as_mut','as_str','as_slice',
+    'to_string','to_owned','to_vec','as_ref','as_mut','as_str','as_slice',
     'parse','trim','trim_start','trim_end','split','split_whitespace','split_once',
     'join','replace','contains','starts_with','ends_with','find','rfind','chars',
     'bytes','lines','to_lowercase','to_uppercase','repeat','is_alphabetic','is_numeric',
-    'clone','deref','borrow','borrow_mut','to_owned','into','from',
+    'clone','deref','borrow','borrow_mut','into','from',
     // std modules
     'std','core','alloc','io','fs','path','env','process','thread','sync','time',
     'collections','fmt','cmp','ops','mem','ptr','str','string','num','convert','iter',
@@ -365,9 +365,9 @@ const ASM_KEYWORDS = [
     'addss','addsd','addps','addpd','subss','subsd','subps','subpd',
     'mulss','mulsd','mulps','mulpd','divss','divsd','divps','divpd',
     'sqrtss','sqrtsd','sqrtps','sqrtpd','maxss','minsd',
-    'ucomiss','ucomisd','comiss','comisd','xorpd','xorpd','andpd','orpd','xorps','andps','orps',
+    'ucomiss','ucomisd','comiss','comisd','xorpd','andpd','orpd','xorps','andps','orps',
     'cvtsi2ss','cvtsi2sd','cvtss2si','cvtsd2si','cvttss2si','cvttsd2si',
-    'cvtss2sd','cvtsd2ss','movd','movq','movdqu','pxor','paddd','paddq','psubd','psubq',
+    'cvtss2sd','cvtsd2ss','movd','movq','pxor','paddd','paddq','psubd','psubq',
     // Conditional move / set
     'cmovz','cmovnz','cmovg','cmovge','cmovl','cmovle','cmova','cmovae','cmovb','cmovbe',
     'setz','setnz','setg','setge','setl','setle','seta','setae','setb','setbe',
@@ -375,7 +375,7 @@ const ASM_KEYWORDS = [
     'cqo','cdq','cwd','cbw','cltq','cltd','cdqe','cwde',
     // Bit manipulation
     'bsf','bsr','bswap','popcnt','lzcnt','tzcnt','andn','bextr','blsi','blsr','blsmsk',
-    'pext','pdep','mulx','rorx','sarx','shlx','shrx','pdep','pext',
+    'pext','pdep','mulx','rorx','sarx','shlx','shrx',
     // Atomics
     'lock','xadd','cmpxchg','cmpxchg8b','cmpxchg16b','mfence','lfence','sfence',
     // String
@@ -438,7 +438,7 @@ const LUA_KEYWORDS = [
     // String
     'string.format','string.sub','string.len','string.upper','string.lower','string.rep',
     'string.find','string.match','string.gmatch','string.gsub','string.byte','string.char',
-    'string.reverse','string.gsub','string.gmatch',
+    'string.reverse',
     // Table
     'table.insert','table.remove','table.concat','table.sort','table.unpack','table.pack',
     // Math
@@ -536,7 +536,7 @@ const JS_KEYWORDS = [
     'console.group','console.groupEnd','console.groupCollapsed','console.assert',
     'console.count','console.countReset','console.clear',
     // Objects
-    'JSON.parse','JSON.stringify','JSON.stringify',
+    'JSON.parse','JSON.stringify',
     'Object.keys','Object.values','Object.entries','Object.assign','Object.create',
     'Object.freeze','Object.seal','Object.isFrozen','Object.isSealed','Object.isExtensible',
     'Object.defineProperty','Object.defineProperties','Object.getOwnPropertyDescriptor',
@@ -551,7 +551,7 @@ const JS_KEYWORDS = [
     'encodeURI','decodeURI','eval',
     'setTimeout','setInterval','clearTimeout','clearInterval','setImmediate',
     'queueMicrotask','requestAnimationFrame','cancelAnimationFrame',
-    'structuredClone','queueMicrotask','atob','btoa',
+    'structuredClone','atob','btoa',
     // Promise / async
     'Promise','Promise.resolve','Promise.reject','Promise.all','Promise.allSettled',
     'Promise.race','Promise.any','Promise.withResolvers',
@@ -669,12 +669,11 @@ const CSS_KEYWORDS = [
     'list-style','list-style-type','list-style-position','list-style-image',
     'table-layout','caption-side','empty-cells',
     // Effects
-    'backdrop-filter','filter','blur','brightness','contrast','drop-shadow',
+    'backdrop-filter','blur','brightness','contrast','drop-shadow',
     'grayscale','hue-rotate','invert','saturate','sepia',
-    'opacity','visibility','mix-blend-mode',
     // Values
     'absolute','relative','fixed','sticky','static','inherit','initial','unset','revert',
-    'block','inline','inline-block','flex','inline-flex','grid','inline-grid',
+    'block','inline','inline-block','inline-flex','inline-grid',
     'table','table-cell','table-row','none','hidden','visible','collapse',
     'center','left','right','top','bottom','start','end',
     'space-between','space-around','space-evenly','stretch','baseline',
@@ -844,7 +843,7 @@ const LANGS = {
         modules: PY_MODULES,
         snippets: PY_SNIPPETS,
         trigger: /[A-Za-z_]/,
-        word: /[A-Za-z_][\w]*$/,
+        word: /[A-Za-z_][\w.]*$/,   // ← 支持模块属性（math.sqrt）
         contexts: ['code']
     },
     c: {
@@ -929,9 +928,12 @@ const MODE_MAP = {
     'lua': 'lua',
     'sql': 'sql',
     'javascript': 'javascript',
+    'jsx': 'javascript',                     // ← 新增
     'text/javascript': 'javascript',
     'application/json': 'javascript',
     'text/typescript': 'javascript',
+    'typescript': 'javascript',              // ← 新增
+    'application/typescript': 'javascript',  // ← 新增
     'text/jsx': 'javascript',
     'css': 'css',
     'htmlmixed': 'html',
@@ -945,7 +947,7 @@ const MODE_MAP = {
 
 /**
  * Determine whether the cursor is inside a string literal or comment
- * for the given language. Returns { inString, inComment, inInclude, inTag }.
+ * for the given language. Returns { inString, inComment, inInclude, inTag, inAttribute }.
  */
 function detectContext(cm, langKey) {
     const cur = cm.getCursor();
@@ -978,7 +980,6 @@ function detectContext(cm, langKey) {
     for (const tok of lcTokens) {
         const idx = before.indexOf(tok);
         if (idx !== -1) {
-            // Only a comment if the token isn't inside a string
             const quoteCount = countUnescapedQuotes(before.slice(0, idx));
             if (quoteCount % 2 === 0) {
                 ctx.inComment = true;
@@ -1007,15 +1008,24 @@ function detectContext(cm, langKey) {
         }
     }
 
-    // --- String literal check ---
-    const quoteCounts = {
-        single: countUnescaped(before, "'"),
-        double: countUnescaped(before, '"'),
-        backtick: countUnescaped(before, '`')
-    };
-    if (quoteCounts.single % 2 === 1) ctx.inString = true;
-    if (quoteCounts.double % 2 === 1) ctx.inString = true;
-    if (quoteCounts.backtick % 2 === 1) ctx.inString = true;
+    // --- String literal check: char-by-char scan, skip comments ---
+    let inStr = false;
+    let strChar = null;
+    for (let i = 0; i < before.length; i++) {
+        const c = before[i];
+        if (!inStr) {
+            if (c === "'" || c === '"' || c === '`') {
+                inStr = true;
+                strChar = c;
+            }
+            // Stop scanning at line-comment token
+            if (lcTokens.some(tok => before.startsWith(tok, i))) break;
+        } else {
+            if (c === '\\') { i++; continue; } // skip escaped char
+            if (c === strChar) { inStr = false; strChar = null; }
+        }
+    }
+    if (inStr) ctx.inString = true;
 
     // --- C/C++ #include context ---
     if (langKey === 'c' || langKey === 'cpp') {
@@ -1030,10 +1040,8 @@ function detectContext(cm, langKey) {
         const gtIdx = before.lastIndexOf('>');
         if (ltIdx > gtIdx) {
             ctx.inTag = true;
-            // Are we past the tag name? If we've seen a space, we're in attributes.
             const tagContent = before.slice(ltIdx + 1);
             if (/\s/.test(tagContent) && !/^\s/.test(tagContent)) {
-                // Is there a space after the tag name that isn't inside a quote?
                 const quoteCount = (tagContent.match(/"/g) || []).length + (tagContent.match(/'/g) || []).length;
                 if (quoteCount % 2 === 0) ctx.inAttribute = true;
             }
@@ -1046,7 +1054,11 @@ function detectContext(cm, langKey) {
 function countUnescaped(str, ch) {
     let count = 0;
     for (let i = 0; i < str.length; i++) {
-        if (str[i] === ch && str[i-1] !== '\\') count++;
+        if (str[i] !== ch) continue;
+        // Count preceding backslashes; if odd, this char is escaped.
+        let bs = 0, j = i - 1;
+        while (j >= 0 && str[j] === '\\') { bs++; j--; }
+        if (bs % 2 === 0) count++;
     }
     return count;
 }
@@ -1070,6 +1082,25 @@ function getTagOpenContext(cm) {
     return { start: { line: cur.line, ch: lt }, partial: after };
 }
 
+/* 自定义渲染：标签条目显示为 <name>  +  描述 */
+function renderTagHint(el, data) {
+    if (data.tagName) {
+        const name = document.createElement('span');
+        name.className = 'cm-tag-hint-name';
+        name.textContent = '<' + data.tagName + '>';
+        const desc = document.createElement('span');
+        desc.className = 'cm-tag-hint-desc';
+        desc.textContent = data.desc || '';
+        el.appendChild(name);
+        el.appendChild(desc);
+    } else {
+        el.textContent = data.displayText || data.text;
+        if (data.kind === 'attr' || data.kind === 'header') {
+            el.classList.add('cm-tag-hint-name');
+        }
+    }
+}
+
 function htmlTagHint(cm) {
     const cur = cm.getCursor();
     const line = cm.getLine(cur.line);
@@ -1081,7 +1112,7 @@ function htmlTagHint(cm) {
     if (ltIdx > gtIdx) {
         const tagContent = before.slice(ltIdx + 1);
         const m = tagContent.match(/([a-zA-Z-]+)\s*=?\s*["'][^"']*$/);
-        // If inside an attribute value, don't suggest (could suggest values but skip)
+        // If inside an attribute value, don't suggest
         if (m) return null;
         // Match current partial attribute
         const attrMatch = tagContent.match(/([a-zA-Z-]+)$/);
@@ -1092,7 +1123,14 @@ function htmlTagHint(cm) {
                 .filter(a => a.toLowerCase().startsWith(partial))
                 .slice(0, 20)
                 .map(a => ({ text: a, displayText: a, kind: 'attr' }));
-            if (list.length) return { list, from: { line: cur.line, ch: startCh }, to: cur };
+            if (list.length) {
+                return {
+                    list,
+                    from: { line: cur.line, ch: startCh },
+                    to: cur,
+                    render: renderTagHint
+                };
+            }
         }
     }
 
@@ -1109,7 +1147,13 @@ function htmlTagHint(cm) {
             desc: t.desc
         }));
     if (!list.length) return null;
-    return { list, from: { line: ctx.start.line, ch: ctx.start.ch }, to: cur };
+
+    return {
+        list,
+        from: { line: ctx.start.line, ch: ctx.start.ch },
+        to: cur,
+        render: renderTagHint
+    };
 }
 
 /* ============================================================
@@ -1138,7 +1182,12 @@ function makeHintProvider(langKey) {
                 .slice(0, 30)
                 .map(h => ({ text: h, displayText: h, kind: 'header' }));
             if (!list.length) return null;
-            return { list, from: { line: cur.line, ch: startCh }, to: cur };
+            return {
+                list,
+                from: { line: cur.line, ch: startCh },
+                to: cur,
+                render: renderTagHint
+            };
         }
 
         // ---- Normal word context ----
@@ -1155,8 +1204,9 @@ function makeHintProvider(langKey) {
 
         // ---- 1. Python module attribute: math.sq -> math.sqrt ----
         if (langKey === 'python' && word.includes('.')) {
-            const [modName, ...rest] = word.split('.');
-            const attrPartial = rest.join('.');
+            const parts = word.split('.');
+            const modName = parts[0];
+            const attrPartial = parts.slice(1).join('.');
             const mod = PY_MODULES[modName];
             if (mod) {
                 const attrLower = attrPartial.toLowerCase();
@@ -1173,25 +1223,24 @@ function makeHintProvider(langKey) {
         }
 
         // ---- 2. Keywords matching ----
-        const kwLower = wordLower;
         for (const kw of lang.keywords) {
             const kwCmp = lang.caseInsensitive ? kw.toLowerCase() : kw;
-            const wordCmp = lang.caseInsensitive ? kwLower : wordLower;
+            const wordCmp = lang.caseInsensitive ? wordLower : wordLower;
 
             // exact prefix
-            if (kwCmp.toLowerCase().startsWith(kwLower)) {
+            if (kwCmp.toLowerCase().startsWith(wordCmp)) {
                 list.push({
                     text: kw,
                     displayText: kw,
                     kind: 'keyword',
-                    _rank: kwCmp.toLowerCase() === kwLower ? 0 :
-                           kwCmp.toLowerCase().startsWith(kwLower) ? 1 : 2
+                    _rank: kwCmp.toLowerCase() === wordCmp ? 0 :
+                           kwCmp.toLowerCase().startsWith(wordCmp) ? 1 : 2
                 });
                 continue;
             }
 
             // fuzzy: characters of word appear in order within kw
-            if (word.length >= 3 && fuzzyMatch(kwLower, kwCmp.toLowerCase())) {
+            if (word.length >= 3 && fuzzyMatch(kwCmp.toLowerCase(), wordCmp)) {
                 list.push({
                     text: kw,
                     displayText: kw,
@@ -1236,7 +1285,7 @@ function makeHintProvider(langKey) {
             }
         }
 
-        // Sort: rank asc, then text length asc (shorter = better prefix match)
+        // Sort: rank asc, then text length asc
         unique.sort((a, b) => {
             const ra = a._rank || 0, rb = b._rank || 0;
             if (ra !== rb) return ra - rb;
@@ -1246,6 +1295,8 @@ function makeHintProvider(langKey) {
         const trimmed = unique.slice(0, 40);
         trimmed.forEach(h => delete h._rank);
 
+        // For snippets, still use default rendering (CodeMirror will show text).
+        // Use default rendering for non-HTML languages.
         return { list: trimmed, from, to: cur };
     };
 }
