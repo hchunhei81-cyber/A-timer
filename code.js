@@ -69,6 +69,254 @@ const DEFAULT_PROJECT = {
 };
 
 /* ------------------------------------------------------------
+   HTML TAG DATABASE  (used for autocomplete)
+   ------------------------------------------------------------ */
+const HTML_TAGS = [
+    // Document / metadata
+    { tag: 'html',   desc: 'Root element',           attrs: ' lang="en"',           type: 'paired' },
+    { tag: 'head',   desc: 'Document head',          attrs: '',                     type: 'paired' },
+    { tag: 'body',   desc: 'Document body',          attrs: '',                     type: 'paired' },
+    { tag: 'title',  desc: 'Document title',         attrs: '',                     type: 'paired' },
+    { tag: 'meta',   desc: 'Metadata',               attrs: ' charset="UTF-8"',     type: 'void'   },
+    { tag: 'link',   desc: 'External resource',      attrs: ' rel="stylesheet" href=""', type: 'void' },
+    { tag: 'style',  desc: 'Inline CSS',             attrs: '',                     type: 'paired' },
+    { tag: 'script', desc: 'Inline / external JS',   attrs: '',                     type: 'paired' },
+    { tag: 'base',   desc: 'Base URL',               attrs: ' href=""',             type: 'void'   },
+
+    // Sections
+    { tag: 'header', desc: 'Header section',         attrs: '',                     type: 'paired' },
+    { tag: 'footer', desc: 'Footer section',         attrs: '',                     type: 'paired' },
+    { tag: 'nav',    desc: 'Navigation',             attrs: '',                     type: 'paired' },
+    { tag: 'main',   desc: 'Main content',           attrs: '',                     type: 'paired' },
+    { tag: 'section',desc: 'Section',                attrs: '',                     type: 'paired' },
+    { tag: 'article',desc: 'Article',                attrs: '',                     type: 'paired' },
+    { tag: 'aside',  desc: 'Sidebar',                attrs: '',                     type: 'paired' },
+    { tag: 'div',    desc: 'Block container',        attrs: '',                     type: 'paired' },
+
+    // Headings
+    { tag: 'h1', desc: 'Heading level 1', attrs: '', type: 'paired' },
+    { tag: 'h2', desc: 'Heading level 2', attrs: '', type: 'paired' },
+    { tag: 'h3', desc: 'Heading level 3', attrs: '', type: 'paired' },
+    { tag: 'h4', desc: 'Heading level 4', attrs: '', type: 'paired' },
+    { tag: 'h5', desc: 'Heading level 5', attrs: '', type: 'paired' },
+    { tag: 'h6', desc: 'Heading level 6', attrs: '', type: 'paired' },
+    { tag: 'hgroup', desc: 'Heading group', attrs: '', type: 'paired' },
+
+    // Text content
+    { tag: 'p',      desc: 'Paragraph',              attrs: '', type: 'paired' },
+    { tag: 'span',   desc: 'Inline container',       attrs: '', type: 'paired' },
+    { tag: 'a',      desc: 'Hyperlink',              attrs: ' href=""', type: 'paired' },
+    { tag: 'strong', desc: 'Bold importance',        attrs: '', type: 'paired' },
+    { tag: 'em',     desc: 'Emphasis',               attrs: '', type: 'paired' },
+    { tag: 'b',      desc: 'Bold',                   attrs: '', type: 'paired' },
+    { tag: 'i',      desc: 'Italic',                 attrs: '', type: 'paired' },
+    { tag: 'u',      desc: 'Underline',              attrs: '', type: 'paired' },
+    { tag: 's',      desc: 'Strikethrough',          attrs: '', type: 'paired' },
+    { tag: 'small',  desc: 'Small print',            attrs: '', type: 'paired' },
+    { tag: 'mark',   desc: 'Highlighted',            attrs: '', type: 'paired' },
+    { tag: 'sub',    desc: 'Subscript',              attrs: '', type: 'paired' },
+    { tag: 'sup',    desc: 'Superscript',            attrs: '', type: 'paired' },
+    { tag: 'code',   desc: 'Inline code',            attrs: '', type: 'paired' },
+    { tag: 'pre',    desc: 'Preformatted',           attrs: '', type: 'paired' },
+    { tag: 'kbd',    desc: 'Keyboard input',         attrs: '', type: 'paired' },
+    { tag: 'samp',   desc: 'Sample output',          attrs: '', type: 'paired' },
+    { tag: 'var',    desc: 'Variable',               attrs: '', type: 'paired' },
+    { tag: 'q',      desc: 'Inline quote',           attrs: '', type: 'paired' },
+    { tag: 'blockquote', desc: 'Block quote',        attrs: '', type: 'paired' },
+    { tag: 'cite',   desc: 'Citation',               attrs: '', type: 'paired' },
+    { tag: 'abbr',   desc: 'Abbreviation',           attrs: ' title=""', type: 'paired' },
+    { tag: 'br',     desc: 'Line break',             attrs: '', type: 'void'   },
+    { tag: 'hr',     desc: 'Thematic break',         attrs: '', type: 'void'   },
+    { tag: 'wbr',    desc: 'Word break opportunity', attrs: '', type: 'void'   },
+
+    // Lists
+    { tag: 'ul', desc: 'Unordered list', attrs: '', type: 'paired' },
+    { tag: 'ol', desc: 'Ordered list',   attrs: '', type: 'paired' },
+    { tag: 'li', desc: 'List item',      attrs: '', type: 'paired' },
+    { tag: 'dl', desc: 'Description list', attrs: '', type: 'paired' },
+    { tag: 'dt', desc: 'Description term', attrs: '', type: 'paired' },
+    { tag: 'dd', desc: 'Description details', attrs: '', type: 'paired' },
+
+    // Media
+    { tag: 'img',    desc: 'Image',      attrs: ' src="" alt=""', type: 'void'   },
+    { tag: 'picture',desc: 'Picture',    attrs: '', type: 'paired' },
+    { tag: 'source', desc: 'Media source', attrs: ' srcset=""', type: 'void'   },
+    { tag: 'video',  desc: 'Video',      attrs: ' controls', type: 'paired' },
+    { tag: 'audio',  desc: 'Audio',      attrs: ' controls', type: 'paired' },
+    { tag: 'track',  desc: 'Text track', attrs: '', type: 'void'   },
+    { tag: 'canvas', desc: 'Canvas',     attrs: '', type: 'paired' },
+    { tag: 'svg',    desc: 'SVG root',   attrs: ' viewBox="0 0 24 24"', type: 'paired' },
+    { tag: 'iframe', desc: 'Inline frame', attrs: ' src=""', type: 'paired' },
+    { tag: 'embed',  desc: 'Embed',      attrs: ' src=""', type: 'void' },
+    { tag: 'object', desc: 'Object',     attrs: ' data=""', type: 'paired' },
+    { tag: 'map',    desc: 'Image map',  attrs: ' name=""', type: 'paired' },
+    { tag: 'area',   desc: 'Image map area', attrs: '', type: 'void' },
+
+    // Tables
+    { tag: 'table',   desc: 'Table',           attrs: '', type: 'paired' },
+    { tag: 'caption', desc: 'Table caption',   attrs: '', type: 'paired' },
+    { tag: 'thead',   desc: 'Table head',      attrs: '', type: 'paired' },
+    { tag: 'tbody',   desc: 'Table body',      attrs: '', type: 'paired' },
+    { tag: 'tfoot',   desc: 'Table footer',    attrs: '', type: 'paired' },
+    { tag: 'tr',      desc: 'Table row',       attrs: '', type: 'paired' },
+    { tag: 'th',      desc: 'Table header',    attrs: '', type: 'paired' },
+    { tag: 'td',      desc: 'Table data',      attrs: '', type: 'paired' },
+    { tag: 'colgroup',desc: 'Column group',    attrs: '', type: 'paired' },
+    { tag: 'col',     desc: 'Column',          attrs: '', type: 'void' },
+
+    // Forms
+    { tag: 'form',    desc: 'Form',            attrs: ' action="" method="post"', type: 'paired' },
+    { tag: 'label',   desc: 'Label',           attrs: ' for=""', type: 'paired' },
+    { tag: 'input',   desc: 'Input field',     attrs: ' type="text" name=""', type: 'void' },
+    { tag: 'textarea',desc: 'Text area',       attrs: ' name=""', type: 'paired' },
+    { tag: 'button',  desc: 'Button',          attrs: ' type="button"', type: 'paired' },
+    { tag: 'select',  desc: 'Select dropdown', attrs: ' name=""', type: 'paired' },
+    { tag: 'option',  desc: 'Option',          attrs: ' value=""', type: 'paired' },
+    { tag: 'optgroup',desc: 'Option group',    attrs: ' label=""', type: 'paired' },
+    { tag: 'datalist',desc: 'Data list',       attrs: '', type: 'paired' },
+    { tag: 'output',  desc: 'Output',          attrs: '', type: 'paired' },
+    { tag: 'progress',desc: 'Progress bar',    attrs: ' value="0" max="100"', type: 'paired' },
+    { tag: 'meter',   desc: 'Meter',           attrs: '', type: 'paired' },
+    { tag: 'fieldset',desc: 'Fieldset',        attrs: '', type: 'paired' },
+    { tag: 'legend',  desc: 'Legend',          attrs: '', type: 'paired' },
+
+    // Details / interactive
+    { tag: 'details', desc: 'Disclosure',      attrs: '', type: 'paired' },
+    { tag: 'summary', desc: 'Disclosure summary', attrs: '', type: 'paired' },
+    { tag: 'dialog',  desc: 'Dialog',          attrs: '', type: 'paired' },
+    { tag: 'template',desc: 'Template',        attrs: '', type: 'paired' },
+    { tag: 'slot',    desc: 'Web component slot', attrs: '', type: 'paired' },
+];
+
+/* ------------------------------------------------------------
+   HTML TAG AUTOCOMPLETE HELPERS
+   ------------------------------------------------------------ */
+const TAG_DEFS = (() => {
+    const map = {};
+    HTML_TAGS.forEach(t => { map[t.tag] = t; });
+    return map;
+})();
+
+const VOID_TAGS = new Set(
+    HTML_TAGS.filter(t => t.type === 'void').map(t => t.tag)
+);
+
+/**
+ * Detect an HTML tag-open context before the cursor.
+ * Returns { start: absolute cursor pos where "<" begins,
+ *           partial: the tag name typed so far } or null.
+ */
+function getTagOpenContext(cm) {
+    const cur = cm.getCursor();
+    const line = cm.getLine(cur.line);
+    const before = line.slice(0, cur.ch);
+
+    // Find the last "<" on this line
+    const lt = before.lastIndexOf('<');
+    if (lt === -1) return null;
+
+    const after = before.slice(lt + 1);
+
+    // Must look like: <tagname   (letters/digits/hyphen, optionally trailing space)
+    // Disallow if there's a ">" between "<" and cursor
+    if (after.includes('>')) return null;
+    if (!/^[a-zA-Z][a-zA-Z0-9-]*$/.test(after)) return null;
+
+    // Ignore closing tags: "<" followed by "/"
+    if (after.startsWith('/')) return null;
+
+    return {
+        start: { line: cur.line, ch: lt },
+        partial: after
+    };
+}
+
+/**
+ * Insert a paired tag at the cursor, replacing the partial "<tag" text.
+ */
+function insertTagPair(cm, tagName) {
+    const def = TAG_DEFS[tagName];
+    if (!def) return;
+
+    const ctx = getTagOpenContext(cm);
+    if (!ctx) return;
+
+    const cur = cm.getCursor();
+    const attrs = def.attrs || '';
+
+    if (def.type === 'void') {
+        // <img src="" alt="" />
+        const snippet = `<${tagName}${attrs}>`;
+        cm.replaceRange(snippet, ctx.start, cur);
+
+        // Put cursor inside the first "" if there is one, else after the tag
+        const afterInsert = cm.getCursor();
+        const line = cm.getLine(afterInsert.line);
+        const eq = line.lastIndexOf('="', afterInsert.ch);
+        if (eq !== -1) {
+            cm.setCursor({ line: afterInsert.line, ch: eq + 2 });
+        }
+        return;
+    }
+
+    // Paired tag with "cursor anchor" between tags.
+    const snippet = `<${tagName}${attrs}>$</${tagName}>`;
+    cm.replaceRange(snippet, ctx.start, cur);
+
+    // Find the "$" we just inserted and place cursor there, removing it.
+    const doc = cm.getValue();
+    // We can compute the position directly: cursor moves to after ">"
+    const pos = { line: ctx.start.line, ch: ctx.start.ch + `<${tagName}${attrs}>`.length };
+    // Remove the "$" that was placed
+    cm.replaceRange('', pos, { line: pos.line, ch: pos.ch + 1 });
+    cm.setCursor(pos);
+}
+
+/**
+ * CodeMirror hint provider for HTML tags.
+ */
+function htmlTagHint(cm) {
+    const ctx = getTagOpenContext(cm);
+    if (!ctx) return null;
+
+    const partial = ctx.partial.toLowerCase();
+    const list = HTML_TAGS
+        .filter(t => t.tag.startsWith(partial))
+        .map(t => ({
+            text: `<${t.tag}>`,
+            displayText: `<${t.tag}>  ${t.desc}`,
+            tagName: t.tag,
+            desc: t.desc
+        }));
+
+    if (list.length === 0) return null;
+
+    return {
+        list,
+        from: { line: ctx.start.line, ch: ctx.start.ch },
+        to: cm.getCursor(),
+        // Custom render
+        _tagContext: true
+    };
+}
+
+/* Custom rendering of hint items (with colored tag name + description) */
+function renderTagHintElement(elt, data) {
+    // elt is the hint item; data is our hint object
+    elt.innerHTML = '';
+    const nameSpan = document.createElement('span');
+    nameSpan.className = 'cm-tag-hint-name';
+    nameSpan.textContent = `<${data.tagName}>`;
+
+    const descSpan = document.createElement('span');
+    descSpan.className = 'cm-tag-hint-desc';
+    descSpan.textContent = data.desc;
+
+    elt.appendChild(nameSpan);
+    elt.appendChild(descSpan);
+}
+
+/* ------------------------------------------------------------
    Main Application
    ------------------------------------------------------------ */
 class HtmlCompiler {
@@ -83,6 +331,7 @@ class HtmlCompiler {
         this.currentSidebarTab = 'files';
         this.currentToolTab = 'palette';
         this._saveTimer = null;
+        this._autoRunTimer = null;
         this._replHistory = [];
         this._replIndex = -1;
         this._fpsRaf = null;
@@ -113,7 +362,7 @@ class HtmlCompiler {
         try {
             const raw = localStorage.getItem('htmlc_projects');
             if (raw) return JSON.parse(raw);
-        } catch {}
+        } catch (_) {}
         return [structuredClone(DEFAULT_PROJECT)];
     }
 
@@ -125,7 +374,7 @@ class HtmlCompiler {
                 this._persistCurrentIntoProjects();
                 localStorage.setItem('htmlc_projects', JSON.stringify(this.projects));
                 localStorage.setItem('htmlc_current_project', this.currentProjectId);
-            } catch (e) {
+            } catch (_) {
                 this.showToast('Storage full', 'error');
             }
         }, 250);
@@ -148,7 +397,7 @@ class HtmlCompiler {
             const json = LZString.decompressFromEncodedURIComponent(m[1]);
             if (!json) return null;
             return JSON.parse(json);
-        } catch { return null; }
+        } catch (_) { return null; }
     }
 
     updateProjectName() {
@@ -178,11 +427,16 @@ class HtmlCompiler {
         const el = document.getElementById('projectList');
         if (!el) return;
         el.innerHTML = this.projects.map(p => `
-            <button onclick="app.switchProject('${p.id}')" class="w-full text-left px-3 py-1.5 hover:bg-studio-panel flex items-center justify-between ${p.id === this.currentProjectId ? 'text-blue-400' : 'text-studio-text'}">
+            <button data-project-id="${this._escapeAttr(p.id)}"
+                    class="project-item w-full text-left px-3 py-1.5 hover:bg-studio-panel flex items-center justify-between ${p.id === this.currentProjectId ? 'text-blue-400' : 'text-studio-text'}">
                 <span class="truncate">${this._escape(p.name)}</span>
                 ${p.id === this.currentProjectId ? '<i class="fa-solid fa-check text-[10px]"></i>' : ''}
             </button>
         `).join('');
+        // Delegated clicks
+        el.querySelectorAll('.project-item').forEach(btn => {
+            btn.addEventListener('click', () => this.switchProject(btn.dataset.projectId));
+        });
     }
 
     switchProject(id) {
@@ -194,7 +448,8 @@ class HtmlCompiler {
         this.openFile(this.project.activeFile || Object.keys(this.project.files)[0]);
         this.renderTabs();
         this.renderSidebar();
-        document.getElementById('projectMenu').classList.add('hidden');
+        const menu = document.getElementById('projectMenu');
+        if (menu) menu.classList.add('hidden');
         this.runCode();
         this.showToast(`Switched to "${this.project.name}"`, 'info');
     }
@@ -209,7 +464,7 @@ class HtmlCompiler {
             files: {
                 'index.html': {
                     name: 'index.html',
-                    content: `<!DOCTYPE html>\n<html lang="en">\n<head>\n  <meta charset="UTF-8">\n  <title>${name}</title>\n</head>\n<body>\n  <h1>Hello, World!</h1>\n</body>\n</html>`
+                    content: `<!DOCTYPE html>\n<html lang="en">\n<head>\n  <meta charset="UTF-8">\n  <title>${this._escape(name)}</title>\n</head>\n<body>\n  <h1>Hello, World!</h1>\n</body>\n</html>`
                 }
             }
         };
@@ -261,10 +516,73 @@ class HtmlCompiler {
             extraKeys: {
                 "Ctrl-Space": "autocomplete",
                 "Cmd-Space": "autocomplete",
+                // Tab → accept active hint, else indent
+                "Tab": (cm) => {
+                    if (cm.state.completionActive &&
+                        cm.state.completionActive.widget) {
+                        cm.state.completionActive.widget.pick();
+                    } else {
+                        cm.execCommand("defaultTab");
+                    }
+                },
+                // Enter → accept hint if list is visible, else newline
+                "Enter": (cm) => {
+                    if (cm.state.completionActive &&
+                        cm.state.completionActive.widget) {
+                        cm.state.completionActive.widget.pick();
+                    } else {
+                        cm.execCommand("newlineAndIndent");
+                    }
+                },
                 "Ctrl-S": () => { this.runCode(); this.showToast('Ran project', 'success'); },
                 "Cmd-S": () => { this.runCode(); }
             }
         });
+
+        // Custom hint options (for HTML autocomplete)
+        this.editor.setOption('hintOptions', {
+            hint: htmlTagHint,
+            completeSingle: false,
+            closeOnUnfocus: true,
+            alignWithWord: true,
+            className: 'cm-tag-hints'
+        });
+
+        // Auto-trigger HTML tag hints on "<" followed by letters
+        this.editor.on('inputRead', (cm, change) => {
+            if (cm.state.completionActive) return;
+            const text = change.text[0] || '';
+            const last = text[text.length - 1];
+
+            // Trigger only in HTML-ish modes
+            const mode = cm.getOption('mode');
+            if (typeof mode === 'string' && mode !== 'htmlmixed' && mode !== 'xml' && mode !== 'vue') {
+                return;
+            }
+
+            if (last === '<') {
+                // show full list after "<"
+                cm.showHint({ hint: htmlTagHint, completeSingle: false });
+                return;
+            }
+
+            // Show/refresh if we're in "<partial" context
+            const ctx = getTagOpenContext(cm);
+            if (ctx && ctx.partial.length >= 1) {
+                cm.showHint({ hint: htmlTagHint, completeSingle: false });
+            }
+        });
+
+        // Custom render for hints (colored tag + description)
+        this.editor.on('startCompletion', (cm) => {
+            // Ensure our custom rendering is applied via the global hook
+        });
+
+        // Patch CodeMirror hint rendering once (global)
+        if (CodeMirror.registerHelper) {
+            // hint render helper (used by show-hint addon)
+            CodeMirror.registerHelper('hint', 'htmlTags', htmlTagHint);
+        }
 
         this.openFile(this.project.activeFile || 'index.html');
 
@@ -272,7 +590,8 @@ class HtmlCompiler {
             const file = this.project.files[this.project.activeFile];
             if (file) file.content = this.editor.getValue();
             this._saveProjects();
-            if (document.getElementById('autoRunToggle')?.checked) {
+            const autoRun = document.getElementById('autoRunToggle');
+            if (autoRun && autoRun.checked) {
                 clearTimeout(this._autoRunTimer);
                 this._autoRunTimer = setTimeout(() => this.runCode(), 600);
             }
@@ -330,16 +649,19 @@ class HtmlCompiler {
         event?.stopPropagation();
         const newName = prompt(`Rename "${filename}" to:`, filename);
         if (!newName || newName === filename) return;
-        if (this.project.files[newName]) { this.showToast('Name already in use', 'error'); return; }
+        // Sanitize: no slashes, no null bytes, no leading/trailing dots-only
+        const safe = newName.replace(/[\/\\\0]/g, '_').trim();
+        if (!safe) { this.showToast('Invalid name', 'error'); return; }
+        if (this.project.files[safe]) { this.showToast('Name already in use', 'error'); return; }
         const file = this.project.files[filename];
-        file.name = newName;
-        this.project.files[newName] = file;
+        file.name = safe;
+        this.project.files[safe] = file;
         delete this.project.files[filename];
-        if (this.project.activeFile === filename) this.project.activeFile = newName;
+        if (this.project.activeFile === filename) this.project.activeFile = safe;
         this._saveProjects();
         this.renderTabs();
         this.renderSidebar();
-        this.showToast(`Renamed to ${newName}`, 'success');
+        this.showToast(`Renamed to ${safe}`, 'success');
     }
 
     renderTabs() {
@@ -351,11 +673,19 @@ class HtmlCompiler {
             tab.className = `h-full px-3 text-xs flex items-center space-x-2 border-r border-studio-border cursor-pointer transition shrink-0 ${
                 isActive ? 'bg-studio-bg text-white border-t-2 border-t-blue-500 font-medium' : 'text-studio-muted hover:bg-studio-panel'
             }`;
-            tab.onclick = () => this.openFile(filename);
-            tab.innerHTML = `
-                <span ondblclick="app.renameFile('${filename}', event)">${this._escape(filename)}</span>
-                <i class="fa-solid fa-xmark text-[10px] hover:text-red-400 p-0.5 rounded" onclick="app.deleteFile('${filename}', event)"></i>
-            `;
+
+            const label = document.createElement('span');
+            label.textContent = filename;
+            label.title = 'Double-click to rename';
+            label.addEventListener('dblclick', (e) => this.renameFile(filename, e));
+
+            const close = document.createElement('i');
+            close.className = 'fa-solid fa-xmark text-[10px] hover:text-red-400 p-0.5 rounded';
+            close.addEventListener('click', (e) => this.deleteFile(filename, e));
+
+            tab.appendChild(label);
+            tab.appendChild(close);
+            tab.addEventListener('click', () => this.openFile(filename));
             header.appendChild(tab);
         });
     }
@@ -365,56 +695,76 @@ class HtmlCompiler {
        ============================================================ */
     switchSidebarTab(tab) {
         this.currentSidebarTab = tab;
-        ['Files', 'Packages', 'Search', 'Snippets', 'Snapshots'].forEach(t => {
-            const btn = document.getElementById(`btnTab${t}`);
-            if (btn) btn.className = btn.className.replace(/text-(blue-400|white|studio-muted)/, 'text-studio-muted');
+        const tabs = ['files', 'packages', 'search', 'snippets', 'snapshots'];
+        tabs.forEach(t => {
+            const btn = document.getElementById(`btnTab${t.charAt(0).toUpperCase() + t.slice(1)}`);
+            if (!btn) return;
+            btn.classList.toggle('text-blue-400', t === tab);
+            btn.classList.toggle('text-studio-muted', t !== tab);
         });
-        const activeBtn = document.getElementById('btnTab' + tab.charAt(0).toUpperCase() + tab.slice(1));
-        if (activeBtn) activeBtn.className = activeBtn.className.replace('text-studio-muted', 'text-blue-400');
         this.renderSidebar();
     }
 
     renderSidebar() {
         const c = document.getElementById('sidebarContent');
+        if (!c) return;
+
         if (this.currentSidebarTab === 'files') {
             c.innerHTML = `
                 <div class="flex items-center justify-between pb-2 border-b border-studio-border mb-2 text-xs">
                     <span class="font-bold text-studio-muted uppercase tracking-wider">Explorer</span>
-                    <button onclick="app.createFile()" class="p-1 text-studio-muted hover:text-white" title="New File">
+                    <button data-action="new-file" class="p-1 text-studio-muted hover:text-white" title="New File">
                         <i class="fa-solid fa-plus"></i>
                     </button>
                 </div>
-                <div class="space-y-0.5">
-                    ${Object.keys(this.project.files).map(filename => `
-                        <div onclick="app.openFile('${filename}')" class="group flex items-center justify-between p-1.5 rounded text-xs cursor-pointer ${
-                            filename === this.project.activeFile ? 'bg-studio-panel text-blue-400 font-semibold' : 'text-studio-text hover:bg-studio-panel/50'
-                        }">
-                            <div class="flex items-center space-x-2 overflow-hidden">
-                                <i class="${this._iconForFile(filename)} text-studio-muted"></i>
-                                <span class="truncate" ondblclick="app.renameFile('${filename}', event)">${this._escape(filename)}</span>
-                            </div>
-                            <i class="fa-solid fa-trash text-[10px] text-studio-muted hover:text-red-400 p-1 opacity-0 group-hover:opacity-100" onclick="app.deleteFile('${filename}', event)"></i>
-                        </div>
-                    `).join('')}
-                </div>
+                <div class="space-y-0.5" id="fileList"></div>
             `;
+            c.querySelector('[data-action="new-file"]').addEventListener('click', () => this.createFile());
+
+            const list = c.querySelector('#fileList');
+            Object.keys(this.project.files).forEach(filename => {
+                const row = document.createElement('div');
+                const active = filename === this.project.activeFile;
+                row.className = `group flex items-center justify-between p-1.5 rounded text-xs cursor-pointer ${
+                    active ? 'bg-studio-panel text-blue-400 font-semibold' : 'text-studio-text hover:bg-studio-panel/50'
+                }`;
+
+                const left = document.createElement('div');
+                left.className = 'flex items-center space-x-2 overflow-hidden';
+
+                const icon = document.createElement('i');
+                icon.className = this._iconForFile(filename);
+                icon.classList.add('text-studio-muted');
+
+                const name = document.createElement('span');
+                name.className = 'truncate';
+                name.textContent = filename;
+                name.title = 'Double-click to rename';
+                name.addEventListener('dblclick', (e) => this.renameFile(filename, e));
+
+                left.appendChild(icon);
+                left.appendChild(name);
+
+                const trash = document.createElement('i');
+                trash.className = 'fa-solid fa-trash text-[10px] text-studio-muted hover:text-red-400 p-1 opacity-0 group-hover:opacity-100';
+                trash.addEventListener('click', (e) => this.deleteFile(filename, e));
+
+                row.appendChild(left);
+                row.appendChild(trash);
+                row.addEventListener('click', () => this.openFile(filename));
+                list.appendChild(row);
+            });
+
         } else if (this.currentSidebarTab === 'packages') {
             c.innerHTML = `
                 <div class="pb-2 border-b border-studio-border mb-2 text-xs font-bold text-studio-muted uppercase">CDN Packages</div>
                 <div class="space-y-2 text-xs">
                     <input id="pkgInput" placeholder="e.g. lodash, gsap, axios" class="w-full bg-studio-panel border border-studio-border rounded p-1.5 text-white focus:outline-none focus:border-blue-500">
-                    <button onclick="app.addCdnPackage()" class="w-full bg-blue-600 hover:bg-blue-500 text-white p-1.5 rounded font-medium">Add Library</button>
+                    <button data-action="add-pkg" class="w-full bg-blue-600 hover:bg-blue-500 text-white p-1.5 rounded font-medium">Add Library</button>
                     <div class="text-[10px] text-studio-muted">Injects CDN script tags into the sandbox.</div>
                     <div class="pt-2 border-t border-studio-border">
                         <div class="text-[10px] text-studio-muted uppercase mb-1">Quick Add</div>
-                        <div class="grid grid-cols-2 gap-1">
-                            <button onclick="app.addCdnUrl('https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js')" class="text-[10px] p-1 bg-studio-panel rounded border border-studio-border hover:bg-studio-border">GSAP</button>
-                            <button onclick="app.addCdnUrl('https://cdnjs.cloudflare.com/ajax/libs/axios/1.4.0/axios.min.js')" class="text-[10px] p-1 bg-studio-panel rounded border border-studio-border hover:bg-studio-border">Axios</button>
-                            <button onclick="app.addCdnUrl('https://cdn.jsdelivr.net/npm/chart.js')" class="text-[10px] p-1 bg-studio-panel rounded border border-studio-border hover:bg-studio-border">Chart.js</button>
-                            <button onclick="app.addCdnUrl('https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js')" class="text-[10px] p-1 bg-studio-panel rounded border border-studio-border hover:bg-studio-border">Three.js</button>
-                            <button onclick="app.addCdnUrl('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css')" class="text-[10px] p-1 bg-studio-panel rounded border border-studio-border hover:bg-studio-border">FontAwesome</button>
-                            <button onclick="app.addCdnUrl('https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js')" class="text-[10px] p-1 bg-studio-panel rounded border border-studio-border hover:bg-studio-border">Anime.js</button>
-                        </div>
+                        <div class="grid grid-cols-2 gap-1" id="quickAddGrid"></div>
                     </div>
                     <div class="pt-2 border-t border-studio-border">
                         <div class="text-[10px] text-studio-muted uppercase mb-1">Active Imports</div>
@@ -422,22 +772,46 @@ class HtmlCompiler {
                     </div>
                 </div>
             `;
+            const quickAdds = [
+                ['GSAP',    'https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js'],
+                ['Axios',   'https://cdnjs.cloudflare.com/ajax/libs/axios/1.4.0/axios.min.js'],
+                ['Chart.js','https://cdn.jsdelivr.net/npm/chart.js'],
+                ['Three.js','https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js'],
+                ['FontAwesome','https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css'],
+                ['Anime.js','https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js'],
+            ];
+            const grid = c.querySelector('#quickAddGrid');
+            quickAdds.forEach(([label, url]) => {
+                const b = document.createElement('button');
+                b.className = 'text-[10px] p-1 bg-studio-panel rounded border border-studio-border hover:bg-studio-border';
+                b.textContent = label;
+                b.addEventListener('click', () => this.addCdnUrl(url));
+                grid.appendChild(b);
+            });
+            c.querySelector('[data-action="add-pkg"]').addEventListener('click', () => this.addCdnPackage());
             this._renderActiveCdn();
+
         } else if (this.currentSidebarTab === 'search') {
             c.innerHTML = `
                 <div class="pb-2 border-b border-studio-border mb-2 text-xs font-bold text-studio-muted uppercase">Global Search</div>
                 <div class="space-y-2 text-xs">
                     <div class="flex gap-1">
-                        <input id="searchInput" placeholder="Find in project..." onkeydown="if(event.key==='Enter')app.performSearch()" class="flex-1 bg-studio-panel border border-studio-border rounded p-1.5 text-white focus:outline-none">
-                        <button onclick="app.performSearch()" class="bg-studio-panel hover:bg-studio-border text-white p-1.5 rounded border border-studio-border"><i class="fa-solid fa-magnifying-glass"></i></button>
+                        <input id="searchInput" placeholder="Find in project..." class="flex-1 bg-studio-panel border border-studio-border rounded p-1.5 text-white focus:outline-none">
+                        <button data-action="search" class="bg-studio-panel hover:bg-studio-border text-white p-1.5 rounded border border-studio-border"><i class="fa-solid fa-magnifying-glass"></i></button>
                     </div>
                     <div class="flex items-center gap-2">
                         <input id="replaceInput" placeholder="Replace with..." class="flex-1 bg-studio-panel border border-studio-border rounded p-1.5 text-white focus:outline-none">
-                        <button onclick="app.replaceAll()" class="text-[10px] bg-studio-panel hover:bg-studio-border text-white px-2 py-1.5 rounded border border-studio-border whitespace-nowrap">Replace All</button>
+                        <button data-action="replace-all" class="text-[10px] bg-studio-panel hover:bg-studio-border text-white px-2 py-1.5 rounded border border-studio-border whitespace-nowrap">Replace All</button>
                     </div>
                     <div id="searchResults" class="space-y-1 pt-2"></div>
                 </div>
             `;
+            c.querySelector('#searchInput').addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') this.performSearch();
+            });
+            c.querySelector('[data-action="search"]').addEventListener('click', () => this.performSearch());
+            c.querySelector('[data-action="replace-all"]').addEventListener('click', () => this.replaceAll());
+
         } else if (this.currentSidebarTab === 'snippets') {
             const snippets = [
                 { id: 'fetch', label: 'Async Fetch', icon: 'fa-cloud' },
@@ -451,40 +825,59 @@ class HtmlCompiler {
             ];
             c.innerHTML = `
                 <div class="pb-2 border-b border-studio-border mb-2 text-xs font-bold text-studio-muted uppercase">Snippets</div>
-                <div class="space-y-1 text-xs">
-                    ${snippets.map(s => `
-                        <button onclick="app.insertSnippet('${s.id}')" class="snippet-trigger w-full text-left p-2 bg-studio-panel hover:bg-studio-border rounded border border-studio-border text-studio-text flex items-center space-x-2 transition">
-                            <i class="fa-solid ${s.icon} text-blue-400 w-4"></i>
-                            <span>${s.label}</span>
-                        </button>
-                    `).join('')}
-                </div>
+                <div class="space-y-1 text-xs" id="snippetList"></div>
             `;
+            const list = c.querySelector('#snippetList');
+            snippets.forEach(s => {
+                const b = document.createElement('button');
+                b.className = 'snippet-trigger w-full text-left p-2 bg-studio-panel hover:bg-studio-border rounded border border-studio-border text-studio-text flex items-center space-x-2 transition';
+                b.innerHTML = `<i class="fa-solid ${s.icon} text-blue-400 w-4"></i><span>${s.label}</span>`;
+                b.addEventListener('click', () => this.insertSnippet(s.id));
+                list.appendChild(b);
+            });
+
         } else if (this.currentSidebarTab === 'snapshots') {
             const snaps = this._getSnapshots();
             c.innerHTML = `
                 <div class="flex items-center justify-between pb-2 border-b border-studio-border mb-2 text-xs">
                     <span class="font-bold text-studio-muted uppercase tracking-wider">Snapshots</span>
-                    <button onclick="app.saveSnapshot()" class="p-1 text-studio-muted hover:text-white" title="Save Snapshot">
+                    <button data-action="save-snap" class="p-1 text-studio-muted hover:text-white" title="Save Snapshot">
                         <i class="fa-solid fa-camera"></i>
                     </button>
                 </div>
-                <div class="space-y-1">
-                    ${snaps.length === 0 ? '<div class="text-[11px] text-studio-muted italic p-2">No snapshots yet.</div>' : ''}
-                    ${snaps.map((s, i) => `
-                        <div class="flex items-center justify-between p-1.5 rounded text-xs bg-studio-panel hover:bg-studio-border">
-                            <div class="flex flex-col truncate">
-                                <span class="text-studio-text truncate">${s.label}</span>
-                                <span class="text-[10px] text-studio-muted">${new Date(s.ts).toLocaleString()}</span>
-                            </div>
-                            <div class="flex gap-1">
-                                <button onclick="app.restoreSnapshot(${i})" class="p-1 text-blue-400 hover:text-blue-300"><i class="fa-solid fa-rotate-left"></i></button>
-                                <button onclick="app.deleteSnapshot(${i})" class="p-1 text-red-400 hover:text-red-300"><i class="fa-solid fa-trash"></i></button>
-                            </div>
-                        </div>
-                    `).join('')}
-                </div>
+                <div class="space-y-1" id="snapList"></div>
             `;
+            c.querySelector('[data-action="save-snap"]').addEventListener('click', () => this.saveSnapshot());
+            const list = c.querySelector('#snapList');
+            if (snaps.length === 0) {
+                list.innerHTML = '<div class="text-[11px] text-studio-muted italic p-2">No snapshots yet.</div>';
+            } else {
+                snaps.forEach((s, i) => {
+                    const row = document.createElement('div');
+                    row.className = 'flex items-center justify-between p-1.5 rounded text-xs bg-studio-panel hover:bg-studio-border';
+                    const info = document.createElement('div');
+                    info.className = 'flex flex-col truncate';
+                    info.innerHTML = `
+                        <span class="text-studio-text truncate">${this._escape(s.label)}</span>
+                        <span class="text-[10px] text-studio-muted">${new Date(s.ts).toLocaleString()}</span>
+                    `;
+                    const actions = document.createElement('div');
+                    actions.className = 'flex gap-1';
+                    const restore = document.createElement('button');
+                    restore.className = 'p-1 text-blue-400 hover:text-blue-300';
+                    restore.innerHTML = '<i class="fa-solid fa-rotate-left"></i>';
+                    restore.addEventListener('click', () => this.restoreSnapshot(i));
+                    const del = document.createElement('button');
+                    del.className = 'p-1 text-red-400 hover:text-red-300';
+                    del.innerHTML = '<i class="fa-solid fa-trash"></i>';
+                    del.addEventListener('click', () => this.deleteSnapshot(i));
+                    actions.appendChild(restore);
+                    actions.appendChild(del);
+                    row.appendChild(info);
+                    row.appendChild(actions);
+                    list.appendChild(row);
+                });
+            }
         }
     }
 
@@ -524,10 +917,10 @@ class HtmlCompiler {
        SEARCH / REPLACE
        ============================================================ */
     performSearch() {
-        const query = document.getElementById('searchInput')?.value;
+        const query = document.getElementById('searchInput')?.value || '';
         const results = document.getElementById('searchResults');
         if (!results) return;
-        if (!query) { results.innerHTML = ''; return; }
+        if (!query.trim()) { results.innerHTML = ''; return; }
         results.innerHTML = '';
         let total = 0;
 
@@ -535,22 +928,26 @@ class HtmlCompiler {
             const lines = (file.content || '').split('\n');
             const matches = [];
             lines.forEach((line, i) => {
-                const idx = line.toLowerCase().indexOf(query.toLowerCase());
-                if (idx !== -1) matches.push({ line: i + 1, text: line.trim().slice(0, 80) });
+                if (line.toLowerCase().includes(query.toLowerCase())) {
+                    matches.push({ line: i + 1, text: line.trim().slice(0, 80) });
+                }
             });
             if (matches.length) {
                 total += matches.length;
                 const block = document.createElement('div');
                 block.className = 'mb-2';
-                block.innerHTML = `
-                    <div class="text-[11px] font-bold text-blue-400 mb-1">${this._escape(filename)} <span class="text-studio-muted">(${matches.length})</span></div>
-                    ${matches.map(m => `
-                        <div class="text-[11px] p-1.5 hover:bg-studio-panel rounded cursor-pointer flex items-start space-x-2" onclick="app._jumpToMatch('${filename}', ${m.line})">
-                            <span class="text-studio-muted shrink-0">${m.line}:</span>
-                            <span class="text-studio-text truncate">${this._escape(m.text)}</span>
-                        </div>
-                    `).join('')}
-                `;
+                const head = document.createElement('div');
+                head.className = 'text-[11px] font-bold text-blue-400 mb-1';
+                head.textContent = `${filename} (${matches.length})`;
+                block.appendChild(head);
+
+                matches.forEach(m => {
+                    const row = document.createElement('div');
+                    row.className = 'text-[11px] p-1.5 hover:bg-studio-panel rounded cursor-pointer flex items-start space-x-2';
+                    row.innerHTML = `<span class="text-studio-muted shrink-0">${m.line}:</span><span class="text-studio-text truncate">${this._escape(m.text)}</span>`;
+                    row.addEventListener('click', () => this._jumpToMatch(filename, m.line));
+                    block.appendChild(row);
+                });
                 results.appendChild(block);
             }
         });
@@ -567,19 +964,23 @@ class HtmlCompiler {
     }
 
     replaceAll() {
-        const find = document.getElementById('searchInput')?.value;
-        const replace = document.getElementById('replaceInput')?.value;
-        if (!find) return;
+        const find = document.getElementById('searchInput')?.value || '';
+        const replace = document.getElementById('replaceInput')?.value ?? '';
+        if (!find.trim()) { this.showToast('Nothing to find', 'warn'); return; }
         let count = 0;
+        const safeFind = find.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        const re = new RegExp(safeFind, 'g');
         Object.values(this.project.files).forEach(f => {
-            const re = new RegExp(find.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g');
             const before = f.content || '';
-            const after = before.replace(re, replace || '');
+            const after = before.replace(re, replace);
             count += (before.match(re) || []).length;
             f.content = after;
         });
-        if (this.project.files[this.project.activeFile]) {
-            this.editor.setValue(this.project.files[this.project.activeFile].content);
+        const active = this.project.files[this.project.activeFile];
+        if (active) {
+            const cur = this.editor.getCursor();
+            this.editor.setValue(active.content);
+            this.editor.setCursor(cur);
         }
         this._saveProjects();
         this.renderSidebar();
@@ -591,7 +992,7 @@ class HtmlCompiler {
        ============================================================ */
     _getSnapshots() {
         try { return JSON.parse(localStorage.getItem('htmlc_snapshots_' + this.currentProjectId) || '[]'); }
-        catch { return []; }
+        catch (_) { return []; }
     }
 
     saveSnapshot() {
@@ -631,7 +1032,7 @@ class HtmlCompiler {
        ============================================================ */
     _getActiveCdn() {
         try { return JSON.parse(localStorage.getItem('htmlc_cdn_' + this.currentProjectId) || '[]'); }
-        catch { return []; }
+        catch (_) { return []; }
     }
 
     _saveActiveCdn(list) {
@@ -672,12 +1073,22 @@ class HtmlCompiler {
             el.innerHTML = '<div class="text-[10px] text-studio-muted italic">No libraries added.</div>';
             return;
         }
-        el.innerHTML = list.map(url => `
-            <div class="flex items-center justify-between p-1.5 bg-studio-panel rounded border border-studio-border text-[10px]">
-                <span class="truncate font-mono text-studio-text" title="${this._escape(url)}">${this._escape(url.split('/').pop())}</span>
-                <button onclick="app.removeCdnUrl('${url}')" class="text-red-400 hover:text-red-300 ml-1"><i class="fa-solid fa-xmark"></i></button>
-            </div>
-        `).join('');
+        el.innerHTML = '';
+        list.forEach(url => {
+            const row = document.createElement('div');
+            row.className = 'flex items-center justify-between p-1.5 bg-studio-panel rounded border border-studio-border text-[10px]';
+            const span = document.createElement('span');
+            span.className = 'truncate font-mono text-studio-text';
+            span.title = url;
+            span.textContent = url.split('/').pop();
+            const btn = document.createElement('button');
+            btn.className = 'text-red-400 hover:text-red-300 ml-1';
+            btn.innerHTML = '<i class="fa-solid fa-xmark"></i>';
+            btn.addEventListener('click', () => this.removeCdnUrl(url));
+            row.appendChild(span);
+            row.appendChild(btn);
+            el.appendChild(row);
+        });
     }
 
     /* ============================================================
@@ -694,16 +1105,16 @@ class HtmlCompiler {
         }
 
         let html = files[entryName].content;
+        const escapeRe = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
-        const allFiles = Object.entries(files);
-        allFiles.forEach(([name, f]) => {
+        Object.entries(files).forEach(([name, f]) => {
             if (name === entryName) return;
             if (name.endsWith('.css')) {
-                const re = new RegExp(`<link[^>]*href=["']${name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}["'][^>]*>`, 'gi');
+                const re = new RegExp(`<link[^>]*href=["']${escapeRe(name)}["'][^>]*>`, 'gi');
                 html = html.replace(re, `<style>\n${f.content}\n</style>`);
             }
             if (name.endsWith('.js')) {
-                const re = new RegExp(`<script[^>]*src=["']${name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}["'][^>]*><\\/script>`, 'gi');
+                const re = new RegExp(`<script[^>]*src=["']${escapeRe(name)}["'][^>]*><\\/script>`, 'gi');
                 const match = html.match(re);
                 const isModule = match && /type=["']module["']/.test(match[0]);
                 const attrs = isModule ? ' type="module"' : '';
@@ -835,7 +1246,7 @@ class HtmlCompiler {
                 this._replIndex = -1;
                 const iframe = document.getElementById('sandboxIframe');
                 try { iframe.contentWindow.postMessage({ type: 'EVAL_REPL', code }, '*'); }
-                catch { this.addConsoleLog('error', ['REPL not available']); }
+                catch (_) { this.addConsoleLog('error', ['REPL not available']); }
                 input.value = '';
             } else if (e.key === 'ArrowUp') {
                 e.preventDefault();
@@ -868,6 +1279,7 @@ class HtmlCompiler {
 
     addConsoleLog(level, args) {
         const stream = document.getElementById('paneConsole');
+        if (!stream) return;
         const line = document.createElement('div');
         let color = 'text-studio-text';
         if (level === 'error') color = 'text-red-400 bg-red-950/20';
@@ -882,15 +1294,17 @@ class HtmlCompiler {
         stream.scrollTop = stream.scrollHeight;
 
         const badge = document.getElementById('consoleBadge');
-        badge.classList.remove('hidden');
-        badge.innerText = stream.children.length;
+        if (badge) {
+            badge.classList.remove('hidden');
+            badge.innerText = stream.children.length;
+        }
     }
 
     _renderLogArg(arg) {
         if (typeof arg !== 'string') return this._escape(String(arg));
         const t = arg.trim();
         if ((t.startsWith('{') && t.endsWith('}')) || (t.startsWith('[') && t.endsWith(']'))) {
-            try { return this._jsonTree(JSON.parse(t), 0); } catch {}
+            try { return this._jsonTree(JSON.parse(t), 0); } catch (_) {}
         }
         return this._escape(arg);
     }
@@ -919,14 +1333,15 @@ class HtmlCompiler {
 
     addNetworkLog(data) {
         const body = document.getElementById('networkTableBody');
+        if (!body) return;
         const row = document.createElement('tr');
         row.className = 'border-b border-studio-border/50 text-xs hover:bg-studio-panel';
         const statusClass = (data.status >= 200 && data.status < 300) ? 'text-emerald-400' : data.status === 'ERR' ? 'text-red-400' : 'text-amber-400';
         row.innerHTML = `
-            <td class="py-1 px-2 font-bold text-amber-400">${data.method}</td>
+            <td class="py-1 px-2 font-bold text-amber-400">${this._escape(String(data.method))}</td>
             <td class="truncate max-w-[180px] text-studio-muted px-2" title="${this._escape(data.url)}">${this._escape(data.url)}</td>
-            <td class="${statusClass} px-2">${data.status}</td>
-            <td class="text-studio-muted px-2">${data.duration}ms</td>
+            <td class="${statusClass} px-2">${this._escape(String(data.status))}</td>
+            <td class="text-studio-muted px-2">${this._escape(String(data.duration))}ms</td>
         `;
         body.appendChild(row);
     }
@@ -935,8 +1350,9 @@ class HtmlCompiler {
         document.getElementById('paneConsole').innerHTML = '';
         document.getElementById('networkTableBody').innerHTML = '';
         document.getElementById('testOutput').innerHTML = '';
-        document.getElementById('consoleBadge').classList.add('hidden');
-        document.getElementById('consoleBadge').innerText = '0';
+        const badge = document.getElementById('consoleBadge');
+        badge.classList.add('hidden');
+        badge.innerText = '0';
     }
 
     toggleConsoleCollapse() {
@@ -967,13 +1383,17 @@ class HtmlCompiler {
                 try {
                     const doc = document.getElementById('sandboxIframe').contentDocument;
                     if (doc) {
-                        document.getElementById('domGauge').innerText = doc.getElementsByTagName('*').length;
+                        const dom = document.getElementById('domGauge');
+                        if (dom) dom.innerText = doc.getElementsByTagName('*').length;
                     }
-                } catch {}
-                if (performance.memory) {
-                    document.getElementById('memGauge').innerText = (performance.memory.usedJSHeapSize / 1048576).toFixed(1) + ' MB';
-                } else {
-                    document.getElementById('memGauge').innerText = '—';
+                } catch (_) {}
+                const mem = document.getElementById('memGauge');
+                if (mem) {
+                    if (performance.memory) {
+                        mem.innerText = (performance.memory.usedJSHeapSize / 1048576).toFixed(1) + ' MB';
+                    } else {
+                        mem.innerText = '—';
+                    }
                 }
             }
             this._fpsRaf = requestAnimationFrame(tick);
@@ -997,11 +1417,11 @@ class HtmlCompiler {
         let passed = 0;
         tests.forEach(t => {
             let ok = false;
-            try { ok = !!t.run(); } catch { ok = false; }
+            try { ok = !!t.run(); } catch (_) { ok = false; }
             if (ok) passed++;
             const row = document.createElement('div');
             row.className = `flex items-center space-x-2 text-xs p-1.5 rounded ${ok ? 'bg-emerald-900/20 text-emerald-400' : 'bg-red-900/20 text-red-400'}`;
-            row.innerHTML = `<i class="fa-solid ${ok ? 'fa-circle-check' : 'fa-circle-xmark'}"></i><span>${t.name}</span>`;
+            row.innerHTML = `<i class="fa-solid ${ok ? 'fa-circle-check' : 'fa-circle-xmark'}"></i><span>${this._escape(t.name)}</span>`;
             out.appendChild(row);
         });
         const summary = document.createElement('div');
@@ -1024,7 +1444,7 @@ class HtmlCompiler {
         }
         try {
             document.getElementById('sandboxIframe').contentWindow.postMessage({ type: 'TOGGLE_INSPECTOR', active: this.inspectorActive }, '*');
-        } catch {}
+        } catch (_) {}
     }
 
     setDeviceFrame(device) {
@@ -1048,12 +1468,14 @@ class HtmlCompiler {
         const entry = files['index.html'] ? 'index.html' : Object.keys(files).find(f => f.endsWith('.html'));
         if (!entry) return;
         let html = files[entry].content;
+        const escapeRe = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
         Object.entries(files).forEach(([name, f]) => {
             if (name === entry) return;
-            if (name.endsWith('.css')) html = html.replace(new RegExp(`<link[^>]*href=["']${name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}["'][^>]*>`, 'gi'), `<style>${f.content}</style>`);
-            if (name.endsWith('.js')) html = html.replace(new RegExp(`<script[^>]*src=["']${name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}["'][^>]*><\\/script>`, 'gi'), `<script>${f.content}<\/script>`);
+            if (name.endsWith('.css')) html = html.replace(new RegExp(`<link[^>]*href=["']${escapeRe(name)}["'][^>]*>`, 'gi'), `<style>${f.content}</style>`);
+            if (name.endsWith('.js')) html = html.replace(new RegExp(`<script[^>]*src=["']${escapeRe(name)}["'][^>]*><\\/script>`, 'gi'), `<script>${f.content}<\/script>`);
         });
         const w = window.open('', '_blank');
+        if (!w) { this.showToast('Popup blocked', 'error'); return; }
         w.document.write(html);
         w.document.close();
     }
@@ -1120,7 +1542,7 @@ class HtmlCompiler {
         cmdHits.forEach(c => {
             const btn = document.createElement('button');
             btn.className = 'cmd-item w-full text-left px-3 py-2 rounded text-xs hover:bg-studio-panel flex items-center space-x-2';
-            btn.innerHTML = `<i class="fa-solid ${c.icon} text-emerald-400 w-4"></i><span>${c.label}</span>`;
+            btn.innerHTML = `<i class="fa-solid ${c.icon} text-emerald-400 w-4"></i><span>${this._escape(c.label)}</span>`;
             btn.onclick = () => { c.action(); this.closeModal('commandPaletteModal'); };
             cmdSec.appendChild(btn);
         });
@@ -1167,6 +1589,7 @@ class HtmlCompiler {
         document.getElementById('exportMenu').classList.add('hidden');
         const files = this.project.files;
         const entry = files['index.html'] ? 'index.html' : Object.keys(files).find(f => f.endsWith('.html'));
+        const escapeRe = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
         if (type === 'zip') {
             const zip = new JSZip();
@@ -1179,8 +1602,8 @@ class HtmlCompiler {
             let html = entry ? files[entry].content : '';
             Object.entries(files).forEach(([name, f]) => {
                 if (name === entry) return;
-                if (name.endsWith('.css')) html = html.replace(new RegExp(`<link[^>]*href=["']${name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}["'][^>]*>`, 'gi'), `<style>${f.content}</style>`);
-                if (name.endsWith('.js')) html = html.replace(new RegExp(`<script[^>]*src=["']${name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}["'][^>]*><\\/script>`, 'gi'), `<script>${f.content}<\/script>`);
+                if (name.endsWith('.css')) html = html.replace(new RegExp(`<link[^>]*href=["']${escapeRe(name)}["'][^>]*>`, 'gi'), `<style>${f.content}</style>`);
+                if (name.endsWith('.js')) html = html.replace(new RegExp(`<script[^>]*src=["']${escapeRe(name)}["'][^>]*><\\/script>`, 'gi'), `<script>${f.content}<\/script>`);
             });
             const blob = new Blob([html], { type: 'text/html' });
             saveAs(blob, 'index.html');
@@ -1199,17 +1622,20 @@ class HtmlCompiler {
                 await navigator.clipboard.writeText(url);
                 this.showToast('Share link copied!', 'success');
             } else { throw new Error('no clipboard'); }
-        } catch {
+        } catch (_) {
             const modal = document.createElement('div');
             modal.className = 'fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4';
             modal.innerHTML = `
                 <div class="bg-studio-sidebar border border-studio-border rounded-xl w-full max-w-lg p-5 space-y-3">
                     <h3 class="text-white font-bold text-sm">Copy Share Link</h3>
-                    <textarea readonly class="w-full h-24 bg-studio-bg border border-studio-border rounded p-2 text-xs text-white font-mono">${url}</textarea>
-                    <div class="flex justify-end"><button class="text-xs px-3 py-1.5 bg-studio-panel border border-studio-border rounded text-white hover:bg-studio-border" onclick="this.closest('.fixed').remove()">Close</button></div>
+                    <textarea readonly class="w-full h-24 bg-studio-bg border border-studio-border rounded p-2 text-xs text-white font-mono"></textarea>
+                    <div class="flex justify-end"><button class="close-btn text-xs px-3 py-1.5 bg-studio-panel border border-studio-border rounded text-white hover:bg-studio-border">Close</button></div>
                 </div>`;
             document.body.appendChild(modal);
-            modal.querySelector('textarea').select();
+            const ta = modal.querySelector('textarea');
+            ta.value = url;
+            ta.select();
+            modal.querySelector('.close-btn').addEventListener('click', () => modal.remove());
         }
     }
 
@@ -1236,13 +1662,22 @@ class HtmlCompiler {
         const hsl = this._hexToHsl(base);
         const container = document.getElementById('paletteRamp');
         const shades = [95, 80, 60, 40, 20];
-        container.innerHTML = shades.map(l => {
+        container.innerHTML = '';
+        shades.forEach(l => {
             const c = this._hslToHex(hsl.h, hsl.s, l);
-            return `<div class="rounded overflow-hidden">
-                <div class="h-16" style="background:${c}"></div>
-                <div class="text-[10px] text-center p-1 bg-studio-panel text-studio-text font-mono cursor-pointer hover:bg-studio-border" onclick="app._copyColor('${c}')">${c}</div>
-            </div>`;
-        }).join('');
+            const wrap = document.createElement('div');
+            wrap.className = 'rounded overflow-hidden';
+            const swatch = document.createElement('div');
+            swatch.className = 'h-16';
+            swatch.style.background = c;
+            const label = document.createElement('div');
+            label.className = 'text-[10px] text-center p-1 bg-studio-panel text-studio-text font-mono cursor-pointer hover:bg-studio-border';
+            label.textContent = c;
+            label.addEventListener('click', () => this._copyColor(c));
+            wrap.appendChild(swatch);
+            wrap.appendChild(label);
+            container.appendChild(wrap);
+        });
     }
 
     _copyColor(c) {
@@ -1307,11 +1742,15 @@ class HtmlCompiler {
     _initIcons() {
         const icons = ['fa-house','fa-user','fa-gear','fa-heart','fa-star','fa-bell','fa-envelope','fa-search','fa-camera','fa-image','fa-video','fa-music','fa-cloud','fa-sun','fa-moon','fa-fire','fa-bolt','fa-leaf','fa-tree','fa-rocket','fa-plane','fa-car','fa-bicycle','fa-book','fa-graduation-cap','fa-code','fa-terminal','fa-database','fa-server','fa-lock','fa-key','fa-shield','fa-download','fa-upload','fa-share','fa-link','fa-paperclip','fa-tag','fa-bookmark','fa-comment','fa-comments','fa-thumbs-up','fa-thumbs-down','fa-eye','fa-eye-slash','fa-trash','fa-edit','fa-copy','fa-paste','fa-cut','fa-save','fa-folder','fa-file','fa-folder-open','fa-file-code','fa-file-image','fa-file-pdf','fa-play','fa-pause','fa-stop','fa-forward','fa-backward','fa-step-forward','fa-step-backward','fa-random','fa-repeat','fa-sync','fa-power-off','fa-wifi','fa-signal','fa-battery-full','fa-plug','fa-microchip','fa-memory','fa-hdd','fa-sd-card','fa-usb','fa-mobile','fa-tablet','fa-laptop','fa-desktop','fa-tv','fa-gamepad','fa-headphones','fa-microphone'];
         const grid = document.getElementById('iconGrid');
-        grid.innerHTML = icons.map(i => `
-            <button onclick="app._insertIcon('${i}')" title="${i}" class="p-2 bg-studio-panel hover:bg-studio-border rounded border border-studio-border text-studio-text">
-                <i class="fa-solid ${i}"></i>
-            </button>
-        `).join('');
+        grid.innerHTML = '';
+        icons.forEach(i => {
+            const btn = document.createElement('button');
+            btn.title = i;
+            btn.className = 'p-2 bg-studio-panel hover:bg-studio-border rounded border border-studio-border text-studio-text';
+            btn.innerHTML = `<i class="fa-solid ${i}"></i>`;
+            btn.addEventListener('click', () => this._insertIcon(i));
+            grid.appendChild(btn);
+        });
     }
 
     filterIcons(q) {
@@ -1396,6 +1835,7 @@ class HtmlCompiler {
         const makeResizableH = (id, prevId) => {
             const r = document.getElementById(id);
             const prev = document.getElementById(prevId);
+            if (!r || !prev) return;
             let startX = 0, startW = 0;
             const move = e => {
                 const dx = e.clientX - startX;
@@ -1419,6 +1859,7 @@ class HtmlCompiler {
         const makeResizableV = (id, prevId) => {
             const r = document.getElementById(id);
             const prev = document.getElementById(prevId);
+            if (!r || !prev) return;
             let startY = 0, startH = 0;
             const move = e => {
                 const dy = e.clientY - startY;
@@ -1477,7 +1918,7 @@ class HtmlCompiler {
 
         document.addEventListener('click', e => {
             const menu = document.getElementById('exportMenu');
-            if (menu && !menu.contains(e.target) && !e.target.closest('button[onclick*="toggleExportMenu"]')) {
+            if (menu && !menu.contains(e.target) && !e.target.closest('button[data-export-toggle]')) {
                 menu.classList.add('hidden');
             }
         });
@@ -1487,19 +1928,33 @@ class HtmlCompiler {
        HELPERS
        ============================================================ */
     _escape(s) {
-        return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+        return String(s)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;');
     }
+    _escapeAttr(s) { return this._escape(s); }
 }
 
 /* ============================================================
-   BOOT
+   BOOT — hash check happens BEFORE construction
    ============================================================ */
 window.addEventListener('load', function () {
     try {
+        // Check for a shared project hash first
+        let shared = null;
+        try {
+            const m = location.hash.match(/#project=(.+)/);
+            if (m) {
+                const json = LZString.decompressFromEncodedURIComponent(m[1]);
+                if (json) shared = JSON.parse(json);
+            }
+        } catch (_) {}
+
         window.app = new HtmlCompiler();
 
-        // Load from share hash if present
-        var shared = window.app._tryLoadFromHash();
         if (shared) {
             window.app._persistCurrentIntoProjects();
             shared.id = 'proj_shared_' + Date.now();
