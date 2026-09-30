@@ -1231,28 +1231,46 @@ SELECT * FROM users ORDER BY age;
             </div>
             <pre id="out" style="font-family:monospace;padding:20px;color:#c9d1d9;white-space:pre-wrap"></pre>
         `;
-            const pyCode = `
-            (async () => {
-                const status = document.getElementById('status');
-                const out = document.getElementById('out');
-                try {
-                    const py = await window.loadPyodide({ indexURL: 'https://cdn.jsdelivr.net/pyodide/v0.25.0/full/' });
-                    if (status) status.textContent = 'Python ready. Running...';
-                    py.setStdout({ batched: (s) => { if (out) out.textContent += s + '\\n'; } });
-                    py.setStderr({ batched: (s) => { if (out) out.textContent += s + '\\n'; } });
-                    await py.runPythonAsync(${JSON.stringify(code)});
-                    if (status) status.textContent = 'Finished.';
-                } catch (err) {
-                    if (status) status.textContent = 'Error';
-                    if (out) out.textContent += '\\n' + (err && err.message ? err.message : String(err));
-                }
-            })();
-        `;
-            const headExtras = `
-            <script src="https://cdn.jsdelivr.net/pyodide/v0.25.0/full/pyodide.js"><\/script>
-            <script>${pyCode}<\/script>
-        `;
-            iframe.srcdoc = this._wrapSandbox(html, headExtras);
+
+            // 1. 先设 iframe 结构（不含 script）
+            iframe.srcdoc = this._wrapSandbox(html, '');
+
+            // 2. 等 iframe 加载完，注入 <script>（用 createElement，不会被格式化破坏）
+            const onLoad = () => {
+                iframe.removeEventListener('load', onLoad);
+                const doc = iframe.contentDocument;
+                if (!doc) return;
+
+                // 2a. 注入 pyodide.js
+                const s1 = doc.createElement('script');
+                s1.src = 'https://cdn.jsdelivr.net/pyodide/v0.25.0/full/pyodide.js';
+                doc.head.appendChild(s1);
+
+                // 2b. pyodide.js 加载完后，注入用户代码
+                s1.addEventListener('load', () => {
+                    const s2 = doc.createElement('script');
+                    s2.textContent = `
+                        (async () => {
+                            const status = document.getElementById('status');
+                            const out = document.getElementById('out');
+                            try {
+                                const py = await window.loadPyodide({ indexURL: 'https://cdn.jsdelivr.net/pyodide/v0.25.0/full/' });
+                                if (status) status.textContent = 'Python ready. Running...';
+                                py.setStdout({ batched: (s) => { if (out) out.textContent += s + '\\n'; } });
+                                py.setStderr({ batched: (s) => { if (out) out.textContent += s + '\\n'; } });
+                                await py.runPythonAsync(${JSON.stringify(code)});
+                                if (status) status.textContent = 'Finished.';
+                            } catch (err) {
+                                if (status) status.textContent = 'Error';
+                                if (out) out.textContent += '\\n' + (err && err.message ? err.message : String(err));
+                            }
+                        })();
+                    `;
+                    doc.head.appendChild(s2);
+                });
+            };
+            iframe.addEventListener('load', onLoad);
+
             this.addConsoleLog('info', ['Loading Python...']);
         }
 
@@ -1276,38 +1294,53 @@ SELECT * FROM users ORDER BY age;
         async runLua(code) {
             const iframe = document.getElementById('sandboxIframe');
             const html = `<pre id="out" style="font-family:monospace;padding:20px;color:#c9d1d9;white-space:pre-wrap"></pre>`;
-            const headExtras = `
-            <script src="https://cdn.jsdelivr.net/npm/fengari-web@0.1.4/dist/fengari-web.js"><\/script>
-            <script>
-                (function() {
-                    const out = document.getElementById('out');
-                    const userCode = ${JSON.stringify(code)};
-                    setTimeout(() => {
-                        try {
-                            const originalWrite = console.log;
-                            console.log = function() {
-                                const s = Array.from(arguments).join(' ');
-                                out.textContent += s + '\\n';
-                                originalWrite.apply(console, arguments);
-                            };
-                            const fengari = window.fengari;
-                            const lua = fengari.lauxlib.luaL_newstate();
-                            fengari.lualib.luaL_openlibs(lua);
-                            fengari.lauxlib.luaL_dostring(lua,
-                                'print = function(...) local args = {...}; local s = ""; for i,v in ipairs(args) do s = s .. tostring(v) .. "\\\\t" end; io.write(s .. "\\\\n") end'
-                            );
-                            if (fengari.lauxlib.luaL_dostring(lua, userCode) !== 0) {
-                                const err = fengari.lauxlib.luaL_tostring(lua, -1);
-                                out.textContent += 'Error: ' + err + '\\n';
-                            }
-                        } catch (err) {
-                            out.textContent += 'Fengari error: ' + (err.message || err) + '\\n';
-                        }
-                    }, 200);
-                })();
-            <\/script>
-        `;
-            iframe.srcdoc = this._wrapSandbox(html, headExtras);
+
+            iframe.srcdoc = this._wrapSandbox(html, '');
+
+            const onLoad = () => {
+                iframe.removeEventListener('load', onLoad);
+                const doc = iframe.contentDocument;
+                if (!doc) return;
+
+                const s1 = doc.createElement('script');
+                s1.src = 'https://cdn.jsdelivr.net/npm/fengari-web@0.1.4/dist/fengari-web.js';
+                doc.head.appendChild(s1);
+
+                s1.addEventListener('load', () => {
+                    const s2 = doc.createElement('script');
+                    s2.textContent = `
+                        (function() {
+                            const out = document.getElementById('out');
+                            const userCode = ${JSON.stringify(code)};
+                            setTimeout(() => {
+                                try {
+                                    const originalWrite = console.log;
+                                    console.log = function() {
+                                        const s = Array.from(arguments).join(' ');
+                                        if (out) out.textContent += s + '\\n';
+                                        originalWrite.apply(console, arguments);
+                                    };
+                                    const fengari = window.fengari;
+                                    const lua = fengari.lauxlib.luaL_newstate();
+                                    fengari.lualib.luaL_openlibs(lua);
+                                    fengari.lauxlib.luaL_dostring(lua,
+                                        'print = function(...) local args = {...}; local s = ""; for i,v in ipairs(args) do s = s .. tostring(v) .. "\\\\t" end; io.write(s .. "\\\\n") end'
+                                    );
+                                    if (fengari.lauxlib.luaL_dostring(lua, userCode) !== 0) {
+                                        const err = fengari.lauxlib.luaL_tostring(lua, -1);
+                                        if (out) out.textContent += 'Error: ' + err + '\\n';
+                                    }
+                                } catch (err) {
+                                    if (out) out.textContent += 'Fengari error: ' + (err.message || err) + '\\n';
+                                }
+                            }, 200);
+                        })();
+                    `;
+                    doc.head.appendChild(s2);
+                });
+            };
+            iframe.addEventListener('load', onLoad);
+
             this.addConsoleLog('info', ['Loading Lua...']);
         }
         async runSql(code) {
