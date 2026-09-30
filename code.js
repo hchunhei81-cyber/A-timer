@@ -1,17 +1,22 @@
 /* ============================================================
-   Code Playground — Multi-Language Edition
-   Supports: HTML/CSS/JS, Python, C, C++, Rust, Go, Assembly, Lua, SQL
+   Code Playground — Multi-Language Edition (uses key.js)
+   Requires: window.KeyHints (loaded from key.js)
    ============================================================ */
 
-/* ---------- Dependency check ---------- */
 (function () {
-    'use strict';
+'use strict';
+
+/* ------------------------------------------------------------
+   Dependency check
+   ------------------------------------------------------------ */
+(function () {
     var missing = [];
     if (typeof CodeMirror === 'undefined') missing.push('CodeMirror');
     if (typeof LZString === 'undefined')  missing.push('LZString');
     if (typeof JSZip === 'undefined')     missing.push('JSZip');
     if (typeof saveAs === 'undefined')    missing.push('FileSaver');
     if (typeof tailwind === 'undefined')  missing.push('Tailwind');
+    if (typeof window.KeyHints === 'undefined') missing.push('key.js');
 
     if (missing.length > 0) {
         document.body.innerHTML =
@@ -20,177 +25,32 @@
     }
 })();
 
-(function () {
-'use strict';
-
 /* ============================================================
-   LANGUAGE DEFINITIONS
+   LANGUAGE DEFINITIONS (for the toolbar / runner dispatch)
    ============================================================ */
 const LANGUAGES = {
-    html: {
-        name: 'HTML', icon: 'fa-brands fa-html5', color: '#e34c26',
-        mode: 'htmlmixed', ext: '.html', runner: 'web', voidAutoClose: true
-    },
-    css: {
-        name: 'CSS', icon: 'fa-brands fa-css3-alt', color: '#2965f1',
-        mode: 'css', ext: '.css', runner: 'web'
-    },
-    javascript: {
-        name: 'JavaScript', icon: 'fa-brands fa-js', color: '#f7df1e',
-        mode: 'javascript', ext: '.js', runner: 'web'
-    },
-    typescript: {
-        name: 'TypeScript', icon: 'fa-solid fa-code', color: '#3178c6',
-        mode: 'javascript', ext: '.ts', runner: 'ts'
-    },
-    python: {
-        name: 'Python', icon: 'fa-brands fa-python', color: '#3776ab',
-        mode: 'python', ext: '.py', runner: 'pyodide'
-    },
-    c: {
-        name: 'C', icon: 'fa-solid fa-c', color: '#a8b9cc',
-        mode: 'text/x-csrc', ext: '.c', runner: 'wandbox', wandbox: 'gcc-head'
-    },
-    cpp: {
-        name: 'C++', icon: 'fa-solid fa-code', color: '#00599c',
-        mode: 'text/x-c++src', ext: '.cpp', runner: 'wandbox', wandbox: 'gcc-head'
-    },
-    rust: {
-        name: 'Rust', icon: 'fa-brands fa-rust', color: '#dea584',
-        mode: 'rust', ext: '.rs', runner: 'wandbox', wandbox: 'rustc-head'
-    },
-    go: {
-        name: 'Go', icon: 'fa-solid fa-g', color: '#00add8',
-        mode: 'go', ext: '.go', runner: 'go'
-    },
-    assembly: {
-        name: 'Assembly', icon: 'fa-solid fa-microchip', color: '#6e4c13',
-        mode: 'gas', ext: '.s', runner: 'wandbox', wandbox: 'nasm-head'
-    },
-    lua: {
-        name: 'Lua', icon: 'fa-solid fa-moon', color: '#000080',
-        mode: 'lua', ext: '.lua', runner: 'fengari'
-    },
-    sql: {
-        name: 'SQL', icon: 'fa-solid fa-database', color: '#00758f',
-        mode: 'sql', ext: '.sql', runner: 'sqljs'
-    }
+    html:       { name: 'HTML',       icon: 'fa-brands fa-html5',      color: '#e34c26', mode: 'htmlmixed',         ext: '.html', runner: 'web' },
+    css:        { name: 'CSS',        icon: 'fa-brands fa-css3-alt',   color: '#2965f1', mode: 'css',               ext: '.css',  runner: 'web' },
+    javascript: { name: 'JavaScript', icon: 'fa-brands fa-js',         color: '#f7df1e', mode: 'javascript',        ext: '.js',   runner: 'web' },
+    typescript: { name: 'TypeScript', icon: 'fa-solid fa-code',        color: '#3178c6', mode: 'javascript',        ext: '.ts',   runner: 'ts' },
+    python:     { name: 'Python',     icon: 'fa-brands fa-python',     color: '#3776ab', mode: 'python',            ext: '.py',   runner: 'pyodide' },
+    c:          { name: 'C',          icon: 'fa-solid fa-c',           color: '#a8b9cc', mode: 'text/x-csrc',       ext: '.c',    runner: 'wandbox', wandbox: 'gcc-head' },
+    cpp:        { name: 'C++',        icon: 'fa-solid fa-code',        color: '#00599c', mode: 'text/x-c++src',     ext: '.cpp',  runner: 'wandbox', wandbox: 'gcc-head' },
+    rust:       { name: 'Rust',       icon: 'fa-brands fa-rust',       color: '#dea584', mode: 'rust',              ext: '.rs',   runner: 'wandbox', wandbox: 'rustc-head' },
+    go:         { name: 'Go',         icon: 'fa-solid fa-g',           color: '#00add8', mode: 'go',                ext: '.go',   runner: 'go' },
+    assembly:   { name: 'Assembly',   icon: 'fa-solid fa-microchip',   color: '#6e4c13', mode: 'gas',               ext: '.s',    runner: 'wandbox', wandbox: 'nasm-head' },
+    lua:        { name: 'Lua',        icon: 'fa-solid fa-moon',        color: '#000080', mode: 'lua',               ext: '.lua',  runner: 'fengari' },
+    sql:        { name: 'SQL',        icon: 'fa-solid fa-database',    color: '#00758f', mode: 'sql',               ext: '.sql',  runner: 'sqljs' }
 };
 
 /* ============================================================
-   HTML TAG DATABASE (autocomplete)
-   ============================================================ */
-const HTML_TAGS = [
-    { tag: 'html', desc: 'Root element', attrs: ' lang="en"', type: 'paired' },
-    { tag: 'head', desc: 'Document head', attrs: '', type: 'paired' },
-    { tag: 'body', desc: 'Document body', attrs: '', type: 'paired' },
-    { tag: 'title', desc: 'Document title', attrs: '', type: 'paired' },
-    { tag: 'meta', desc: 'Metadata', attrs: ' charset="UTF-8"', type: 'void' },
-    { tag: 'link', desc: 'External resource', attrs: ' rel="stylesheet" href=""', type: 'void' },
-    { tag: 'style', desc: 'Inline CSS', attrs: '', type: 'paired' },
-    { tag: 'script', desc: 'Script', attrs: '', type: 'paired' },
-    { tag: 'header', desc: 'Header', attrs: '', type: 'paired' },
-    { tag: 'footer', desc: 'Footer', attrs: '', type: 'paired' },
-    { tag: 'nav', desc: 'Navigation', attrs: '', type: 'paired' },
-    { tag: 'main', desc: 'Main', attrs: '', type: 'paired' },
-    { tag: 'section', desc: 'Section', attrs: '', type: 'paired' },
-    { tag: 'article', desc: 'Article', attrs: '', type: 'paired' },
-    { tag: 'aside', desc: 'Sidebar', attrs: '', type: 'paired' },
-    { tag: 'div', desc: 'Block', attrs: '', type: 'paired' },
-    { tag: 'h1', desc: 'Heading 1', attrs: '', type: 'paired' },
-    { tag: 'h2', desc: 'Heading 2', attrs: '', type: 'paired' },
-    { tag: 'h3', desc: 'Heading 3', attrs: '', type: 'paired' },
-    { tag: 'h4', desc: 'Heading 4', attrs: '', type: 'paired' },
-    { tag: 'h5', desc: 'Heading 5', attrs: '', type: 'paired' },
-    { tag: 'h6', desc: 'Heading 6', attrs: '', type: 'paired' },
-    { tag: 'p', desc: 'Paragraph', attrs: '', type: 'paired' },
-    { tag: 'span', desc: 'Inline', attrs: '', type: 'paired' },
-    { tag: 'a', desc: 'Link', attrs: ' href=""', type: 'paired' },
-    { tag: 'strong', desc: 'Bold', attrs: '', type: 'paired' },
-    { tag: 'em', desc: 'Italic', attrs: '', type: 'paired' },
-    { tag: 'b', desc: 'Bold', attrs: '', type: 'paired' },
-    { tag: 'i', desc: 'Italic', attrs: '', type: 'paired' },
-    { tag: 'code', desc: 'Code', attrs: '', type: 'paired' },
-    { tag: 'pre', desc: 'Preformatted', attrs: '', type: 'paired' },
-    { tag: 'blockquote', desc: 'Quote', attrs: '', type: 'paired' },
-    { tag: 'br', desc: 'Break', attrs: '', type: 'void' },
-    { tag: 'hr', desc: 'Rule', attrs: '', type: 'void' },
-    { tag: 'ul', desc: 'List', attrs: '', type: 'paired' },
-    { tag: 'ol', desc: 'Ordered list', attrs: '', type: 'paired' },
-    { tag: 'li', desc: 'List item', attrs: '', type: 'paired' },
-    { tag: 'img', desc: 'Image', attrs: ' src="" alt=""', type: 'void' },
-    { tag: 'video', desc: 'Video', attrs: ' controls', type: 'paired' },
-    { tag: 'audio', desc: 'Audio', attrs: ' controls', type: 'paired' },
-    { tag: 'canvas', desc: 'Canvas', attrs: '', type: 'paired' },
-    { tag: 'svg', desc: 'SVG', attrs: ' viewBox="0 0 24 24"', type: 'paired' },
-    { tag: 'iframe', desc: 'Frame', attrs: ' src=""', type: 'paired' },
-    { tag: 'table', desc: 'Table', attrs: '', type: 'paired' },
-    { tag: 'thead', desc: 'Table head', attrs: '', type: 'paired' },
-    { tag: 'tbody', desc: 'Table body', attrs: '', type: 'paired' },
-    { tag: 'tr', desc: 'Table row', attrs: '', type: 'paired' },
-    { tag: 'th', desc: 'Table header', attrs: '', type: 'paired' },
-    { tag: 'td', desc: 'Table data', attrs: '', type: 'paired' },
-    { tag: 'form', desc: 'Form', attrs: ' action="" method="post"', type: 'paired' },
-    { tag: 'label', desc: 'Label', attrs: ' for=""', type: 'paired' },
-    { tag: 'input', desc: 'Input', attrs: ' type="text" name=""', type: 'void' },
-    { tag: 'textarea', desc: 'Textarea', attrs: ' name=""', type: 'paired' },
-    { tag: 'button', desc: 'Button', attrs: ' type="button"', type: 'paired' },
-    { tag: 'select', desc: 'Select', attrs: ' name=""', type: 'paired' },
-    { tag: 'option', desc: 'Option', attrs: ' value=""', type: 'paired' },
-    { tag: 'details', desc: 'Details', attrs: '', type: 'paired' },
-    { tag: 'summary', desc: 'Summary', attrs: '', type: 'paired' },
-    { tag: 'dialog', desc: 'Dialog', attrs: '', type: 'paired' },
-    { tag: 'template', desc: 'Template', attrs: '', type: 'paired' }
-];
-
-const TAG_DEFS = (() => {
-    const map = {};
-    HTML_TAGS.forEach(t => { map[t.tag] = t; });
-    return map;
-})();
-
-const VOID_TAGS = new Set(HTML_TAGS.filter(t => t.type === 'void').map(t => t.tag));
-
-/* ---------- HTML autocomplete helpers ---------- */
-function getTagOpenContext(cm) {
-    const cur = cm.getCursor();
-    const line = cm.getLine(cur.line);
-    const before = line.slice(0, cur.ch);
-    const lt = before.lastIndexOf('<');
-    if (lt === -1) return null;
-    const after = before.slice(lt + 1);
-    if (after.includes('>')) return null;
-    if (after.startsWith('/')) return null;
-    if (!/^[a-zA-Z][a-zA-Z0-9-]*$/.test(after)) return null;
-    return { start: { line: cur.line, ch: lt }, partial: after };
-}
-
-function htmlTagHint(cm) {
-    const ctx = getTagOpenContext(cm);
-    if (!ctx) return null;
-    const partial = ctx.partial.toLowerCase();
-    const list = HTML_TAGS.filter(t => t.tag.startsWith(partial)).map(t => ({
-        text: `<${t.tag}>`,
-        displayText: `<${t.tag}>  ${t.desc}`,
-        tagName: t.tag,
-        desc: t.desc
-    }));
-    if (list.length === 0) return null;
-    return { list, from: { line: ctx.start.line, ch: ctx.start.ch }, to: cm.getCursor() };
-}
-
-/* ============================================================
-   DEFAULT PROJECTS
+   DEFAULT PROJECT TEMPLATES
    ============================================================ */
 const DEFAULT_PROJECTS = {
     html: {
-        name: 'HTML Hello World',
-        language: 'html',
-        activeFile: 'index.html',
+        name: 'HTML Hello World', language: 'html', activeFile: 'index.html',
         files: {
-            'index.html': {
-                name: 'index.html',
-                content: `<!DOCTYPE html>
+            'index.html': { name: 'index.html', content: `<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -200,18 +60,13 @@ const DEFAULT_PROJECTS = {
   <h1>Hello, World!</h1>
   <p>Edit the code on the left and click Run.</p>
 </body>
-</html>`
-            }
+</html>` }
         }
     },
     python: {
-        name: 'Python',
-        language: 'python',
-        activeFile: 'main.py',
+        name: 'Python', language: 'python', activeFile: 'main.py',
         files: {
-            'main.py': {
-                name: 'main.py',
-                content: `import math
+            'main.py': { name: 'main.py', content: `import math
 import random
 
 print("Hello from Python!")
@@ -222,21 +77,15 @@ for i in range(1, 6):
 print("sqrt(2) =", math.sqrt(2))
 print("Random number:", random.randint(1, 100))
 
-# Lists work too
 nums = [x * 2 for x in range(5)]
 print("Doubled:", nums)
-`
-            }
+` }
         }
     },
     c: {
-        name: 'C',
-        language: 'c',
-        activeFile: 'main.c',
+        name: 'C', language: 'c', activeFile: 'main.c',
         files: {
-            'main.c': {
-                name: 'main.c',
-                content: `#include <stdio.h>
+            'main.c': { name: 'main.c', content: `#include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
 
@@ -250,18 +99,13 @@ int main(void) {
     printf("sqrt(2) = %.6f\\n", sqrt(2.0));
     return 0;
 }
-`
-            }
+` }
         }
     },
     cpp: {
-        name: 'C++',
-        language: 'cpp',
-        activeFile: 'main.cpp',
+        name: 'C++', language: 'cpp', activeFile: 'main.cpp',
         files: {
-            'main.cpp': {
-                name: 'main.cpp',
-                content: `#include <iostream>
+            'main.cpp': { name: 'main.cpp', content: `#include <iostream>
 #include <vector>
 #include <cmath>
 #include <string>
@@ -274,25 +118,20 @@ int main() {
     }
 
     std::vector<std::string> languages = {"C", "C++", "Rust", "Go"};
-    std::cout << "Compiled languages: ";
+    std::cout << "Languages: ";
     for (const auto& lang : languages) std::cout << lang << " ";
     std::cout << std::endl;
 
     std::cout << "sqrt(2) = " << std::sqrt(2.0) << std::endl;
     return 0;
 }
-`
-            }
+` }
         }
     },
     rust: {
-        name: 'Rust',
-        language: 'rust',
-        activeFile: 'main.rs',
+        name: 'Rust', language: 'rust', activeFile: 'main.rs',
         files: {
-            'main.rs': {
-                name: 'main.rs',
-                content: `fn main() {
+            'main.rs': { name: 'main.rs', content: `fn main() {
     println!("Hello from Rust!");
 
     for i in 1..=5 {
@@ -302,18 +141,13 @@ int main() {
     let langs = vec!["C", "C++", "Rust", "Go"];
     println!("Systems languages: {}", langs.join(", "));
 }
-`
-            }
+` }
         }
     },
     go: {
-        name: 'Go',
-        language: 'go',
-        activeFile: 'main.go',
+        name: 'Go', language: 'go', activeFile: 'main.go',
         files: {
-            'main.go': {
-                name: 'main.go',
-                content: `package main
+            'main.go': { name: 'main.go', content: `package main
 
 import (
     "fmt"
@@ -329,20 +163,13 @@ func main() {
 
     fmt.Printf("sqrt(2) = %.6f\\n", math.Sqrt(2))
 }
-`
-            }
+` }
         }
     },
     assembly: {
-        name: 'Assembly',
-        language: 'assembly',
-        activeFile: 'main.s',
+        name: 'Assembly', language: 'assembly', activeFile: 'main.s',
         files: {
-            'main.s': {
-                name: 'main.s',
-                content: `; x86-64 Assembly (NASM syntax)
-; Assemble with: nasm -f elf64 main.s
-; Prints "Hello from Assembly!" using Linux syscalls
+            'main.s': { name: 'main.s', content: `; x86-64 Assembly (NASM syntax)
 
 section .data
     msg db 'Hello from Assembly!', 10
@@ -353,28 +180,23 @@ section .text
 
 _start:
     ; write(1, msg, len)
-    mov rax, 1          ; sys_write
-    mov rdi, 1          ; stdout
+    mov rax, 1
+    mov rdi, 1
     mov rsi, msg
     mov rdx, len
     syscall
 
     ; exit(0)
-    mov rax, 60         ; sys_exit
+    mov rax, 60
     xor rdi, rdi
     syscall
-`
-            }
+` }
         }
     },
     lua: {
-        name: 'Lua',
-        language: 'lua',
-        activeFile: 'main.lua',
+        name: 'Lua', language: 'lua', activeFile: 'main.lua',
         files: {
-            'main.lua': {
-                name: 'main.lua',
-                content: `print("Hello from Lua!")
+            'main.lua': { name: 'main.lua', content: `print("Hello from Lua!")
 
 for i = 1, 5 do
     print("  " .. i .. " squared = " .. (i * i))
@@ -385,18 +207,13 @@ for i = 1, 5 do
     t[i] = i * 2
 end
 print("Doubled: " .. table.concat(t, ", "))
-`
-            }
+` }
         }
     },
     sql: {
-        name: 'SQL',
-        language: 'sql',
-        activeFile: 'query.sql',
+        name: 'SQL', language: 'sql', activeFile: 'query.sql',
         files: {
-            'query.sql': {
-                name: 'query.sql',
-                content: `-- SQLite syntax
+            'query.sql': { name: 'query.sql', content: `-- SQLite syntax
 CREATE TABLE users (id INTEGER PRIMARY KEY, name TEXT, age INTEGER);
 
 INSERT INTO users (name, age) VALUES ('Alice', 30);
@@ -404,8 +221,7 @@ INSERT INTO users (name, age) VALUES ('Bob', 25);
 INSERT INTO users (name, age) VALUES ('Carol', 35);
 
 SELECT * FROM users ORDER BY age;
-`
-            }
+` }
         }
     }
 };
@@ -413,27 +229,12 @@ SELECT * FROM users ORDER BY age;
 /* ============================================================
    REMOTE RUNNERS
    ============================================================ */
-
-/**
- * Wandbox — public compile API for C, C++, Rust, Assembly (NASM), etc.
- * Docs: https://github.com/melpon/wandbox/blob/master/kennel2/API.md
- */
 const Wandbox = {
     async run(compiler, code, stdin) {
-        const url = 'https://wandbox.org/api/compile.json';
-        const body = {
-            compiler,
-            code,
-            stdin: stdin || '',
-            options: '',
-            compiler_option_raw: '',
-            runtime_option_raw: '',
-            save: false
-        };
-        const res = await fetch(url, {
+        const res = await fetch('https://wandbox.org/api/compile.json', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(body)
+            body: JSON.stringify({ compiler, code, stdin: stdin || '', options: '', save: false })
         });
         if (!res.ok) throw new Error(`Wandbox HTTP ${res.status}`);
         const data = await res.json();
@@ -446,18 +247,8 @@ const Wandbox = {
     }
 };
 
-/**
- * Go Playground API — official compiler for Go.
- */
 const GoPlay = {
-    async run(code, stdin) {
-        const url = 'https://go.dev/play/compile'; // compilation only
-        // The public API is /play/p/ for share; for actual execution we use
-        // the proxy that go.dev exposes. However the officially documented
-        // approach is POST to https://go.dev/play/fmt with 'body' param
-        // followed by /play/compile.
-        //
-        // We use the widely-used mirror:
+    async run(code) {
         const res = await fetch('https://play.golang.org/compile', {
             method: 'POST',
             headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
@@ -472,49 +263,6 @@ const GoPlay = {
     }
 };
 
-/**
- * Pyodide — real CPython compiled to WebAssembly.
- * Loaded lazily on first Python run. Runs inside the sandbox iframe.
- */
-let pyodideReadyPromise = null;
-function loadPyodideRuntime() {
-    if (pyodideReadyPromise) return pyodideReadyPromise;
-    pyodideReadyPromise = new Promise((resolve, reject) => {
-        const s = document.createElement('script');
-        s.src = 'https://cdn.jsdelivr.net/pyodide/v0.25.0/full/pyodide.js';
-        s.onload = async () => {
-            try {
-                const py = await window.loadPyodide({
-                    indexURL: 'https://cdn.jsdelivr.net/pyodide/v0.25.0/full/'
-                });
-                resolve(py);
-            } catch (e) { reject(e); }
-        };
-        s.onerror = () => reject(new Error('Pyodide failed to load'));
-        document.head.appendChild(s);
-    });
-    return pyodideReadyPromise;
-}
-
-/**
- * Fengari — Lua 5.3 in pure JavaScript.
- */
-let fengariReady = null;
-function loadLuaRuntime() {
-    if (fengariReady) return fengariReady;
-    fengariReady = new Promise((resolve, reject) => {
-        const s = document.createElement('script');
-        s.src = 'https://cdn.jsdelivr.net/npm/fengari-web@0.1.4/dist/fengari-web.js';
-        s.onload = () => resolve(window.fengari);
-        s.onerror = () => reject(new Error('Fengari (Lua) failed to load'));
-        document.head.appendChild(s);
-    });
-    return fengariReady;
-}
-
-/**
- * sql.js — SQLite compiled to WebAssembly.
- */
 let sqlReady = null;
 function loadSqlRuntime() {
     if (sqlReady) return sqlReady;
@@ -540,7 +288,6 @@ function loadSqlRuntime() {
    ============================================================ */
 class HtmlCompiler {
     constructor() {
-        // Load projects
         this.projects = this._loadProjects();
         this.currentProjectId = localStorage.getItem('htmlc_current_project') || this.projects[0]?.id;
         this.project = this._getCurrentProject() || structuredClone(DEFAULT_PROJECTS.html);
@@ -559,7 +306,6 @@ class HtmlCompiler {
         this._fpsLast = performance.now();
         this._cmdCommands = [];
         this._autoSaveEnabled = true;
-        this._runningLanguage = this.project.language || 'html';
 
         this.initEditor();
         this.initResizers();
@@ -583,14 +329,10 @@ class HtmlCompiler {
     _loadProjects() {
         try {
             const raw = localStorage.getItem('htmlc_projects');
-            if (raw) {
-                const arr = JSON.parse(raw);
-                if (Array.isArray(arr) && arr.length) return arr;
-            }
+            if (raw) { const arr = JSON.parse(raw); if (Array.isArray(arr) && arr.length) return arr; }
         } catch (_) {}
         return [structuredClone(DEFAULT_PROJECTS.html)];
     }
-
     _saveProjects() {
         if (!this._autoSaveEnabled) return;
         clearTimeout(this._saveTimer);
@@ -602,56 +344,38 @@ class HtmlCompiler {
             } catch (_) { this.showToast('Storage full', 'error'); }
         }, 250);
     }
-
     _persistCurrentIntoProjects() {
         const idx = this.projects.findIndex(p => p.id === this.currentProjectId);
-        if (idx >= 0) this.projects[idx] = this.project;
-        else this.projects.push(this.project);
+        if (idx >= 0) this.projects[idx] = this.project; else this.projects.push(this.project);
     }
-
-    _getCurrentProject() {
-        return this.projects.find(p => p.id === this.currentProjectId);
-    }
-
+    _getCurrentProject() { return this.projects.find(p => p.id === this.currentProjectId); }
     updateProjectName() {
         const el = document.getElementById('currentProjectName');
         if (el) el.innerText = this.project.name || 'Untitled';
     }
-
     toggleProjectMenu() {
         const menu = document.getElementById('projectMenu');
         const wasHidden = menu.classList.contains('hidden');
         this._renderProjectList();
         menu.classList.toggle('hidden');
-        if (wasHidden) {
-            setTimeout(() => document.addEventListener('click', this._closeProjectMenu, { once: true }), 0);
-        }
+        if (wasHidden) setTimeout(() => document.addEventListener('click', this._closeProjectMenu, { once: true }), 0);
     }
-
     _closeProjectMenu = (e) => {
         const menu = document.getElementById('projectMenu');
         const btn = document.getElementById('projectDropdownBtn');
-        if (menu && btn && !menu.contains(e.target) && !btn.contains(e.target)) {
-            menu.classList.add('hidden');
-        }
+        if (menu && btn && !menu.contains(e.target) && !btn.contains(e.target)) menu.classList.add('hidden');
     }
-
     _renderProjectList() {
         const el = document.getElementById('projectList');
         if (!el) return;
         el.innerHTML = this.projects.map(p => {
             const lang = LANGUAGES[p.language || 'html'] || LANGUAGES.html;
-            return `<button data-project-id="${this._escapeAttr(p.id)}"
-                class="project-item w-full text-left px-3 py-1.5 hover:bg-studio-panel flex items-center justify-between ${p.id === this.currentProjectId ? 'text-blue-400' : 'text-studio-text'}">
-                <span class="truncate"><i class="${lang.icon} mr-2" style="color:${lang.color}"></i>${this._escape(p.name)}</span>
-                ${p.id === this.currentProjectId ? '<i class="fa-solid fa-check text-[10px]"></i>' : ''}
-            </button>`;
+            return `<button data-project-id="${this._escapeAttr(p.id)}" class="project-item w-full text-left px-3 py-1.5 hover:bg-studio-panel flex items-center justify-between ${p.id === this.currentProjectId ? 'text-blue-400' : 'text-studio-text'}"><span class="truncate"><i class="${lang.icon} mr-2" style="color:${lang.color}"></i>${this._escape(p.name)}</span>${p.id === this.currentProjectId ? '<i class="fa-solid fa-check text-[10px]"></i>' : ''}</button>`;
         }).join('');
         el.querySelectorAll('.project-item').forEach(btn => {
             btn.addEventListener('click', () => this.switchProject(btn.dataset.projectId));
         });
     }
-
     switchProject(id) {
         this._persistCurrentIntoProjects();
         this.currentProjectId = id;
@@ -667,28 +391,18 @@ class HtmlCompiler {
         this.runCode();
         this.showToast(`Switched to "${this.project.name}"`, 'info');
     }
-
     newProject() {
         const name = prompt('New project name:', 'My Project');
         if (!name) return;
         const newProj = {
-            id: 'proj_' + Date.now(),
-            name,
-            language: 'html',
-            activeFile: 'index.html',
-            files: {
-                'index.html': {
-                    name: 'index.html',
-                    content: `<!DOCTYPE html>\n<html lang="en">\n<head>\n  <meta charset="UTF-8">\n  <title>${this._escape(name)}</title>\n</head>\n<body>\n  <h1>Hello, World!</h1>\n</body>\n</html>`
-                }
-            }
+            id: 'proj_' + Date.now(), name, language: 'html', activeFile: 'index.html',
+            files: { 'index.html': { name: 'index.html', content: `<!DOCTYPE html>\n<html lang="en">\n<head>\n  <meta charset="UTF-8">\n  <title>${this._escape(name)}</title>\n</head>\n<body>\n  <h1>Hello, World!</h1>\n</body>\n</html>` } }
         };
         this._persistCurrentIntoProjects();
         this.projects.push(newProj);
         localStorage.setItem('htmlc_projects', JSON.stringify(this.projects));
         this.switchProject(newProj.id);
     }
-
     renameProject() {
         const name = prompt('Rename project:', this.project.name);
         if (!name) return;
@@ -698,7 +412,6 @@ class HtmlCompiler {
         this._renderProjectList();
         this.showToast('Renamed', 'success');
     }
-
     deleteProject() {
         if (this.projects.length <= 1) { this.showToast('Cannot delete your only project', 'error'); return; }
         if (!confirm(`Delete "${this.project.name}"?`)) return;
@@ -714,6 +427,7 @@ class HtmlCompiler {
     initEditor() {
         const textarea = document.getElementById('cmTextarea');
         const hasCloseTagAddon = typeof CodeMirror.commands.closeTag === 'function';
+        const self = this;
 
         this.editor = CodeMirror.fromTextArea(textarea, {
             lineNumbers: true,
@@ -728,8 +442,8 @@ class HtmlCompiler {
             foldGutter: true,
             gutters: ['CodeMirror-linenumbers', 'CodeMirror-foldgutter'],
             extraKeys: {
-                "Ctrl-Space": "autocomplete",
-                "Cmd-Space": "autocomplete",
+                "Ctrl-Space": (cm) => { cm.showHint({ completeSingle: false }); },
+                "Cmd-Space":  (cm) => { cm.showHint({ completeSingle: false }); },
                 "Tab": (cm) => {
                     if (cm.state.completionActive && cm.state.completionActive.widget) {
                         cm.state.completionActive.widget.pick();
@@ -751,15 +465,21 @@ class HtmlCompiler {
             }
         });
 
+        // Dynamic, mode-aware hint provider from key.js
         this.editor.setOption('hintOptions', {
-            hint: htmlTagHint,
+            hint: (cm) => {
+                const mode = cm.getOption('mode');
+                const provider = window.KeyHints.providerFor(mode);
+                if (!provider) return null;
+                return provider(cm);
+            },
             completeSingle: false,
             closeOnUnfocus: true,
             alignWithWord: true,
             className: 'cm-tag-hints'
         });
 
-        // Fallback auto-close tag (used only if closetag addon not loaded)
+        // Auto-close tag fallback
         if (!hasCloseTagAddon) {
             this.editor.on('beforeChange', (cm, change) => {
                 if (change.origin !== '+input') return;
@@ -781,7 +501,7 @@ class HtmlCompiler {
                 const match = after.match(/^([a-zA-Z][a-zA-Z0-9-]*)/);
                 if (!match) return;
                 const tagName = match[1].toLowerCase();
-                if (VOID_TAGS.has(tagName)) return;
+                if (window.KeyHints.VOID_TAGS.has(tagName)) return;
 
                 setTimeout(() => {
                     const c = cm.getCursor();
@@ -794,16 +514,35 @@ class HtmlCompiler {
             });
         }
 
-        // HTML hint trigger
+        // Universal hint trigger for every language
         this.editor.on('inputRead', (cm, change) => {
             if (cm.state.completionActive) return;
             const mode = cm.getOption('mode');
-            if (typeof mode === 'string' && mode !== 'htmlmixed' && mode !== 'xml' && mode !== 'vue') return;
+            const provider = window.KeyHints.providerFor(mode);
+            if (!provider) return;
+
             const text = change.text[0] || '';
             const last = text[text.length - 1];
-            if (last === '<') { cm.showHint({ hint: htmlTagHint, completeSingle: false }); return; }
-            const ctx = getTagOpenContext(cm);
-            if (ctx && ctx.partial.length >= 1) cm.showHint({ hint: htmlTagHint, completeSingle: false });
+
+            // HTML: trigger on "<" or letters
+            if (mode === 'htmlmixed' || mode === 'xml' || mode === 'vue') {
+                if (last === '<' || /[a-zA-Z-]/.test(last)) {
+                    cm.showHint({ hint: provider, completeSingle: false });
+                }
+                return;
+            }
+
+            // Everywhere else: trigger if the character could start a word
+            if (!window.KeyHints.shouldTrigger(mode, last)) return;
+
+            // Only trigger when there's a partial word (>= 2 chars)
+            const cur = cm.getCursor();
+            const line = cm.getLine(cur.line);
+            const before = line.slice(0, cur.ch);
+            const m = before.match(/[A-Za-z_$][\w$.:\-!#@]*$/);
+            if (m && m[0].length >= 2) {
+                cm.showHint({ hint: provider, completeSingle: false });
+            }
         });
 
         this.openFile(this.project.activeFile || Object.keys(this.project.files)[0]);
@@ -841,20 +580,10 @@ class HtmlCompiler {
         for (const key in LANGUAGES) {
             if (LANGUAGES[key].ext === ext) return LANGUAGES[key].mode;
         }
-        if (name.endsWith('.html')) return 'htmlmixed';
-        if (name.endsWith('.css')) return 'css';
-        if (name.endsWith('.js')) return 'javascript';
-        if (name.endsWith('.py')) return 'python';
-        if (name.endsWith('.c')) return 'text/x-csrc';
-        if (name.endsWith('.cpp') || name.endsWith('.cc')) return 'text/x-c++src';
-        if (name.endsWith('.rs')) return 'rust';
-        if (name.endsWith('.go')) return 'go';
-        if (name.endsWith('.s') || name.endsWith('.asm')) return 'gas';
-        if (name.endsWith('.lua')) return 'lua';
-        if (name.endsWith('.sql')) return 'sql';
         if (name.endsWith('.vue')) return 'vue';
         if (name.endsWith('.jsx')) return 'jsx';
         if (name.endsWith('.md')) return 'markdown';
+        if (name.endsWith('.ts')) return 'javascript';
         return 'javascript';
     }
 
@@ -867,7 +596,6 @@ class HtmlCompiler {
         this.openFile(name);
         this.showToast(`Created ${name}`, 'success');
     }
-
     deleteFile(filename, event) {
         event?.stopPropagation();
         if (Object.keys(this.project.files).length <= 1) { this.showToast('Cannot delete the only file', 'error'); return; }
@@ -878,7 +606,6 @@ class HtmlCompiler {
         this.openFile(this.project.activeFile);
         this.showToast(`Deleted ${filename}`, 'info');
     }
-
     renameFile(filename, event) {
         event?.stopPropagation();
         const newName = prompt(`Rename "${filename}" to:`, filename);
@@ -896,16 +623,13 @@ class HtmlCompiler {
         this.renderSidebar();
         this.showToast(`Renamed to ${safe}`, 'success');
     }
-
     renderTabs() {
         const header = document.getElementById('tabsHeader');
         header.innerHTML = '';
         Object.keys(this.project.files).forEach(filename => {
             const isActive = filename === this.project.activeFile;
             const tab = document.createElement('div');
-            tab.className = `h-full px-3 text-xs flex items-center space-x-2 border-r border-studio-border cursor-pointer transition shrink-0 ${
-                isActive ? 'bg-studio-bg text-white border-t-2 border-t-blue-500 font-medium' : 'text-studio-muted hover:bg-studio-panel'
-            }`;
+            tab.className = `h-full px-3 text-xs flex items-center space-x-2 border-r border-studio-border cursor-pointer transition shrink-0 ${isActive ? 'bg-studio-bg text-white border-t-2 border-t-blue-500 font-medium' : 'text-studio-muted hover:bg-studio-panel'}`;
             const label = document.createElement('span');
             label.textContent = filename;
             label.title = 'Double-click to rename';
@@ -941,7 +665,6 @@ class HtmlCompiler {
     switchLanguage(langKey) {
         const lang = LANGUAGES[langKey];
         if (!lang) return;
-        // If this project already has a file with this language's extension, just switch
         const existingFile = Object.keys(this.project.files).find(f => f.endsWith(lang.ext));
         if (existingFile) {
             this.project.language = langKey;
@@ -952,11 +675,7 @@ class HtmlCompiler {
             this.runCode();
             return;
         }
-
-        // Otherwise ask if user wants to load the starter template for this language
-        const starterKey = langKey === 'html' ? 'html' :
-                          langKey === 'css' || langKey === 'javascript' || langKey === 'typescript' ? 'html' :
-                          langKey;
+        const starterKey = (langKey === 'css' || langKey === 'javascript' || langKey === 'typescript') ? 'html' : langKey;
         const starter = DEFAULT_PROJECTS[starterKey];
         if (starter && confirm(`Switch to ${lang.name}? This will load a starter template.`)) {
             this._persistCurrentIntoProjects();
@@ -987,8 +706,7 @@ class HtmlCompiler {
        ============================================================ */
     switchSidebarTab(tab) {
         this.currentSidebarTab = tab;
-        const tabs = ['files', 'packages', 'search', 'snippets', 'snapshots'];
-        tabs.forEach(t => {
+        ['files', 'packages', 'search', 'snippets', 'snapshots'].forEach(t => {
             const btn = document.getElementById(`btnTab${t.charAt(0).toUpperCase() + t.slice(1)}`);
             if (!btn) return;
             btn.classList.toggle('text-blue-400', t === tab);
@@ -1019,7 +737,6 @@ class HtmlCompiler {
                 left.className = 'flex items-center space-x-2 overflow-hidden';
                 const icon = document.createElement('i');
                 icon.className = this._iconForFile(filename);
-                icon.classList.add('text-studio-muted');
                 const name = document.createElement('span');
                 name.className = 'truncate';
                 name.textContent = filename;
@@ -1039,17 +756,17 @@ class HtmlCompiler {
             c.innerHTML = `
                 <div class="pb-2 border-b border-studio-border mb-2 text-xs font-bold text-studio-muted uppercase">Packages</div>
                 <div class="space-y-2 text-xs">
-                    <div class="text-[10px] text-studio-muted mb-1">
-                        Import libraries in your code using:
-                        <div class="font-mono text-emerald-400 mt-1">
+                    <div class="text-[10px] text-studio-muted">
+                        Import libraries in code:
+                        <div class="font-mono text-emerald-400 mt-1 space-y-0.5">
                             <div>Python: <code>import math</code></div>
                             <div>C: <code>#include &lt;stdio.h&gt;</code></div>
                             <div>C++: <code>#include &lt;iostream&gt;</code></div>
                         </div>
                     </div>
                     <div class="pt-2 border-t border-studio-border">
-                        <div class="text-[10px] text-studio-muted uppercase mb-1">Web (HTML/JS) CDN</div>
-                        <input id="pkgInput" placeholder="e.g. lodash, gsap, axios" class="w-full bg-studio-panel border border-studio-border rounded p-1.5 text-white focus:outline-none focus:border-blue-500">
+                        <div class="text-[10px] text-studio-muted uppercase mb-1">Web CDN</div>
+                        <input id="pkgInput" placeholder="e.g. lodash, gsap" class="w-full bg-studio-panel border border-studio-border rounded p-1.5 text-white focus:outline-none focus:border-blue-500">
                         <button data-action="add-pkg" class="w-full bg-blue-600 hover:bg-blue-500 text-white p-1.5 rounded font-medium mt-1">Add CDN</button>
                     </div>
                     <div class="pt-2 border-t border-studio-border">
@@ -1081,7 +798,6 @@ class HtmlCompiler {
                 { id: 'fetch', label: 'Async Fetch (JS)', icon: 'fa-cloud' },
                 { id: 'flex', label: 'Flex Center (CSS)', icon: 'fa-align-center' },
                 { id: 'debounce', label: 'Debounce fn', icon: 'fa-clock' },
-                { id: 'localStorage', label: 'localStorage helpers', icon: 'fa-database' },
                 { id: 'pythonList', label: 'Python list comp.', icon: 'fa-brands fa-python' },
                 { id: 'cStdio', label: 'C stdio template', icon: 'fa-solid fa-c' },
                 { id: 'cppVector', label: 'C++ vector loop', icon: 'fa-solid fa-code' },
@@ -1112,33 +828,26 @@ class HtmlCompiler {
             `;
             c.querySelector('[data-action="save-snap"]').addEventListener('click', () => this.saveSnapshot());
             const list = c.querySelector('#snapList');
-            if (!snaps.length) {
-                list.innerHTML = '<div class="text-[11px] text-studio-muted italic p-2">No snapshots yet.</div>';
-            } else {
-                snaps.forEach((s, i) => {
-                    const row = document.createElement('div');
-                    row.className = 'flex items-center justify-between p-1.5 rounded text-xs bg-studio-panel hover:bg-studio-border';
-                    row.innerHTML = `
-                        <div class="flex flex-col truncate">
-                            <span class="text-studio-text truncate">${this._escape(s.label)}</span>
-                            <span class="text-[10px] text-studio-muted">${new Date(s.ts).toLocaleString()}</span>
-                        </div>`;
-                    const actions = document.createElement('div');
-                    actions.className = 'flex gap-1';
-                    const restore = document.createElement('button');
-                    restore.className = 'p-1 text-blue-400 hover:text-blue-300';
-                    restore.innerHTML = '<i class="fa-solid fa-rotate-left"></i>';
-                    restore.addEventListener('click', () => this.restoreSnapshot(i));
-                    const del = document.createElement('button');
-                    del.className = 'p-1 text-red-400 hover:text-red-300';
-                    del.innerHTML = '<i class="fa-solid fa-trash"></i>';
-                    del.addEventListener('click', () => this.deleteSnapshot(i));
-                    actions.appendChild(restore);
-                    actions.appendChild(del);
-                    row.appendChild(actions);
-                    list.appendChild(row);
-                });
-            }
+            if (!snaps.length) list.innerHTML = '<div class="text-[11px] text-studio-muted italic p-2">No snapshots yet.</div>';
+            else snaps.forEach((s, i) => {
+                const row = document.createElement('div');
+                row.className = 'flex items-center justify-between p-1.5 rounded text-xs bg-studio-panel hover:bg-studio-border';
+                row.innerHTML = `<div class="flex flex-col truncate"><span class="text-studio-text truncate">${this._escape(s.label)}</span><span class="text-[10px] text-studio-muted">${new Date(s.ts).toLocaleString()}</span></div>`;
+                const actions = document.createElement('div');
+                actions.className = 'flex gap-1';
+                const restore = document.createElement('button');
+                restore.className = 'p-1 text-blue-400 hover:text-blue-300';
+                restore.innerHTML = '<i class="fa-solid fa-rotate-left"></i>';
+                restore.addEventListener('click', () => this.restoreSnapshot(i));
+                const del = document.createElement('button');
+                del.className = 'p-1 text-red-400 hover:text-red-300';
+                del.innerHTML = '<i class="fa-solid fa-trash"></i>';
+                del.addEventListener('click', () => this.deleteSnapshot(i));
+                actions.appendChild(restore);
+                actions.appendChild(del);
+                row.appendChild(actions);
+                list.appendChild(row);
+            });
         }
     }
 
@@ -1146,6 +855,7 @@ class HtmlCompiler {
         if (name.endsWith('.html')) return 'fa-brands fa-html5 text-orange-400';
         if (name.endsWith('.css')) return 'fa-brands fa-css3-alt text-blue-400';
         if (name.endsWith('.js')) return 'fa-brands fa-js text-yellow-400';
+        if (name.endsWith('.ts')) return 'fa-solid fa-code text-blue-400';
         if (name.endsWith('.py')) return 'fa-brands fa-python text-yellow-300';
         if (name.endsWith('.c')) return 'fa-solid fa-c text-blue-300';
         if (name.endsWith('.cpp') || name.endsWith('.cc')) return 'fa-solid fa-code text-blue-400';
@@ -1157,7 +867,7 @@ class HtmlCompiler {
         if (name.endsWith('.vue')) return 'fa-brands fa-vuejs text-emerald-400';
         if (name.endsWith('.jsx')) return 'fa-brands fa-react text-cyan-400';
         if (name.endsWith('.md')) return 'fa-brands fa-markdown text-studio-text';
-        return 'fa-regular fa-file';
+        return 'fa-regular fa-file text-studio-muted';
     }
 
     /* ============================================================
@@ -1168,7 +878,6 @@ class HtmlCompiler {
             fetch: `async function loadData(url) {\n  try {\n    const res = await fetch(url);\n    if (!res.ok) throw new Error('HTTP ' + res.status);\n    return await res.json();\n  } catch (err) {\n    console.error('Fetch failed:', err);\n    throw err;\n  }\n}\n`,
             flex: `.flex-center {\n  display: flex;\n  justify-content: center;\n  align-items: center;\n  min-height: 100vh;\n}\n`,
             debounce: `function debounce(fn, delay = 250) {\n  let timer;\n  return (...args) => {\n    clearTimeout(timer);\n    timer = setTimeout(() => fn(...args), delay);\n  };\n}\n`,
-            localStorage: `const store = {\n  get: (k, d=null) => { try { return JSON.parse(localStorage.getItem(k)) ?? d; } catch { return d; } },\n  set: (k, v) => localStorage.setItem(k, JSON.stringify(v)),\n  remove: (k) => localStorage.removeItem(k)\n};\n`,
             pythonList: `squares = [x ** 2 for x in range(10)]\nprint(squares)\n`,
             cStdio: `#include <stdio.h>\n\nint main(void) {\n    printf("Hello, World!\\n");\n    return 0;\n}\n`,
             cppVector: `#include <iostream>\n#include <vector>\n\nint main() {\n    std::vector<int> v = {1, 2, 3, 4, 5};\n    for (int x : v) std::cout << x << " ";\n    std::cout << std::endl;\n    return 0;\n}\n`,
@@ -1217,7 +926,6 @@ class HtmlCompiler {
         });
         if (!total) results.innerHTML = `<div class="text-[11px] text-studio-muted italic">No matches.</div>`;
     }
-
     _jumpToMatch(filename, line) {
         this.openFile(filename);
         setTimeout(() => {
@@ -1226,7 +934,6 @@ class HtmlCompiler {
             this.editor.focus();
         }, 60);
     }
-
     replaceAll() {
         const find = document.getElementById('searchInput')?.value || '';
         const replace = document.getElementById('replaceInput')?.value ?? '';
@@ -1258,7 +965,6 @@ class HtmlCompiler {
         try { return JSON.parse(localStorage.getItem('htmlc_snapshots_' + this.currentProjectId) || '[]'); }
         catch (_) { return []; }
     }
-
     saveSnapshot() {
         const label = prompt('Snapshot label:', 'Snapshot ' + new Date().toLocaleTimeString());
         if (!label) return;
@@ -1269,7 +975,6 @@ class HtmlCompiler {
         this.renderSidebar();
         this.showToast('Snapshot saved', 'success');
     }
-
     restoreSnapshot(i) {
         const snaps = this._getSnapshots();
         if (!snaps[i]) return;
@@ -1284,7 +989,6 @@ class HtmlCompiler {
         this.runCode();
         this.showToast('Restored snapshot', 'success');
     }
-
     deleteSnapshot(i) {
         const snaps = this._getSnapshots();
         snaps.splice(i, 1);
@@ -1347,7 +1051,7 @@ class HtmlCompiler {
     }
 
     /* ============================================================
-       RUN CODE — dispatcher
+       RUN
        ============================================================ */
     async runCode() {
         const lang = this.project.language || 'html';
@@ -1363,21 +1067,13 @@ class HtmlCompiler {
         try {
             this.clearConsole();
             const ldef = LANGUAGES[lang];
-
             if (!ldef) { this.showToast('Unknown language', 'error'); return; }
-            if (ldef.runner === 'web' || ldef.runner === 'ts') {
-                this.runWeb();
-            } else if (ldef.runner === 'pyodide') {
-                await this.runPython(code);
-            } else if (ldef.runner === 'wandbox') {
-                await this.runWandbox(ldef.wandbox, code);
-            } else if (ldef.runner === 'go') {
-                await this.runGo(code);
-            } else if (ldef.runner === 'lua') {
-                await this.runLua(code);
-            } else if (ldef.runner === 'sqljs') {
-                await this.runSql(code);
-            }
+            if (ldef.runner === 'web' || ldef.runner === 'ts') await this.runWeb();
+            else if (ldef.runner === 'pyodide') await this.runPython(code);
+            else if (ldef.runner === 'wandbox') await this.runWandbox(ldef.wandbox, code);
+            else if (ldef.runner === 'go') await this.runGo(code);
+            else if (ldef.runner === 'fengari') await this.runLua(code);
+            else if (ldef.runner === 'sqljs') await this.runSql(code);
         } catch (err) {
             this.addConsoleLog('error', ['Run failed: ' + (err.message || err)]);
         } finally {
@@ -1386,15 +1082,12 @@ class HtmlCompiler {
         }
     }
 
-    /* ============================================================
-       RUN — Web (HTML/CSS/JS)
-       ============================================================ */
-    runWeb() {
+    async runWeb() {
         const iframe = document.getElementById('sandboxIframe');
         const files = this.project.files;
         let entryName = files['index.html'] ? 'index.html' : Object.keys(files).find(f => f.endsWith('.html'));
         if (!entryName) {
-            iframe.srcdoc = '<html><body style="color:#999;font-family:sans-serif;padding:20px">No HTML file found. Switch to a project that has index.html.</body></html>';
+            iframe.srcdoc = '<html><body style="color:#999;font-family:sans-serif;padding:20px">No HTML file. Switch to a project with index.html.</body></html>';
             return;
         }
         let html = files[entryName].content;
@@ -1414,24 +1107,16 @@ class HtmlCompiler {
             }
         });
         const cdnList = this._getActiveCdn();
-        const cdnTags = cdnList.map(url => url.endsWith('.css')
-            ? `<link rel="stylesheet" href="${url}">`
-            : `<script src="${url}"><\/script>`
-        ).join('\n');
-        const fullDoc = this._wrapSandbox(html, cdnTags);
-        iframe.srcdoc = fullDoc;
+        const cdnTags = cdnList.map(url => url.endsWith('.css') ? `<link rel="stylesheet" href="${url}">` : `<script src="${url}"><\/script>`).join('\n');
+        iframe.srcdoc = this._wrapSandbox(html, cdnTags);
         this.addConsoleLog('info', ['▶ Sandbox reloaded']);
     }
 
-    /* ============================================================
-       SANDBOX BRIDGE — used by web + pyodide + lua + sql
-       ============================================================ */
     _wrapSandbox(bodyHTML, extraHead = '') {
         const bridge = `
         <script>
         (function() {
             const send = (type, payload) => window.parent.postMessage({ type, ...payload }, '*');
-
             ['log','info','warn','error','debug'].forEach(m => {
                 const orig = console[m];
                 console[m] = function(...args) {
@@ -1442,10 +1127,7 @@ class HtmlCompiler {
                                 if (typeof a === 'object' && a !== null) {
                                     const cache = new WeakSet();
                                     return JSON.stringify(a, (k, v) => {
-                                        if (typeof v === 'object' && v !== null) {
-                                            if (cache.has(v)) return '[Circular]';
-                                            cache.add(v);
-                                        }
+                                        if (typeof v === 'object' && v !== null) { if (cache.has(v)) return '[Circular]'; cache.add(v); }
                                         if (typeof v === 'function') return '[Function]';
                                         return v;
                                     });
@@ -1458,14 +1140,8 @@ class HtmlCompiler {
                     orig.apply(console, args);
                 };
             });
-
-            window.addEventListener('error', e => {
-                send('CONSOLE_LOG', { level: 'error', args: ['Uncaught: ' + e.message + ' (line ' + e.lineno + ')'] });
-            });
-            window.addEventListener('unhandledrejection', e => {
-                send('CONSOLE_LOG', { level: 'error', args: ['Unhandled Promise: ' + (e.reason?.message || e.reason)] });
-            });
-
+            window.addEventListener('error', e => send('CONSOLE_LOG', { level: 'error', args: ['Uncaught: ' + e.message + ' (line ' + e.lineno + ')'] }));
+            window.addEventListener('unhandledrejection', e => send('CONSOLE_LOG', { level: 'error', args: ['Unhandled Promise: ' + (e.reason?.message || e.reason)] }));
             const origFetch = window.fetch;
             window.fetch = async function(...args) {
                 const start = performance.now();
@@ -1478,42 +1154,19 @@ class HtmlCompiler {
                     throw err;
                 }
             };
-
-            // --- Message handlers (inspector + REPL + stdio) ---
             window.addEventListener('message', e => {
                 const d = e.data || {};
-                if (d.type === 'TOGGLE_INSPECTOR') {
-                    window.__inspectorActive = !!d.active;
-                }
+                if (d.type === 'TOGGLE_INSPECTOR') window.__inspectorActive = !!d.active;
                 if (d.type === 'EVAL_REPL') {
                     try {
                         const r = eval(d.code);
                         send('REPL_RESULT', { ok: true, value: typeof r === 'object' ? JSON.stringify(r) : String(r) });
-                    } catch (err) {
-                        send('REPL_RESULT', { ok: false, value: err.message });
-                    }
-                }
-                if (d.type === 'STDIO_INPUT') {
-                    if (typeof window.__feedStdin === 'function') window.__feedStdin(d.line);
+                    } catch (err) { send('REPL_RESULT', { ok: false, value: err.message }); }
                 }
             });
-
-            // Stdio support for Pyodide / Lua — reads from a queue fed by parent
-            window.__stdinQueue = [];
-            window.__stdinWaiters = [];
-            window.__feedStdin = (line) => {
-                if (window.__stdinWaiters.length) window.__stdinWaiters.shift()(line);
-                else window.__stdinQueue.push(line);
-            };
-            window.__readStdin = () => new Promise(res => {
-                if (window.__stdinQueue.length) res(window.__stdinQueue.shift());
-                else window.__stdinWaiters.push(res);
-            });
-
             window.__inspectorActive = false;
             let __hl = null;
             const clear = () => { if (__hl) { __hl.style.outline = ''; __hl.style.outlineOffset = ''; __hl = null; } };
-
             document.addEventListener('mouseover', e => {
                 if (!window.__inspectorActive) return;
                 clear();
@@ -1542,9 +1195,6 @@ class HtmlCompiler {
         return `<!DOCTYPE html>\n<html class="${this.sandboxTheme}">\n<head>\n<meta charset="UTF-8">\n${bridge}\n${extraHead}\n</head>\n<body>\n${bodyHTML}\n</body>\n</html>`;
     }
 
-    /* ============================================================
-       RUN — Python (Pyodide)
-       ============================================================ */
     async runPython(code) {
         const iframe = document.getElementById('sandboxIframe');
         const html = `
@@ -1553,15 +1203,12 @@ class HtmlCompiler {
             </div>
             <pre id="out" style="font-family:monospace;padding:20px;color:#c9d1d9;white-space:pre-wrap"></pre>
         `;
-        // Load the bridge, then run pyodide
         const pyCode = `
             (async () => {
                 const status = document.getElementById('status');
                 const out = document.getElementById('out');
                 try {
-                    const py = await window.loadPyodide({
-                        indexURL: 'https://cdn.jsdelivr.net/pyodide/v0.25.0/full/'
-                    });
+                    const py = await window.loadPyodide({ indexURL: 'https://cdn.jsdelivr.net/pyodide/v0.25.0/full/' });
                     status.textContent = '✔ Python ready. Running…';
                     py.setStdout({ batched: (s) => { out.textContent += s + '\\n'; } });
                     py.setStderr({ batched: (s) => { out.textContent += s + '\\n'; } });
@@ -1573,7 +1220,6 @@ class HtmlCompiler {
                 }
             })();
         `;
-        // Inject Pyodide loader + our script
         const headExtras = `
             <script src="https://cdn.jsdelivr.net/pyodide/v0.25.0/full/pyodide.js"><\/script>
             <script>${pyCode}<\/script>
@@ -1582,9 +1228,6 @@ class HtmlCompiler {
         this.addConsoleLog('info', ['▶ Loading Python…']);
     }
 
-    /* ============================================================
-       RUN — Wandbox (C, C++, Rust, Assembly)
-       ============================================================ */
     async runWandbox(compiler, code) {
         this.addConsoleLog('info', ['▶ Compiling with Wandbox (' + compiler + ')…']);
         const result = await Wandbox.run(compiler, code, '');
@@ -1594,32 +1237,17 @@ class HtmlCompiler {
         this.addConsoleLog('info', ['✔ Exit: ' + result.exitCode]);
     }
 
-    /* ============================================================
-       RUN — Go
-       ============================================================ */
     async runGo(code) {
         this.addConsoleLog('info', ['▶ Compiling Go…']);
-        const result = await GoPlay.run(code, '');
+        const result = await GoPlay.run(code);
         if (result.stdout) result.stdout.split('\n').forEach(l => this.addConsoleLog('log', [l]));
         if (result.stderr) result.stderr.split('\n').forEach(l => this.addConsoleLog('error', [l]));
         if (!result.stdout && !result.stderr) this.addConsoleLog('info', ['(no output)']);
     }
 
-    /* ============================================================
-       RUN — Lua (Fengari)
-       ============================================================ */
     async runLua(code) {
         const iframe = document.getElementById('sandboxIframe');
-        const html = `
-            <pre id="out" style="font-family:monospace;padding:20px;color:#c9d1d9;white-space:pre-wrap"></pre>
-        `;
-        const luaRun = `
-            (function() {
-                const out = document.getElementById('out');
-                const origLog = console.log;
-                window.fengari = null;
-            })();
-        `;
+        const html = `<pre id="out" style="font-family:monospace;padding:20px;color:#c9d1d9;white-space:pre-wrap"></pre>`;
         const headExtras = `
             <script src="https://cdn.jsdelivr.net/npm/fengari-web@0.1.4/dist/fengari-web.js"><\/script>
             <script>
@@ -1634,11 +1262,9 @@ class HtmlCompiler {
                                 out.textContent += s + '\\n';
                                 originalWrite.apply(console, arguments);
                             };
-                            // fengari-web exposes lauxlib, lualib, interop
                             const fengari = window.fengari;
                             const lua = fengari.lauxlib.luaL_newstate();
                             fengari.lualib.luaL_openlibs(lua);
-                            // Override print
                             fengari.lauxlib.luaL_dostring(lua,
                                 'print = function(...) local args = {...}; local s = ""; for i,v in ipairs(args) do s = s .. tostring(v) .. "\\\\t" end; io.write(s .. "\\\\n") end'
                             );
@@ -1657,27 +1283,19 @@ class HtmlCompiler {
         this.addConsoleLog('info', ['▶ Loading Lua…']);
     }
 
-    /* ============================================================
-       RUN — SQL (sql.js)
-       ============================================================ */
     async runSql(code) {
         this.addConsoleLog('info', ['▶ Loading SQLite (sql.js)…']);
         const SQL = await loadSqlRuntime();
         const db = new SQL.Database();
         try {
             const result = db.exec(code);
-            if (!result.length) {
-                this.addConsoleLog('log', ['(query ok — no rows returned)']);
-            } else {
-                result.forEach(rs => {
-                    const cols = rs.columns.join(' | ');
-                    this.addConsoleLog('log', [cols]);
-                    this.addConsoleLog('log', ['-'.repeat(cols.length)]);
-                    rs.values.forEach(row => {
-                        this.addConsoleLog('log', [row.map(v => v === null ? 'NULL' : String(v)).join(' | ')]);
-                    });
-                });
-            }
+            if (!result.length) this.addConsoleLog('log', ['(query ok — no rows returned)']);
+            else result.forEach(rs => {
+                const cols = rs.columns.join(' | ');
+                this.addConsoleLog('log', [cols]);
+                this.addConsoleLog('log', ['-'.repeat(cols.length)]);
+                rs.values.forEach(row => this.addConsoleLog('log', [row.map(v => v === null ? 'NULL' : String(v)).join(' | ')]));
+            });
             this.addConsoleLog('info', ['✔ Query executed']);
         } catch (err) {
             this.addConsoleLog('error', [err.message || String(err)]);
@@ -1731,7 +1349,6 @@ class HtmlCompiler {
         if (ap) ap.classList.remove('hidden');
         if (ab) ab.className = 'text-white font-semibold flex items-center space-x-1.5 border-b-2 border-blue-500 pb-1';
     }
-
     addConsoleLog(level, args) {
         const stream = document.getElementById('paneConsole');
         if (!stream) return;
@@ -1749,7 +1366,6 @@ class HtmlCompiler {
         const badge = document.getElementById('consoleBadge');
         if (badge) { badge.classList.remove('hidden'); badge.innerText = stream.children.length; }
     }
-
     _renderLogArg(arg) {
         if (typeof arg !== 'string') return this._escape(String(arg));
         const t = arg.trim();
@@ -1758,7 +1374,6 @@ class HtmlCompiler {
         }
         return this._escape(arg);
     }
-
     _jsonTree(obj, depth) {
         if (depth > 5) return '<span class="text-studio-muted">…</span>';
         if (obj === null) return '<span class="text-purple-400">null</span>';
@@ -1778,22 +1393,15 @@ class HtmlCompiler {
         }
         return this._escape(String(obj));
     }
-
     addNetworkLog(data) {
         const body = document.getElementById('networkTableBody');
         if (!body) return;
         const row = document.createElement('tr');
         row.className = 'border-b border-studio-border/50 text-xs hover:bg-studio-panel';
         const statusClass = (data.status >= 200 && data.status < 300) ? 'text-emerald-400' : data.status === 'ERR' ? 'text-red-400' : 'text-amber-400';
-        row.innerHTML = `
-            <td class="py-1 px-2 font-bold text-amber-400">${this._escape(String(data.method))}</td>
-            <td class="truncate max-w-[180px] text-studio-muted px-2" title="${this._escape(data.url)}">${this._escape(data.url)}</td>
-            <td class="${statusClass} px-2">${this._escape(String(data.status))}</td>
-            <td class="text-studio-muted px-2">${this._escape(String(data.duration))}ms</td>
-        `;
+        row.innerHTML = `<td class="py-1 px-2 font-bold text-amber-400">${this._escape(String(data.method))}</td><td class="truncate max-w-[180px] text-studio-muted px-2" title="${this._escape(data.url)}">${this._escape(data.url)}</td><td class="${statusClass} px-2">${this._escape(String(data.status))}</td><td class="text-studio-muted px-2">${this._escape(String(data.duration))}ms</td>`;
         body.appendChild(row);
     }
-
     clearConsole() {
         document.getElementById('paneConsole').innerHTML = '';
         document.getElementById('networkTableBody').innerHTML = '';
@@ -1802,17 +1410,11 @@ class HtmlCompiler {
         badge.classList.add('hidden');
         badge.innerText = '0';
     }
-
     toggleConsoleCollapse() {
         const drawer = document.getElementById('consoleDrawer');
         const icon = document.getElementById('consoleCollapseIcon');
-        if (drawer.style.height === '32px') {
-            drawer.style.height = '192px';
-            icon.className = 'fa-solid fa-chevron-down';
-        } else {
-            drawer.style.height = '32px';
-            icon.className = 'fa-solid fa-chevron-up';
-        }
+        if (drawer.style.height === '32px') { drawer.style.height = '192px'; icon.className = 'fa-solid fa-chevron-down'; }
+        else { drawer.style.height = '32px'; icon.className = 'fa-solid fa-chevron-up'; }
     }
 
     /* ============================================================
@@ -1830,16 +1432,10 @@ class HtmlCompiler {
                 this._fpsLast = now;
                 try {
                     const doc = document.getElementById('sandboxIframe').contentDocument;
-                    if (doc) {
-                        const dom = document.getElementById('domGauge');
-                        if (dom) dom.innerText = doc.getElementsByTagName('*').length;
-                    }
+                    if (doc) { const dom = document.getElementById('domGauge'); if (dom) dom.innerText = doc.getElementsByTagName('*').length; }
                 } catch (_) {}
                 const mem = document.getElementById('memGauge');
-                if (mem) {
-                    if (performance.memory) mem.innerText = (performance.memory.usedJSHeapSize / 1048576).toFixed(1) + ' MB';
-                    else mem.innerText = '—';
-                }
+                if (mem) mem.innerText = performance.memory ? (performance.memory.usedJSHeapSize / 1048576).toFixed(1) + ' MB' : '—';
             }
             this._fpsRaf = requestAnimationFrame(tick);
         };
@@ -2023,8 +1619,7 @@ class HtmlCompiler {
                 if (name.endsWith('.css')) html = html.replace(new RegExp(`<link[^>]*href=["']${escapeRe(name)}["'][^>]*>`, 'gi'), `<style>${f.content}</style>`);
                 if (name.endsWith('.js')) html = html.replace(new RegExp(`<script[^>]*src=["']${escapeRe(name)}["'][^>]*><\\/script>`, 'gi'), `<script>${f.content}<\/script>`);
             });
-            const blob = new Blob([html], { type: 'text/html' });
-            saveAs(blob, 'index.html');
+            saveAs(new Blob([html], { type: 'text/html' }), 'index.html');
             this.showToast('Downloaded HTML', 'success');
         }
     }
@@ -2120,8 +1715,7 @@ class HtmlCompiler {
     }
     insertKeyframeIntoSnippet() {
         const css = document.getElementById('kfOutputCss').value;
-        const cursor = this.editor.getCursor();
-        this.editor.replaceRange('\n' + css + '\n', cursor);
+        this.editor.replaceRange('\n' + css + '\n', this.editor.getCursor());
         this.closeModal('toolsModal');
         this.showToast('Keyframes inserted', 'success');
     }
@@ -2145,8 +1739,7 @@ class HtmlCompiler {
         });
     }
     _insertIcon(cls) {
-        const cursor = this.editor.getCursor();
-        this.editor.replaceRange(`<i class="fa-solid ${cls}"></i>`, cursor);
+        this.editor.replaceRange(`<i class="fa-solid ${cls}"></i>`, this.editor.getCursor());
         this.showToast(`Inserted ${cls}`, 'success');
     }
 
