@@ -2,7 +2,6 @@
    Code Playground - Custom Styles
    ============================================================ */
 
-/* ---------- Theme variables ---------- */
 :root {
     --studio-bg:      #0d1117;
     --studio-sidebar: #161b22;
@@ -14,7 +13,6 @@
     --studio-cursor:  #58a6ff;
 }
 
-/* ---------- Base ---------- */
 html, body {
     height: 100%;
     margin: 0;
@@ -35,101 +33,65 @@ body {
     background: var(--studio-bg) !important;
     color: var(--studio-text) !important;
 }
-
 .CodeMirror-gutters {
     background-color: var(--studio-sidebar) !important;
     border-right: 1px solid var(--studio-border) !important;
 }
-
-.CodeMirror-linenumber {
-    color: #6e7681 !important;
-}
-
-.CodeMirror-cursor {
-    border-left: 2px solid var(--studio-cursor) !important;
-}
-
-.CodeMirror-selected {
-    background: rgba(31, 111, 235, 0.27) !important;
-}
-
+.CodeMirror-linenumber { color: #6e7681 !important; }
+.CodeMirror-cursor { border-left: 2px solid var(--studio-cursor) !important; }
+.CodeMirror-selected { background: rgba(31, 111, 235, 0.27) !important; }
 .CodeMirror-matchingbracket {
     color: var(--studio-accent) !important;
     background: rgba(31, 111, 235, 0.2) !important;
 }
-
-.CodeMirror-activeline-background {
-    background: rgba(31, 111, 235, 0.06) !important;
-}
-
-.CodeMirror-foldmarker {
-    color: var(--studio-accent);
-    text-shadow: none;
-}
+.CodeMirror-activeline-background { background: rgba(31, 111, 235, 0.06) !important; }
+.CodeMirror-foldmarker { color: var(--studio-accent); text-shadow: none; }
 
 /* ---------- Scrollbars ---------- */
-::-webkit-scrollbar {
-    width: 8px;
-    height: 8px;
-}
+::-webkit-scrollbar { width: 8px; height: 8px; }
 ::-webkit-scrollbar-track { background: var(--studio-bg); }
-::-webkit-scrollbar-thumb {
-    background: var(--studio-border);
-    border-radius: 4px;
-}
+::-webkit-scrollbar-thumb { background: var(--studio-border); border-radius: 4px; }
 ::-webkit-scrollbar-thumb:hover { background: #484f58; }
 
 /* ---------- Device frames ---------- */
 .device-iphone {
-    width: 390px;
-    height: 844px;
-    border: 12px solid #333;
-    border-radius: 40px;
-    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    width: 390px; height: 844px;
+    border: 12px solid #333; border-radius: 40px;
+    box-shadow: 0 25px 50px -12px rgba(0,0,0,.5);
     flex-shrink: 0;
 }
 .device-pixel {
-    width: 412px;
-    height: 915px;
-    border: 10px solid #222;
-    border-radius: 28px;
-    flex-shrink: 0;
+    width: 412px; height: 915px;
+    border: 10px solid #222; border-radius: 28px; flex-shrink: 0;
 }
 .device-ipad {
-    width: 820px;
-    height: 1080px;
-    border: 16px solid #111;
-    border-radius: 30px;
-    flex-shrink: 0;
+    width: 820px; height: 1080px;
+    border: 16px solid #111; border-radius: 30px; flex-shrink: 0;
 }
 
 /* ---------- Resizers ---------- */
 .resizer-h {
-    cursor: col-resize;
-    width: 4px;
+    cursor: col-resize; width: 4px;
     background: var(--studio-border);
-    transition: background 0.2s;
-    flex-shrink: 0;
+    transition: background .2s; flex-shrink: 0;
 }
 .resizer-h:hover, .resizer-h.active { background: var(--studio-accent); }
-
 .resizer-v {
-    cursor: row-resize;
-    height: 4px;
+    cursor: row-resize; height: 4px;
     background: var(--studio-border);
-    transition: background 0.2s;
+    transition: background .2s;
 }
 .resizer-v:hover, .resizer-v.active { background: var(--studio-accent); }
 
-/* ---------- Toast animation ---------- */
-.toast { animation: slideIn 0.3s ease-out; }
+/* ---------- Toast ---------- */
+.toast { animation: slideIn .3s ease-out; }
 @keyframes slideIn {
     from { transform: translateX(120%); opacity: 0; }
     to   { transform: translateX(0);    opacity: 1; }
 }
 
 /* ---------- Console ---------- */
-.console-entry:hover { background: rgba(88, 166, 255, 0.05); }
+.console-entry:hover { background: rgba(88,166,255,.05); }
 .console-tree {
     padding-left: 12px;
     border-left: 1px solid var(--studio-border);
@@ -137,47 +99,27 @@ body {
 }
 details > summary { cursor: pointer; list-style: none; }
 details > summary::before {
-    content: '▶ ';
-    color: var(--studio-accent);
-    font-size: 10px;
-    margin-right: 4px;
+    content: '▶ '; color: var(--studio-accent);
+    font-size: 10px; margin-right: 4px;
 }
 details[open] > summary::before { content: '▼ '; }
 summary::-webkit-details-marker { display: none; }
 
 /* ---------- Snippets ---------- */
-.snippet-trigger:active { transform: scale(0.98); }
+.snippet-trigger:active { transform: scale(.98); }
 
 /* ---------- Inspector pulse ---------- */
 .pulse-active { animation: pulseBtn 1.5s infinite; }
 @keyframes pulseBtn {
-    0%, 100% { box-shadow: 0 0 0 0 rgba(88, 166, 255, 0.7); }
-    50%      { box-shadow: 0 0 0 8px rgba(88, 166, 255, 0); }
+    0%,100% { box-shadow: 0 0 0 0 rgba(88,166,255,.7); }
+    50%     { box-shadow: 0 0 0 8px rgba(88,166,255,0); }
 }
 
-/* ---------- Search highlight ---------- */
-.search-match {
-    background: #facc15 !important;
-    color: #000 !important;
-}
-.search-current {
-    background: var(--studio-accent) !important;
-    color: #000 !important;
-}
+/* ---------- Search ---------- */
+.search-match { background: #facc15 !important; color: #000 !important; }
+.search-current { background: var(--studio-accent) !important; color: #000 !important; }
 
-/* ---------- Responsive tweaks ---------- */
-@media (max-width: 768px) {
-    .device-iphone,
-    .device-pixel,
-    .device-ipad {
-        transform: scale(0.75);
-        transform-origin: center;
-    }
-}
-
-/* ============================================================
-   HTML TAG AUTOCOMPLETE  (new)
-   ============================================================ */
+/* ---------- HTML autocomplete ---------- */
 .CodeMirror-hints.cm-tag-hints {
     background: var(--studio-sidebar) !important;
     border: 1px solid var(--studio-border) !important;
@@ -190,32 +132,56 @@ summary::-webkit-details-marker { display: none; }
     max-height: 260px;
     overflow-y: auto;
 }
-
 .CodeMirror-hints.cm-tag-hints .CodeMirror-hint {
     color: var(--studio-text);
-    padding: 4px 12px;
-    border-radius: 4px;
-    margin: 0 4px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
+    padding: 4px 12px; border-radius: 4px; margin: 0 4px;
+    display: flex; align-items: center; gap: 8px;
     white-space: nowrap;
 }
-
 .CodeMirror-hints.cm-tag-hints .CodeMirror-hint-active {
-    background: #1f6feb !important;
-    color: #fff !important;
+    background: #1f6feb !important; color: #fff !important;
 }
-
-.cm-tag-hint-name {
-    color: #7ee787;
-    font-weight: 600;
-}
-.cm-tag-hint-desc {
-    color: var(--studio-muted);
-    font-size: 11px;
-}
+.cm-tag-hint-name { color: #7ee787; font-weight: 600; }
+.cm-tag-hint-desc { color: var(--studio-muted); font-size: 11px; }
 .CodeMirror-hints.cm-tag-hints .CodeMirror-hint-active .cm-tag-hint-desc,
 .CodeMirror-hints.cm-tag-hints .CodeMirror-hint-active .cm-tag-hint-name {
     color: #cfe9ff;
+}
+
+/* ---------- Language chips (new) ---------- */
+.lang-chip {
+    font-size: 10px;
+    padding: 2px 6px;
+    border-radius: 4px;
+    border: 1px solid var(--studio-border);
+    background: var(--studio-panel);
+    color: var(--studio-text);
+    cursor: pointer;
+    transition: all .15s;
+    white-space: nowrap;
+}
+.lang-chip:hover { background: var(--studio-border); color: #fff; }
+.lang-chip.active {
+    background: #1f6feb;
+    border-color: #1f6feb;
+    color: #fff;
+    font-weight: 600;
+}
+
+/* ---------- Run spinner ---------- */
+.run-spinner {
+    display: inline-block;
+    width: 12px; height: 12px;
+    border: 2px solid rgba(255,255,255,.3);
+    border-top-color: #fff;
+    border-radius: 50%;
+    animation: spin .7s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ---------- Responsive ---------- */
+@media (max-width: 768px) {
+    .device-iphone, .device-pixel, .device-ipad {
+        transform: scale(.75); transform-origin: center;
+    }
 }
