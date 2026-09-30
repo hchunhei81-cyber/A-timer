@@ -1,6 +1,9 @@
 /* ============================================================
-   Dependency check — runs before anything else
+   Code Playground — Multi-Language Edition
+   Supports: HTML/CSS/JS, Python, C, C++, Rust, Go, Assembly, Lua, SQL
    ============================================================ */
+
+/* ---------- Dependency check ---------- */
 (function () {
     'use strict';
     var missing = [];
@@ -12,171 +15,132 @@
 
     if (missing.length > 0) {
         document.body.innerHTML =
-            '<div style="position:fixed;inset:0;display:flex;align-items:center;' +
-            'justify-content:center;background:#0d1117;color:#c9d1d9;' +
-            'font-family:Inter,sans-serif;padding:24px;text-align:center;z-index:9999">' +
-                '<div style="max-width:520px">' +
-                    '<h1 style="font-size:20px;font-weight:700;margin-bottom:10px">' +
-                        'Code Playground could not start' +
-                    '</h1>' +
-                    '<p style="font-size:13px;color:#8b949e;line-height:1.6;margin-bottom:14px">' +
-                        'One or more required libraries failed to load. This usually means the ' +
-                        'CDN is blocked or you are offline.' +
-                    '</p>' +
-                    '<div style="font-family:ui-monospace,monospace;font-size:12px;' +
-                    'background:#161b22;border:1px solid #30363d;border-radius:10px;' +
-                    'padding:12px;text-align:left;color:#f0883e">' +
-                        'Missing: ' + missing.join(', ') +
-                    '</div>' +
-                    '<button onclick="location.reload()" ' +
-                    'style="margin-top:16px;background:#1f6feb;color:#fff;border:none;' +
-                    'padding:10px 18px;border-radius:8px;font-size:13px;font-weight:600;' +
-                    'cursor:pointer">Reload</button>' +
-                '</div>' +
-            '</div>';
+            '<div style="position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:#0d1117;color:#c9d1d9;font-family:Inter,sans-serif;padding:24px;text-align:center;z-index:9999"><div style="max-width:520px"><h1 style="font-size:20px;font-weight:700;margin-bottom:10px">Code Playground could not start</h1><p style="font-size:13px;color:#8b949e;line-height:1.6;margin-bottom:14px">One or more required libraries failed to load.</p><div style="font-family:ui-monospace,monospace;font-size:12px;background:#161b22;border:1px solid #30363d;border-radius:10px;padding:12px;text-align:left;color:#f0883e">Missing: ' + missing.join(', ') + '</div><button onclick="location.reload()" style="margin-top:16px;background:#1f6feb;color:#fff;border:none;padding:10px 18px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer">Reload</button></div></div>';
         throw new Error('Missing dependencies: ' + missing.join(', '));
     }
 })();
 
-/* ============================================================
-   HTML Compiler - Core application logic
-   ============================================================ */
 (function () {
 'use strict';
 
-/* ------------------------------------------------------------
-   Default project
-   ------------------------------------------------------------ */
-const DEFAULT_PROJECT = {
-    id: 'proj_default',
-    name: 'Hello World',
-    activeFile: 'index.html',
-    files: {
-        'index.html': {
-            name: 'index.html',
-            content: `<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>Hello World</title>
-</head>
-<body>
-  <h1>Hello, World!</h1>
-</body>
-</html>`
-        }
+/* ============================================================
+   LANGUAGE DEFINITIONS
+   ============================================================ */
+const LANGUAGES = {
+    html: {
+        name: 'HTML', icon: 'fa-brands fa-html5', color: '#e34c26',
+        mode: 'htmlmixed', ext: '.html', runner: 'web', voidAutoClose: true
+    },
+    css: {
+        name: 'CSS', icon: 'fa-brands fa-css3-alt', color: '#2965f1',
+        mode: 'css', ext: '.css', runner: 'web'
+    },
+    javascript: {
+        name: 'JavaScript', icon: 'fa-brands fa-js', color: '#f7df1e',
+        mode: 'javascript', ext: '.js', runner: 'web'
+    },
+    typescript: {
+        name: 'TypeScript', icon: 'fa-solid fa-code', color: '#3178c6',
+        mode: 'javascript', ext: '.ts', runner: 'ts'
+    },
+    python: {
+        name: 'Python', icon: 'fa-brands fa-python', color: '#3776ab',
+        mode: 'python', ext: '.py', runner: 'pyodide'
+    },
+    c: {
+        name: 'C', icon: 'fa-solid fa-c', color: '#a8b9cc',
+        mode: 'text/x-csrc', ext: '.c', runner: 'wandbox', wandbox: 'gcc-head'
+    },
+    cpp: {
+        name: 'C++', icon: 'fa-solid fa-code', color: '#00599c',
+        mode: 'text/x-c++src', ext: '.cpp', runner: 'wandbox', wandbox: 'gcc-head'
+    },
+    rust: {
+        name: 'Rust', icon: 'fa-brands fa-rust', color: '#dea584',
+        mode: 'rust', ext: '.rs', runner: 'wandbox', wandbox: 'rustc-head'
+    },
+    go: {
+        name: 'Go', icon: 'fa-solid fa-g', color: '#00add8',
+        mode: 'go', ext: '.go', runner: 'go'
+    },
+    assembly: {
+        name: 'Assembly', icon: 'fa-solid fa-microchip', color: '#6e4c13',
+        mode: 'gas', ext: '.s', runner: 'wandbox', wandbox: 'nasm-head'
+    },
+    lua: {
+        name: 'Lua', icon: 'fa-solid fa-moon', color: '#000080',
+        mode: 'lua', ext: '.lua', runner: 'fengari'
+    },
+    sql: {
+        name: 'SQL', icon: 'fa-solid fa-database', color: '#00758f',
+        mode: 'sql', ext: '.sql', runner: 'sqljs'
     }
 };
 
-/* ------------------------------------------------------------
-   HTML TAG DATABASE
-   ------------------------------------------------------------ */
+/* ============================================================
+   HTML TAG DATABASE (autocomplete)
+   ============================================================ */
 const HTML_TAGS = [
-    { tag: 'html',   desc: 'Root element',           attrs: ' lang="en"',           type: 'paired' },
-    { tag: 'head',   desc: 'Document head',          attrs: '',                     type: 'paired' },
-    { tag: 'body',   desc: 'Document body',          attrs: '',                     type: 'paired' },
-    { tag: 'title',  desc: 'Document title',         attrs: '',                     type: 'paired' },
-    { tag: 'meta',   desc: 'Metadata',               attrs: ' charset="UTF-8"',     type: 'void'   },
-    { tag: 'link',   desc: 'External resource',      attrs: ' rel="stylesheet" href=""', type: 'void' },
-    { tag: 'style',  desc: 'Inline CSS',             attrs: '',                     type: 'paired' },
-    { tag: 'script', desc: 'Inline / external JS',   attrs: '',                     type: 'paired' },
-    { tag: 'base',   desc: 'Base URL',               attrs: ' href=""',             type: 'void'   },
-
-    { tag: 'header', desc: 'Header section',         attrs: '',                     type: 'paired' },
-    { tag: 'footer', desc: 'Footer section',         attrs: '',                     type: 'paired' },
-    { tag: 'nav',    desc: 'Navigation',             attrs: '',                     type: 'paired' },
-    { tag: 'main',   desc: 'Main content',           attrs: '',                     type: 'paired' },
-    { tag: 'section',desc: 'Section',                attrs: '',                     type: 'paired' },
-    { tag: 'article',desc: 'Article',                attrs: '',                     type: 'paired' },
-    { tag: 'aside',  desc: 'Sidebar',                attrs: '',                     type: 'paired' },
-    { tag: 'div',    desc: 'Block container',        attrs: '',                     type: 'paired' },
-
-    { tag: 'h1', desc: 'Heading level 1', attrs: '', type: 'paired' },
-    { tag: 'h2', desc: 'Heading level 2', attrs: '', type: 'paired' },
-    { tag: 'h3', desc: 'Heading level 3', attrs: '', type: 'paired' },
-    { tag: 'h4', desc: 'Heading level 4', attrs: '', type: 'paired' },
-    { tag: 'h5', desc: 'Heading level 5', attrs: '', type: 'paired' },
-    { tag: 'h6', desc: 'Heading level 6', attrs: '', type: 'paired' },
-    { tag: 'hgroup', desc: 'Heading group', attrs: '', type: 'paired' },
-
-    { tag: 'p',      desc: 'Paragraph',              attrs: '', type: 'paired' },
-    { tag: 'span',   desc: 'Inline container',       attrs: '', type: 'paired' },
-    { tag: 'a',      desc: 'Hyperlink',              attrs: ' href=""', type: 'paired' },
-    { tag: 'strong', desc: 'Bold importance',        attrs: '', type: 'paired' },
-    { tag: 'em',     desc: 'Emphasis',               attrs: '', type: 'paired' },
-    { tag: 'b',      desc: 'Bold',                   attrs: '', type: 'paired' },
-    { tag: 'i',      desc: 'Italic',                 attrs: '', type: 'paired' },
-    { tag: 'u',      desc: 'Underline',              attrs: '', type: 'paired' },
-    { tag: 's',      desc: 'Strikethrough',          attrs: '', type: 'paired' },
-    { tag: 'small',  desc: 'Small print',            attrs: '', type: 'paired' },
-    { tag: 'mark',   desc: 'Highlighted',            attrs: '', type: 'paired' },
-    { tag: 'sub',    desc: 'Subscript',              attrs: '', type: 'paired' },
-    { tag: 'sup',    desc: 'Superscript',            attrs: '', type: 'paired' },
-    { tag: 'code',   desc: 'Inline code',            attrs: '', type: 'paired' },
-    { tag: 'pre',    desc: 'Preformatted',           attrs: '', type: 'paired' },
-    { tag: 'kbd',    desc: 'Keyboard input',         attrs: '', type: 'paired' },
-    { tag: 'samp',   desc: 'Sample output',          attrs: '', type: 'paired' },
-    { tag: 'var',    desc: 'Variable',               attrs: '', type: 'paired' },
-    { tag: 'q',      desc: 'Inline quote',           attrs: '', type: 'paired' },
-    { tag: 'blockquote', desc: 'Block quote',        attrs: '', type: 'paired' },
-    { tag: 'cite',   desc: 'Citation',               attrs: '', type: 'paired' },
-    { tag: 'abbr',   desc: 'Abbreviation',           attrs: ' title=""', type: 'paired' },
-    { tag: 'br',     desc: 'Line break',             attrs: '', type: 'void'   },
-    { tag: 'hr',     desc: 'Thematic break',         attrs: '', type: 'void'   },
-    { tag: 'wbr',    desc: 'Word break opportunity', attrs: '', type: 'void'   },
-
-    { tag: 'ul', desc: 'Unordered list', attrs: '', type: 'paired' },
-    { tag: 'ol', desc: 'Ordered list',   attrs: '', type: 'paired' },
-    { tag: 'li', desc: 'List item',      attrs: '', type: 'paired' },
-    { tag: 'dl', desc: 'Description list', attrs: '', type: 'paired' },
-    { tag: 'dt', desc: 'Description term', attrs: '', type: 'paired' },
-    { tag: 'dd', desc: 'Description details', attrs: '', type: 'paired' },
-
-    { tag: 'img',    desc: 'Image',      attrs: ' src="" alt=""', type: 'void'   },
-    { tag: 'picture',desc: 'Picture',    attrs: '', type: 'paired' },
-    { tag: 'source', desc: 'Media source', attrs: ' srcset=""', type: 'void'   },
-    { tag: 'video',  desc: 'Video',      attrs: ' controls', type: 'paired' },
-    { tag: 'audio',  desc: 'Audio',      attrs: ' controls', type: 'paired' },
-    { tag: 'track',  desc: 'Text track', attrs: '', type: 'void'   },
-    { tag: 'canvas', desc: 'Canvas',     attrs: '', type: 'paired' },
-    { tag: 'svg',    desc: 'SVG root',   attrs: ' viewBox="0 0 24 24"', type: 'paired' },
-    { tag: 'iframe', desc: 'Inline frame', attrs: ' src=""', type: 'paired' },
-    { tag: 'embed',  desc: 'Embed',      attrs: ' src=""', type: 'void' },
-    { tag: 'object', desc: 'Object',     attrs: ' data=""', type: 'paired' },
-    { tag: 'map',    desc: 'Image map',  attrs: ' name=""', type: 'paired' },
-    { tag: 'area',   desc: 'Image map area', attrs: '', type: 'void' },
-
-    { tag: 'table',   desc: 'Table',           attrs: '', type: 'paired' },
-    { tag: 'caption', desc: 'Table caption',   attrs: '', type: 'paired' },
-    { tag: 'thead',   desc: 'Table head',      attrs: '', type: 'paired' },
-    { tag: 'tbody',   desc: 'Table body',      attrs: '', type: 'paired' },
-    { tag: 'tfoot',   desc: 'Table footer',    attrs: '', type: 'paired' },
-    { tag: 'tr',      desc: 'Table row',       attrs: '', type: 'paired' },
-    { tag: 'th',      desc: 'Table header',    attrs: '', type: 'paired' },
-    { tag: 'td',      desc: 'Table data',      attrs: '', type: 'paired' },
-    { tag: 'colgroup',desc: 'Column group',    attrs: '', type: 'paired' },
-    { tag: 'col',     desc: 'Column',          attrs: '', type: 'void' },
-
-    { tag: 'form',    desc: 'Form',            attrs: ' action="" method="post"', type: 'paired' },
-    { tag: 'label',   desc: 'Label',           attrs: ' for=""', type: 'paired' },
-    { tag: 'input',   desc: 'Input field',     attrs: ' type="text" name=""', type: 'void' },
-    { tag: 'textarea',desc: 'Text area',       attrs: ' name=""', type: 'paired' },
-    { tag: 'button',  desc: 'Button',          attrs: ' type="button"', type: 'paired' },
-    { tag: 'select',  desc: 'Select dropdown', attrs: ' name=""', type: 'paired' },
-    { tag: 'option',  desc: 'Option',          attrs: ' value=""', type: 'paired' },
-    { tag: 'optgroup',desc: 'Option group',    attrs: ' label=""', type: 'paired' },
-    { tag: 'datalist',desc: 'Data list',       attrs: '', type: 'paired' },
-    { tag: 'output',  desc: 'Output',          attrs: '', type: 'paired' },
-    { tag: 'progress',desc: 'Progress bar',    attrs: ' value="0" max="100"', type: 'paired' },
-    { tag: 'meter',   desc: 'Meter',           attrs: '', type: 'paired' },
-    { tag: 'fieldset',desc: 'Fieldset',        attrs: '', type: 'paired' },
-    { tag: 'legend',  desc: 'Legend',          attrs: '', type: 'paired' },
-
-    { tag: 'details', desc: 'Disclosure',      attrs: '', type: 'paired' },
-    { tag: 'summary', desc: 'Disclosure summary', attrs: '', type: 'paired' },
-    { tag: 'dialog',  desc: 'Dialog',          attrs: '', type: 'paired' },
-    { tag: 'template',desc: 'Template',        attrs: '', type: 'paired' },
-    { tag: 'slot',    desc: 'Web component slot', attrs: '', type: 'paired' },
+    { tag: 'html', desc: 'Root element', attrs: ' lang="en"', type: 'paired' },
+    { tag: 'head', desc: 'Document head', attrs: '', type: 'paired' },
+    { tag: 'body', desc: 'Document body', attrs: '', type: 'paired' },
+    { tag: 'title', desc: 'Document title', attrs: '', type: 'paired' },
+    { tag: 'meta', desc: 'Metadata', attrs: ' charset="UTF-8"', type: 'void' },
+    { tag: 'link', desc: 'External resource', attrs: ' rel="stylesheet" href=""', type: 'void' },
+    { tag: 'style', desc: 'Inline CSS', attrs: '', type: 'paired' },
+    { tag: 'script', desc: 'Script', attrs: '', type: 'paired' },
+    { tag: 'header', desc: 'Header', attrs: '', type: 'paired' },
+    { tag: 'footer', desc: 'Footer', attrs: '', type: 'paired' },
+    { tag: 'nav', desc: 'Navigation', attrs: '', type: 'paired' },
+    { tag: 'main', desc: 'Main', attrs: '', type: 'paired' },
+    { tag: 'section', desc: 'Section', attrs: '', type: 'paired' },
+    { tag: 'article', desc: 'Article', attrs: '', type: 'paired' },
+    { tag: 'aside', desc: 'Sidebar', attrs: '', type: 'paired' },
+    { tag: 'div', desc: 'Block', attrs: '', type: 'paired' },
+    { tag: 'h1', desc: 'Heading 1', attrs: '', type: 'paired' },
+    { tag: 'h2', desc: 'Heading 2', attrs: '', type: 'paired' },
+    { tag: 'h3', desc: 'Heading 3', attrs: '', type: 'paired' },
+    { tag: 'h4', desc: 'Heading 4', attrs: '', type: 'paired' },
+    { tag: 'h5', desc: 'Heading 5', attrs: '', type: 'paired' },
+    { tag: 'h6', desc: 'Heading 6', attrs: '', type: 'paired' },
+    { tag: 'p', desc: 'Paragraph', attrs: '', type: 'paired' },
+    { tag: 'span', desc: 'Inline', attrs: '', type: 'paired' },
+    { tag: 'a', desc: 'Link', attrs: ' href=""', type: 'paired' },
+    { tag: 'strong', desc: 'Bold', attrs: '', type: 'paired' },
+    { tag: 'em', desc: 'Italic', attrs: '', type: 'paired' },
+    { tag: 'b', desc: 'Bold', attrs: '', type: 'paired' },
+    { tag: 'i', desc: 'Italic', attrs: '', type: 'paired' },
+    { tag: 'code', desc: 'Code', attrs: '', type: 'paired' },
+    { tag: 'pre', desc: 'Preformatted', attrs: '', type: 'paired' },
+    { tag: 'blockquote', desc: 'Quote', attrs: '', type: 'paired' },
+    { tag: 'br', desc: 'Break', attrs: '', type: 'void' },
+    { tag: 'hr', desc: 'Rule', attrs: '', type: 'void' },
+    { tag: 'ul', desc: 'List', attrs: '', type: 'paired' },
+    { tag: 'ol', desc: 'Ordered list', attrs: '', type: 'paired' },
+    { tag: 'li', desc: 'List item', attrs: '', type: 'paired' },
+    { tag: 'img', desc: 'Image', attrs: ' src="" alt=""', type: 'void' },
+    { tag: 'video', desc: 'Video', attrs: ' controls', type: 'paired' },
+    { tag: 'audio', desc: 'Audio', attrs: ' controls', type: 'paired' },
+    { tag: 'canvas', desc: 'Canvas', attrs: '', type: 'paired' },
+    { tag: 'svg', desc: 'SVG', attrs: ' viewBox="0 0 24 24"', type: 'paired' },
+    { tag: 'iframe', desc: 'Frame', attrs: ' src=""', type: 'paired' },
+    { tag: 'table', desc: 'Table', attrs: '', type: 'paired' },
+    { tag: 'thead', desc: 'Table head', attrs: '', type: 'paired' },
+    { tag: 'tbody', desc: 'Table body', attrs: '', type: 'paired' },
+    { tag: 'tr', desc: 'Table row', attrs: '', type: 'paired' },
+    { tag: 'th', desc: 'Table header', attrs: '', type: 'paired' },
+    { tag: 'td', desc: 'Table data', attrs: '', type: 'paired' },
+    { tag: 'form', desc: 'Form', attrs: ' action="" method="post"', type: 'paired' },
+    { tag: 'label', desc: 'Label', attrs: ' for=""', type: 'paired' },
+    { tag: 'input', desc: 'Input', attrs: ' type="text" name=""', type: 'void' },
+    { tag: 'textarea', desc: 'Textarea', attrs: ' name=""', type: 'paired' },
+    { tag: 'button', desc: 'Button', attrs: ' type="button"', type: 'paired' },
+    { tag: 'select', desc: 'Select', attrs: ' name=""', type: 'paired' },
+    { tag: 'option', desc: 'Option', attrs: ' value=""', type: 'paired' },
+    { tag: 'details', desc: 'Details', attrs: '', type: 'paired' },
+    { tag: 'summary', desc: 'Summary', attrs: '', type: 'paired' },
+    { tag: 'dialog', desc: 'Dialog', attrs: '', type: 'paired' },
+    { tag: 'template', desc: 'Template', attrs: '', type: 'paired' }
 ];
 
 const TAG_DEFS = (() => {
@@ -185,67 +149,401 @@ const TAG_DEFS = (() => {
     return map;
 })();
 
-const VOID_TAGS = new Set(
-    HTML_TAGS.filter(t => t.type === 'void').map(t => t.tag)
-);
+const VOID_TAGS = new Set(HTML_TAGS.filter(t => t.type === 'void').map(t => t.tag));
 
-/**
- * Detect an HTML tag-open context before the cursor.
- */
+/* ---------- HTML autocomplete helpers ---------- */
 function getTagOpenContext(cm) {
     const cur = cm.getCursor();
     const line = cm.getLine(cur.line);
     const before = line.slice(0, cur.ch);
-
     const lt = before.lastIndexOf('<');
     if (lt === -1) return null;
-
     const after = before.slice(lt + 1);
-
     if (after.includes('>')) return null;
     if (after.startsWith('/')) return null;
     if (!/^[a-zA-Z][a-zA-Z0-9-]*$/.test(after)) return null;
-
-    return {
-        start: { line: cur.line, ch: lt },
-        partial: after
-    };
+    return { start: { line: cur.line, ch: lt }, partial: after };
 }
 
-/**
- * CodeMirror hint provider for HTML tags.
- */
 function htmlTagHint(cm) {
     const ctx = getTagOpenContext(cm);
     if (!ctx) return null;
-
     const partial = ctx.partial.toLowerCase();
-    const list = HTML_TAGS
-        .filter(t => t.tag.startsWith(partial))
-        .map(t => ({
-            text: `<${t.tag}>`,
-            displayText: `<${t.tag}>  ${t.desc}`,
-            tagName: t.tag,
-            desc: t.desc
-        }));
-
+    const list = HTML_TAGS.filter(t => t.tag.startsWith(partial)).map(t => ({
+        text: `<${t.tag}>`,
+        displayText: `<${t.tag}>  ${t.desc}`,
+        tagName: t.tag,
+        desc: t.desc
+    }));
     if (list.length === 0) return null;
-
-    return {
-        list,
-        from: { line: ctx.start.line, ch: ctx.start.ch },
-        to: cm.getCursor()
-    };
+    return { list, from: { line: ctx.start.line, ch: ctx.start.ch }, to: cm.getCursor() };
 }
 
-/* ------------------------------------------------------------
-   Main Application
-   ------------------------------------------------------------ */
+/* ============================================================
+   DEFAULT PROJECTS
+   ============================================================ */
+const DEFAULT_PROJECTS = {
+    html: {
+        name: 'HTML Hello World',
+        language: 'html',
+        activeFile: 'index.html',
+        files: {
+            'index.html': {
+                name: 'index.html',
+                content: `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Hello World</title>
+</head>
+<body style="font-family:system-ui;padding:24px">
+  <h1>Hello, World!</h1>
+  <p>Edit the code on the left and click Run.</p>
+</body>
+</html>`
+            }
+        }
+    },
+    python: {
+        name: 'Python',
+        language: 'python',
+        activeFile: 'main.py',
+        files: {
+            'main.py': {
+                name: 'main.py',
+                content: `import math
+import random
+
+print("Hello from Python!")
+
+for i in range(1, 6):
+    print(f"  {i} squared = {i ** 2}")
+
+print("sqrt(2) =", math.sqrt(2))
+print("Random number:", random.randint(1, 100))
+
+# Lists work too
+nums = [x * 2 for x in range(5)]
+print("Doubled:", nums)
+`
+            }
+        }
+    },
+    c: {
+        name: 'C',
+        language: 'c',
+        activeFile: 'main.c',
+        files: {
+            'main.c': {
+                name: 'main.c',
+                content: `#include <stdio.h>
+#include <stdlib.h>
+#include <math.h>
+
+int main(void) {
+    printf("Hello from C!\\n");
+
+    for (int i = 1; i <= 5; i++) {
+        printf("  %d squared = %d\\n", i, i * i);
+    }
+
+    printf("sqrt(2) = %.6f\\n", sqrt(2.0));
+    return 0;
+}
+`
+            }
+        }
+    },
+    cpp: {
+        name: 'C++',
+        language: 'cpp',
+        activeFile: 'main.cpp',
+        files: {
+            'main.cpp': {
+                name: 'main.cpp',
+                content: `#include <iostream>
+#include <vector>
+#include <cmath>
+#include <string>
+
+int main() {
+    std::cout << "Hello from C++!" << std::endl;
+
+    for (int i = 1; i <= 5; ++i) {
+        std::cout << "  " << i << " squared = " << i * i << std::endl;
+    }
+
+    std::vector<std::string> languages = {"C", "C++", "Rust", "Go"};
+    std::cout << "Compiled languages: ";
+    for (const auto& lang : languages) std::cout << lang << " ";
+    std::cout << std::endl;
+
+    std::cout << "sqrt(2) = " << std::sqrt(2.0) << std::endl;
+    return 0;
+}
+`
+            }
+        }
+    },
+    rust: {
+        name: 'Rust',
+        language: 'rust',
+        activeFile: 'main.rs',
+        files: {
+            'main.rs': {
+                name: 'main.rs',
+                content: `fn main() {
+    println!("Hello from Rust!");
+
+    for i in 1..=5 {
+        println!("  {} squared = {}", i, i * i);
+    }
+
+    let langs = vec!["C", "C++", "Rust", "Go"];
+    println!("Systems languages: {}", langs.join(", "));
+}
+`
+            }
+        }
+    },
+    go: {
+        name: 'Go',
+        language: 'go',
+        activeFile: 'main.go',
+        files: {
+            'main.go': {
+                name: 'main.go',
+                content: `package main
+
+import (
+    "fmt"
+    "math"
+)
+
+func main() {
+    fmt.Println("Hello from Go!")
+
+    for i := 1; i <= 5; i++ {
+        fmt.Printf("  %d squared = %d\\n", i, i*i)
+    }
+
+    fmt.Printf("sqrt(2) = %.6f\\n", math.Sqrt(2))
+}
+`
+            }
+        }
+    },
+    assembly: {
+        name: 'Assembly',
+        language: 'assembly',
+        activeFile: 'main.s',
+        files: {
+            'main.s': {
+                name: 'main.s',
+                content: `; x86-64 Assembly (NASM syntax)
+; Assemble with: nasm -f elf64 main.s
+; Prints "Hello from Assembly!" using Linux syscalls
+
+section .data
+    msg db 'Hello from Assembly!', 10
+    len equ $ - msg
+
+section .text
+    global _start
+
+_start:
+    ; write(1, msg, len)
+    mov rax, 1          ; sys_write
+    mov rdi, 1          ; stdout
+    mov rsi, msg
+    mov rdx, len
+    syscall
+
+    ; exit(0)
+    mov rax, 60         ; sys_exit
+    xor rdi, rdi
+    syscall
+`
+            }
+        }
+    },
+    lua: {
+        name: 'Lua',
+        language: 'lua',
+        activeFile: 'main.lua',
+        files: {
+            'main.lua': {
+                name: 'main.lua',
+                content: `print("Hello from Lua!")
+
+for i = 1, 5 do
+    print("  " .. i .. " squared = " .. (i * i))
+end
+
+local t = {}
+for i = 1, 5 do
+    t[i] = i * 2
+end
+print("Doubled: " .. table.concat(t, ", "))
+`
+            }
+        }
+    },
+    sql: {
+        name: 'SQL',
+        language: 'sql',
+        activeFile: 'query.sql',
+        files: {
+            'query.sql': {
+                name: 'query.sql',
+                content: `-- SQLite syntax
+CREATE TABLE users (id INTEGER PRIMARY KEY, name TEXT, age INTEGER);
+
+INSERT INTO users (name, age) VALUES ('Alice', 30);
+INSERT INTO users (name, age) VALUES ('Bob', 25);
+INSERT INTO users (name, age) VALUES ('Carol', 35);
+
+SELECT * FROM users ORDER BY age;
+`
+            }
+        }
+    }
+};
+
+/* ============================================================
+   REMOTE RUNNERS
+   ============================================================ */
+
+/**
+ * Wandbox — public compile API for C, C++, Rust, Assembly (NASM), etc.
+ * Docs: https://github.com/melpon/wandbox/blob/master/kennel2/API.md
+ */
+const Wandbox = {
+    async run(compiler, code, stdin) {
+        const url = 'https://wandbox.org/api/compile.json';
+        const body = {
+            compiler,
+            code,
+            stdin: stdin || '',
+            options: '',
+            compiler_option_raw: '',
+            runtime_option_raw: '',
+            save: false
+        };
+        const res = await fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(body)
+        });
+        if (!res.ok) throw new Error(`Wandbox HTTP ${res.status}`);
+        const data = await res.json();
+        return {
+            ok: !data.compiler_error && data.status === '0',
+            stdout: data.program_output || '',
+            stderr: data.program_error || data.compiler_error || '',
+            exitCode: data.status
+        };
+    }
+};
+
+/**
+ * Go Playground API — official compiler for Go.
+ */
+const GoPlay = {
+    async run(code, stdin) {
+        const url = 'https://go.dev/play/compile'; // compilation only
+        // The public API is /play/p/ for share; for actual execution we use
+        // the proxy that go.dev exposes. However the officially documented
+        // approach is POST to https://go.dev/play/fmt with 'body' param
+        // followed by /play/compile.
+        //
+        // We use the widely-used mirror:
+        const res = await fetch('https://play.golang.org/compile', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: 'version=2&body=' + encodeURIComponent(code)
+        });
+        if (!res.ok) throw new Error(`Go HTTP ${res.status}`);
+        const data = await res.json();
+        const ev = data.Events || [];
+        const stdout = ev.filter(e => e.Kind === 'stdout').map(e => e.Message).join('');
+        const stderr = ev.filter(e => e.Kind === 'stderr').map(e => e.Message).join('');
+        return { ok: !data.Errors, stdout, stderr: stderr + (data.Errors || ''), exitCode: data.Errors ? 1 : 0 };
+    }
+};
+
+/**
+ * Pyodide — real CPython compiled to WebAssembly.
+ * Loaded lazily on first Python run. Runs inside the sandbox iframe.
+ */
+let pyodideReadyPromise = null;
+function loadPyodideRuntime() {
+    if (pyodideReadyPromise) return pyodideReadyPromise;
+    pyodideReadyPromise = new Promise((resolve, reject) => {
+        const s = document.createElement('script');
+        s.src = 'https://cdn.jsdelivr.net/pyodide/v0.25.0/full/pyodide.js';
+        s.onload = async () => {
+            try {
+                const py = await window.loadPyodide({
+                    indexURL: 'https://cdn.jsdelivr.net/pyodide/v0.25.0/full/'
+                });
+                resolve(py);
+            } catch (e) { reject(e); }
+        };
+        s.onerror = () => reject(new Error('Pyodide failed to load'));
+        document.head.appendChild(s);
+    });
+    return pyodideReadyPromise;
+}
+
+/**
+ * Fengari — Lua 5.3 in pure JavaScript.
+ */
+let fengariReady = null;
+function loadLuaRuntime() {
+    if (fengariReady) return fengariReady;
+    fengariReady = new Promise((resolve, reject) => {
+        const s = document.createElement('script');
+        s.src = 'https://cdn.jsdelivr.net/npm/fengari-web@0.1.4/dist/fengari-web.js';
+        s.onload = () => resolve(window.fengari);
+        s.onerror = () => reject(new Error('Fengari (Lua) failed to load'));
+        document.head.appendChild(s);
+    });
+    return fengariReady;
+}
+
+/**
+ * sql.js — SQLite compiled to WebAssembly.
+ */
+let sqlReady = null;
+function loadSqlRuntime() {
+    if (sqlReady) return sqlReady;
+    sqlReady = new Promise((resolve, reject) => {
+        const s = document.createElement('script');
+        s.src = 'https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.8.0/sql-wasm.js';
+        s.onload = async () => {
+            try {
+                const SQL = await window.initSqlJs({
+                    locateFile: f => `https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.8.0/${f}`
+                });
+                resolve(SQL);
+            } catch (e) { reject(e); }
+        };
+        s.onerror = () => reject(new Error('sql.js failed to load'));
+        document.head.appendChild(s);
+    });
+    return sqlReady;
+}
+
+/* ============================================================
+   MAIN APPLICATION
+   ============================================================ */
 class HtmlCompiler {
     constructor() {
+        // Load projects
         this.projects = this._loadProjects();
         this.currentProjectId = localStorage.getItem('htmlc_current_project') || this.projects[0]?.id;
-        this.project = this._getCurrentProject() || structuredClone(DEFAULT_PROJECT);
+        this.project = this._getCurrentProject() || structuredClone(DEFAULT_PROJECTS.html);
 
         this.editor = null;
         this.inspectorActive = false;
@@ -261,9 +559,11 @@ class HtmlCompiler {
         this._fpsLast = performance.now();
         this._cmdCommands = [];
         this._autoSaveEnabled = true;
+        this._runningLanguage = this.project.language || 'html';
 
         this.initEditor();
         this.initResizers();
+        this.renderLanguageBar();
         this.renderSidebar();
         this.renderTabs();
         this.updateProjectName();
@@ -278,14 +578,17 @@ class HtmlCompiler {
     }
 
     /* ============================================================
-       PROJECT MANAGEMENT
+       PROJECTS
        ============================================================ */
     _loadProjects() {
         try {
             const raw = localStorage.getItem('htmlc_projects');
-            if (raw) return JSON.parse(raw);
+            if (raw) {
+                const arr = JSON.parse(raw);
+                if (Array.isArray(arr) && arr.length) return arr;
+            }
         } catch (_) {}
-        return [structuredClone(DEFAULT_PROJECT)];
+        return [structuredClone(DEFAULT_PROJECTS.html)];
     }
 
     _saveProjects() {
@@ -296,9 +599,7 @@ class HtmlCompiler {
                 this._persistCurrentIntoProjects();
                 localStorage.setItem('htmlc_projects', JSON.stringify(this.projects));
                 localStorage.setItem('htmlc_current_project', this.currentProjectId);
-            } catch (_) {
-                this.showToast('Storage full', 'error');
-            }
+            } catch (_) { this.showToast('Storage full', 'error'); }
         }, 250);
     }
 
@@ -338,13 +639,14 @@ class HtmlCompiler {
     _renderProjectList() {
         const el = document.getElementById('projectList');
         if (!el) return;
-        el.innerHTML = this.projects.map(p => `
-            <button data-project-id="${this._escapeAttr(p.id)}"
-                    class="project-item w-full text-left px-3 py-1.5 hover:bg-studio-panel flex items-center justify-between ${p.id === this.currentProjectId ? 'text-blue-400' : 'text-studio-text'}">
-                <span class="truncate">${this._escape(p.name)}</span>
+        el.innerHTML = this.projects.map(p => {
+            const lang = LANGUAGES[p.language || 'html'] || LANGUAGES.html;
+            return `<button data-project-id="${this._escapeAttr(p.id)}"
+                class="project-item w-full text-left px-3 py-1.5 hover:bg-studio-panel flex items-center justify-between ${p.id === this.currentProjectId ? 'text-blue-400' : 'text-studio-text'}">
+                <span class="truncate"><i class="${lang.icon} mr-2" style="color:${lang.color}"></i>${this._escape(p.name)}</span>
                 ${p.id === this.currentProjectId ? '<i class="fa-solid fa-check text-[10px]"></i>' : ''}
-            </button>
-        `).join('');
+            </button>`;
+        }).join('');
         el.querySelectorAll('.project-item').forEach(btn => {
             btn.addEventListener('click', () => this.switchProject(btn.dataset.projectId));
         });
@@ -357,6 +659,7 @@ class HtmlCompiler {
         localStorage.setItem('htmlc_current_project', id);
         this.updateProjectName();
         this.openFile(this.project.activeFile || Object.keys(this.project.files)[0]);
+        this.renderLanguageBar();
         this.renderTabs();
         this.renderSidebar();
         const menu = document.getElementById('projectMenu');
@@ -371,6 +674,7 @@ class HtmlCompiler {
         const newProj = {
             id: 'proj_' + Date.now(),
             name,
+            language: 'html',
             activeFile: 'index.html',
             files: {
                 'index.html': {
@@ -396,10 +700,7 @@ class HtmlCompiler {
     }
 
     deleteProject() {
-        if (this.projects.length <= 1) {
-            this.showToast('Cannot delete your only project', 'error');
-            return;
-        }
+        if (this.projects.length <= 1) { this.showToast('Cannot delete your only project', 'error'); return; }
         if (!confirm(`Delete "${this.project.name}"?`)) return;
         this.projects = this.projects.filter(p => p.id !== this.currentProjectId);
         localStorage.setItem('htmlc_projects', JSON.stringify(this.projects));
@@ -412,8 +713,6 @@ class HtmlCompiler {
        ============================================================ */
     initEditor() {
         const textarea = document.getElementById('cmTextarea');
-
-        // Detect if closetag addon is loaded
         const hasCloseTagAddon = typeof CodeMirror.commands.closeTag === 'function';
 
         this.editor = CodeMirror.fromTextArea(textarea, {
@@ -422,7 +721,7 @@ class HtmlCompiler {
             theme: 'dracula',
             matchBrackets: true,
             autoCloseBrackets: true,
-            autoCloseTags: hasCloseTagAddon,   // only enable if addon present
+            autoCloseTags: hasCloseTagAddon,
             tabSize: 2,
             lineWrapping: false,
             styleActiveLine: true,
@@ -445,12 +744,13 @@ class HtmlCompiler {
                         cm.execCommand("newlineAndIndent");
                     }
                 },
-                "Ctrl-S": () => { this.runCode(); this.showToast('Ran project', 'success'); },
+                "Ctrl-Enter": () => { this.runCode(); },
+                "Cmd-Enter": () => { this.runCode(); },
+                "Ctrl-S": () => { this.runCode(); this.showToast('Ran', 'success'); },
                 "Cmd-S": () => { this.runCode(); }
             }
         });
 
-        // HTML tag hint provider
         this.editor.setOption('hintOptions', {
             hint: htmlTagHint,
             completeSingle: false,
@@ -459,20 +759,15 @@ class HtmlCompiler {
             className: 'cm-tag-hints'
         });
 
-        // ---- Auto-pair tags on typing ">" --------------------------
-        // Only active if the closetag addon is NOT available.
+        // Fallback auto-close tag (used only if closetag addon not loaded)
         if (!hasCloseTagAddon) {
             this.editor.on('beforeChange', (cm, change) => {
                 if (change.origin !== '+input') return;
-                if (change.text.length !== 1) return;
-                if (change.text[0] !== '>') return;
+                if (change.text.length !== 1 || change.text[0] !== '>') return;
                 if (change.removed && change.removed.length > 0) return;
 
                 const mode = cm.getOption('mode');
-                if (typeof mode === 'string' &&
-                    mode !== 'htmlmixed' && mode !== 'xml' && mode !== 'vue') {
-                    return;
-                }
+                if (typeof mode === 'string' && mode !== 'htmlmixed' && mode !== 'xml' && mode !== 'vue') return;
 
                 const cur = cm.getCursor();
                 const line = cm.getLine(cur.line);
@@ -492,50 +787,42 @@ class HtmlCompiler {
                     const c = cm.getCursor();
                     const l = cm.getLine(c.line);
                     if (l.charAt(c.ch - 1) !== '>') return;
-                    const rest = l.slice(c.ch);
-                    if (rest.startsWith('</')) return;
+                    if (l.slice(c.ch).startsWith('</')) return;
                     cm.replaceRange(`</${tagName}>`, c);
                     cm.setCursor(c);
                 }, 0);
             });
         }
 
-        // ---- Show hint list on "<" or "<partial" -------------------
+        // HTML hint trigger
         this.editor.on('inputRead', (cm, change) => {
             if (cm.state.completionActive) return;
-
             const mode = cm.getOption('mode');
-            if (typeof mode === 'string' &&
-                mode !== 'htmlmixed' && mode !== 'xml' && mode !== 'vue') {
-                return;
-            }
-
+            if (typeof mode === 'string' && mode !== 'htmlmixed' && mode !== 'xml' && mode !== 'vue') return;
             const text = change.text[0] || '';
             const last = text[text.length - 1];
-
-            if (last === '<') {
-                cm.showHint({ hint: htmlTagHint, completeSingle: false });
-                return;
-            }
-
+            if (last === '<') { cm.showHint({ hint: htmlTagHint, completeSingle: false }); return; }
             const ctx = getTagOpenContext(cm);
-            if (ctx && ctx.partial.length >= 1) {
-                cm.showHint({ hint: htmlTagHint, completeSingle: false });
-            }
+            if (ctx && ctx.partial.length >= 1) cm.showHint({ hint: htmlTagHint, completeSingle: false });
         });
 
-        this.openFile(this.project.activeFile || 'index.html');
+        this.openFile(this.project.activeFile || Object.keys(this.project.files)[0]);
 
         this.editor.on('change', () => {
             const file = this.project.files[this.project.activeFile];
             if (file) file.content = this.editor.getValue();
             this._saveProjects();
             const autoRun = document.getElementById('autoRunToggle');
-            if (autoRun && autoRun.checked) {
+            if (autoRun && autoRun.checked && this._isWebProject()) {
                 clearTimeout(this._autoRunTimer);
                 this._autoRunTimer = setTimeout(() => this.runCode(), 600);
             }
         });
+    }
+
+    _isWebProject() {
+        const lang = this.project.language || 'html';
+        return lang === 'html' || lang === 'css' || lang === 'javascript' || lang === 'typescript';
     }
 
     openFile(filename) {
@@ -550,9 +837,21 @@ class HtmlCompiler {
     }
 
     _modeForFile(name) {
+        const ext = name.slice(name.lastIndexOf('.'));
+        for (const key in LANGUAGES) {
+            if (LANGUAGES[key].ext === ext) return LANGUAGES[key].mode;
+        }
         if (name.endsWith('.html')) return 'htmlmixed';
         if (name.endsWith('.css')) return 'css';
         if (name.endsWith('.js')) return 'javascript';
+        if (name.endsWith('.py')) return 'python';
+        if (name.endsWith('.c')) return 'text/x-csrc';
+        if (name.endsWith('.cpp') || name.endsWith('.cc')) return 'text/x-c++src';
+        if (name.endsWith('.rs')) return 'rust';
+        if (name.endsWith('.go')) return 'go';
+        if (name.endsWith('.s') || name.endsWith('.asm')) return 'gas';
+        if (name.endsWith('.lua')) return 'lua';
+        if (name.endsWith('.sql')) return 'sql';
         if (name.endsWith('.vue')) return 'vue';
         if (name.endsWith('.jsx')) return 'jsx';
         if (name.endsWith('.md')) return 'markdown';
@@ -560,7 +859,7 @@ class HtmlCompiler {
     }
 
     createFile() {
-        const name = prompt('New file name (e.g. utils.js, main.css):');
+        const name = prompt('New file name (e.g. utils.js, main.py):');
         if (!name) return;
         if (this.project.files[name]) { this.showToast('File already exists', 'error'); return; }
         this.project.files[name] = { name, content: '' };
@@ -571,15 +870,10 @@ class HtmlCompiler {
 
     deleteFile(filename, event) {
         event?.stopPropagation();
-        if (Object.keys(this.project.files).length <= 1) {
-            this.showToast('Cannot delete the only file', 'error');
-            return;
-        }
+        if (Object.keys(this.project.files).length <= 1) { this.showToast('Cannot delete the only file', 'error'); return; }
         if (!confirm(`Delete ${filename}?`)) return;
         delete this.project.files[filename];
-        if (this.project.activeFile === filename) {
-            this.project.activeFile = Object.keys(this.project.files)[0];
-        }
+        if (this.project.activeFile === filename) this.project.activeFile = Object.keys(this.project.files)[0];
         this._saveProjects();
         this.openFile(this.project.activeFile);
         this.showToast(`Deleted ${filename}`, 'info');
@@ -612,21 +906,80 @@ class HtmlCompiler {
             tab.className = `h-full px-3 text-xs flex items-center space-x-2 border-r border-studio-border cursor-pointer transition shrink-0 ${
                 isActive ? 'bg-studio-bg text-white border-t-2 border-t-blue-500 font-medium' : 'text-studio-muted hover:bg-studio-panel'
             }`;
-
             const label = document.createElement('span');
             label.textContent = filename;
             label.title = 'Double-click to rename';
             label.addEventListener('dblclick', (e) => this.renameFile(filename, e));
-
             const close = document.createElement('i');
             close.className = 'fa-solid fa-xmark text-[10px] hover:text-red-400 p-0.5 rounded';
             close.addEventListener('click', (e) => this.deleteFile(filename, e));
-
             tab.appendChild(label);
             tab.appendChild(close);
             tab.addEventListener('click', () => this.openFile(filename));
             header.appendChild(tab);
         });
+    }
+
+    /* ============================================================
+       LANGUAGE BAR
+       ============================================================ */
+    renderLanguageBar() {
+        const bar = document.getElementById('languageBar');
+        if (!bar) return;
+        bar.innerHTML = '';
+        const current = this.project.language || 'html';
+        Object.entries(LANGUAGES).forEach(([key, lang]) => {
+            const chip = document.createElement('button');
+            chip.className = 'lang-chip' + (key === current ? ' active' : '');
+            chip.title = `Switch to ${lang.name}`;
+            chip.innerHTML = `<i class="${lang.icon}" style="color:${key === current ? '#fff' : lang.color}"></i> ${lang.name}`;
+            chip.addEventListener('click', () => this.switchLanguage(key));
+            bar.appendChild(chip);
+        });
+    }
+
+    switchLanguage(langKey) {
+        const lang = LANGUAGES[langKey];
+        if (!lang) return;
+        // If this project already has a file with this language's extension, just switch
+        const existingFile = Object.keys(this.project.files).find(f => f.endsWith(lang.ext));
+        if (existingFile) {
+            this.project.language = langKey;
+            this.project.activeFile = existingFile;
+            this._saveProjects();
+            this.openFile(existingFile);
+            this.renderLanguageBar();
+            this.runCode();
+            return;
+        }
+
+        // Otherwise ask if user wants to load the starter template for this language
+        const starterKey = langKey === 'html' ? 'html' :
+                          langKey === 'css' || langKey === 'javascript' || langKey === 'typescript' ? 'html' :
+                          langKey;
+        const starter = DEFAULT_PROJECTS[starterKey];
+        if (starter && confirm(`Switch to ${lang.name}? This will load a starter template.`)) {
+            this._persistCurrentIntoProjects();
+            const newId = 'proj_' + Date.now();
+            this.project = {
+                id: newId,
+                name: `${lang.name} Project`,
+                language: langKey,
+                activeFile: Object.keys(starter.files)[0],
+                files: structuredClone(starter.files)
+            };
+            this.projects.push(this.project);
+            this.currentProjectId = newId;
+            localStorage.setItem('htmlc_projects', JSON.stringify(this.projects));
+            localStorage.setItem('htmlc_current_project', newId);
+            this.updateProjectName();
+            this.openFile(this.project.activeFile);
+            this.renderLanguageBar();
+            this.renderTabs();
+            this.renderSidebar();
+            this.runCode();
+            this.showToast(`Switched to ${lang.name}`, 'success');
+        }
     }
 
     /* ============================================================
@@ -652,58 +1005,52 @@ class HtmlCompiler {
             c.innerHTML = `
                 <div class="flex items-center justify-between pb-2 border-b border-studio-border mb-2 text-xs">
                     <span class="font-bold text-studio-muted uppercase tracking-wider">Explorer</span>
-                    <button data-action="new-file" class="p-1 text-studio-muted hover:text-white" title="New File">
-                        <i class="fa-solid fa-plus"></i>
-                    </button>
+                    <button data-action="new-file" class="p-1 text-studio-muted hover:text-white" title="New File"><i class="fa-solid fa-plus"></i></button>
                 </div>
                 <div class="space-y-0.5" id="fileList"></div>
             `;
             c.querySelector('[data-action="new-file"]').addEventListener('click', () => this.createFile());
-
             const list = c.querySelector('#fileList');
             Object.keys(this.project.files).forEach(filename => {
                 const row = document.createElement('div');
                 const active = filename === this.project.activeFile;
-                row.className = `group flex items-center justify-between p-1.5 rounded text-xs cursor-pointer ${
-                    active ? 'bg-studio-panel text-blue-400 font-semibold' : 'text-studio-text hover:bg-studio-panel/50'
-                }`;
-
+                row.className = `group flex items-center justify-between p-1.5 rounded text-xs cursor-pointer ${active ? 'bg-studio-panel text-blue-400 font-semibold' : 'text-studio-text hover:bg-studio-panel/50'}`;
                 const left = document.createElement('div');
                 left.className = 'flex items-center space-x-2 overflow-hidden';
-
                 const icon = document.createElement('i');
                 icon.className = this._iconForFile(filename);
                 icon.classList.add('text-studio-muted');
-
                 const name = document.createElement('span');
                 name.className = 'truncate';
                 name.textContent = filename;
                 name.title = 'Double-click to rename';
                 name.addEventListener('dblclick', (e) => this.renameFile(filename, e));
-
                 left.appendChild(icon);
                 left.appendChild(name);
-
                 const trash = document.createElement('i');
                 trash.className = 'fa-solid fa-trash text-[10px] text-studio-muted hover:text-red-400 p-1 opacity-0 group-hover:opacity-100';
                 trash.addEventListener('click', (e) => this.deleteFile(filename, e));
-
                 row.appendChild(left);
                 row.appendChild(trash);
                 row.addEventListener('click', () => this.openFile(filename));
                 list.appendChild(row);
             });
-
         } else if (this.currentSidebarTab === 'packages') {
             c.innerHTML = `
-                <div class="pb-2 border-b border-studio-border mb-2 text-xs font-bold text-studio-muted uppercase">CDN Packages</div>
+                <div class="pb-2 border-b border-studio-border mb-2 text-xs font-bold text-studio-muted uppercase">Packages</div>
                 <div class="space-y-2 text-xs">
-                    <input id="pkgInput" placeholder="e.g. lodash, gsap, axios" class="w-full bg-studio-panel border border-studio-border rounded p-1.5 text-white focus:outline-none focus:border-blue-500">
-                    <button data-action="add-pkg" class="w-full bg-blue-600 hover:bg-blue-500 text-white p-1.5 rounded font-medium">Add Library</button>
-                    <div class="text-[10px] text-studio-muted">Injects CDN script tags into the sandbox.</div>
+                    <div class="text-[10px] text-studio-muted mb-1">
+                        Import libraries in your code using:
+                        <div class="font-mono text-emerald-400 mt-1">
+                            <div>Python: <code>import math</code></div>
+                            <div>C: <code>#include &lt;stdio.h&gt;</code></div>
+                            <div>C++: <code>#include &lt;iostream&gt;</code></div>
+                        </div>
+                    </div>
                     <div class="pt-2 border-t border-studio-border">
-                        <div class="text-[10px] text-studio-muted uppercase mb-1">Quick Add</div>
-                        <div class="grid grid-cols-2 gap-1" id="quickAddGrid"></div>
+                        <div class="text-[10px] text-studio-muted uppercase mb-1">Web (HTML/JS) CDN</div>
+                        <input id="pkgInput" placeholder="e.g. lodash, gsap, axios" class="w-full bg-studio-panel border border-studio-border rounded p-1.5 text-white focus:outline-none focus:border-blue-500">
+                        <button data-action="add-pkg" class="w-full bg-blue-600 hover:bg-blue-500 text-white p-1.5 rounded font-medium mt-1">Add CDN</button>
                     </div>
                     <div class="pt-2 border-t border-studio-border">
                         <div class="text-[10px] text-studio-muted uppercase mb-1">Active Imports</div>
@@ -711,56 +1058,36 @@ class HtmlCompiler {
                     </div>
                 </div>
             `;
-            const quickAdds = [
-                ['GSAP',    'https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js'],
-                ['Axios',   'https://cdnjs.cloudflare.com/ajax/libs/axios/1.4.0/axios.min.js'],
-                ['Chart.js','https://cdn.jsdelivr.net/npm/chart.js'],
-                ['Three.js','https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js'],
-                ['FontAwesome','https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css'],
-                ['Anime.js','https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js'],
-            ];
-            const grid = c.querySelector('#quickAddGrid');
-            quickAdds.forEach(([label, url]) => {
-                const b = document.createElement('button');
-                b.className = 'text-[10px] p-1 bg-studio-panel rounded border border-studio-border hover:bg-studio-border';
-                b.textContent = label;
-                b.addEventListener('click', () => this.addCdnUrl(url));
-                grid.appendChild(b);
-            });
             c.querySelector('[data-action="add-pkg"]').addEventListener('click', () => this.addCdnPackage());
             this._renderActiveCdn();
-
         } else if (this.currentSidebarTab === 'search') {
             c.innerHTML = `
-                <div class="pb-2 border-b border-studio-border mb-2 text-xs font-bold text-studio-muted uppercase">Global Search</div>
+                <div class="pb-2 border-b border-studio-border mb-2 text-xs font-bold text-studio-muted uppercase">Search</div>
                 <div class="space-y-2 text-xs">
+                    <input id="searchInput" placeholder="Find in project..." class="w-full bg-studio-panel border border-studio-border rounded p-1.5 text-white focus:outline-none">
+                    <input id="replaceInput" placeholder="Replace with..." class="w-full bg-studio-panel border border-studio-border rounded p-1.5 text-white focus:outline-none">
                     <div class="flex gap-1">
-                        <input id="searchInput" placeholder="Find in project..." class="flex-1 bg-studio-panel border border-studio-border rounded p-1.5 text-white focus:outline-none">
-                        <button data-action="search" class="bg-studio-panel hover:bg-studio-border text-white p-1.5 rounded border border-studio-border"><i class="fa-solid fa-magnifying-glass"></i></button>
-                    </div>
-                    <div class="flex items-center gap-2">
-                        <input id="replaceInput" placeholder="Replace with..." class="flex-1 bg-studio-panel border border-studio-border rounded p-1.5 text-white focus:outline-none">
-                        <button data-action="replace-all" class="text-[10px] bg-studio-panel hover:bg-studio-border text-white px-2 py-1.5 rounded border border-studio-border whitespace-nowrap">Replace All</button>
+                        <button data-action="search" class="flex-1 bg-studio-panel hover:bg-studio-border text-white p-1.5 rounded border border-studio-border">Find</button>
+                        <button data-action="replace-all" class="flex-1 bg-studio-panel hover:bg-studio-border text-white p-1.5 rounded border border-studio-border">Replace All</button>
                     </div>
                     <div id="searchResults" class="space-y-1 pt-2"></div>
                 </div>
             `;
-            c.querySelector('#searchInput').addEventListener('keydown', (e) => {
-                if (e.key === 'Enter') this.performSearch();
-            });
             c.querySelector('[data-action="search"]').addEventListener('click', () => this.performSearch());
             c.querySelector('[data-action="replace-all"]').addEventListener('click', () => this.replaceAll());
-
+            c.querySelector('#searchInput').addEventListener('keydown', e => { if (e.key === 'Enter') this.performSearch(); });
         } else if (this.currentSidebarTab === 'snippets') {
             const snippets = [
-                { id: 'fetch', label: 'Async Fetch', icon: 'fa-cloud' },
+                { id: 'fetch', label: 'Async Fetch (JS)', icon: 'fa-cloud' },
                 { id: 'flex', label: 'Flex Center (CSS)', icon: 'fa-align-center' },
                 { id: 'debounce', label: 'Debounce fn', icon: 'fa-clock' },
                 { id: 'localStorage', label: 'localStorage helpers', icon: 'fa-database' },
-                { id: 'vueSetup', label: 'Vue 3 Composition', icon: 'fa-layer-group' },
-                { id: 'reactHooks', label: 'React Hooks Skeleton', icon: 'fa-atom' },
-                { id: 'canvas', label: 'Canvas RAF Loop', icon: 'fa-palette' },
-                { id: 'fetchJSON', label: 'Fetch JSON + error', icon: 'fa-code' }
+                { id: 'pythonList', label: 'Python list comp.', icon: 'fa-brands fa-python' },
+                { id: 'cStdio', label: 'C stdio template', icon: 'fa-solid fa-c' },
+                { id: 'cppVector', label: 'C++ vector loop', icon: 'fa-solid fa-code' },
+                { id: 'rustMain', label: 'Rust main()', icon: 'fa-brands fa-rust' },
+                { id: 'goMain', label: 'Go main()', icon: 'fa-solid fa-g' },
+                { id: 'asmSyscall', label: 'ASM write syscall', icon: 'fa-solid fa-microchip' }
             ];
             c.innerHTML = `
                 <div class="pb-2 border-b border-studio-border mb-2 text-xs font-bold text-studio-muted uppercase">Snippets</div>
@@ -774,32 +1101,28 @@ class HtmlCompiler {
                 b.addEventListener('click', () => this.insertSnippet(s.id));
                 list.appendChild(b);
             });
-
         } else if (this.currentSidebarTab === 'snapshots') {
             const snaps = this._getSnapshots();
             c.innerHTML = `
                 <div class="flex items-center justify-between pb-2 border-b border-studio-border mb-2 text-xs">
                     <span class="font-bold text-studio-muted uppercase tracking-wider">Snapshots</span>
-                    <button data-action="save-snap" class="p-1 text-studio-muted hover:text-white" title="Save Snapshot">
-                        <i class="fa-solid fa-camera"></i>
-                    </button>
+                    <button data-action="save-snap" class="p-1 text-studio-muted hover:text-white"><i class="fa-solid fa-camera"></i></button>
                 </div>
                 <div class="space-y-1" id="snapList"></div>
             `;
             c.querySelector('[data-action="save-snap"]').addEventListener('click', () => this.saveSnapshot());
             const list = c.querySelector('#snapList');
-            if (snaps.length === 0) {
+            if (!snaps.length) {
                 list.innerHTML = '<div class="text-[11px] text-studio-muted italic p-2">No snapshots yet.</div>';
             } else {
                 snaps.forEach((s, i) => {
                     const row = document.createElement('div');
                     row.className = 'flex items-center justify-between p-1.5 rounded text-xs bg-studio-panel hover:bg-studio-border';
-                    const info = document.createElement('div');
-                    info.className = 'flex flex-col truncate';
-                    info.innerHTML = `
-                        <span class="text-studio-text truncate">${this._escape(s.label)}</span>
-                        <span class="text-[10px] text-studio-muted">${new Date(s.ts).toLocaleString()}</span>
-                    `;
+                    row.innerHTML = `
+                        <div class="flex flex-col truncate">
+                            <span class="text-studio-text truncate">${this._escape(s.label)}</span>
+                            <span class="text-[10px] text-studio-muted">${new Date(s.ts).toLocaleString()}</span>
+                        </div>`;
                     const actions = document.createElement('div');
                     actions.className = 'flex gap-1';
                     const restore = document.createElement('button');
@@ -812,7 +1135,6 @@ class HtmlCompiler {
                     del.addEventListener('click', () => this.deleteSnapshot(i));
                     actions.appendChild(restore);
                     actions.appendChild(del);
-                    row.appendChild(info);
                     row.appendChild(actions);
                     list.appendChild(row);
                 });
@@ -824,6 +1146,14 @@ class HtmlCompiler {
         if (name.endsWith('.html')) return 'fa-brands fa-html5 text-orange-400';
         if (name.endsWith('.css')) return 'fa-brands fa-css3-alt text-blue-400';
         if (name.endsWith('.js')) return 'fa-brands fa-js text-yellow-400';
+        if (name.endsWith('.py')) return 'fa-brands fa-python text-yellow-300';
+        if (name.endsWith('.c')) return 'fa-solid fa-c text-blue-300';
+        if (name.endsWith('.cpp') || name.endsWith('.cc')) return 'fa-solid fa-code text-blue-400';
+        if (name.endsWith('.rs')) return 'fa-brands fa-rust text-orange-400';
+        if (name.endsWith('.go')) return 'fa-solid fa-g text-cyan-400';
+        if (name.endsWith('.s') || name.endsWith('.asm')) return 'fa-solid fa-microchip text-pink-400';
+        if (name.endsWith('.lua')) return 'fa-solid fa-moon text-blue-300';
+        if (name.endsWith('.sql')) return 'fa-solid fa-database text-teal-400';
         if (name.endsWith('.vue')) return 'fa-brands fa-vuejs text-emerald-400';
         if (name.endsWith('.jsx')) return 'fa-brands fa-react text-cyan-400';
         if (name.endsWith('.md')) return 'fa-brands fa-markdown text-studio-text';
@@ -839,10 +1169,12 @@ class HtmlCompiler {
             flex: `.flex-center {\n  display: flex;\n  justify-content: center;\n  align-items: center;\n  min-height: 100vh;\n}\n`,
             debounce: `function debounce(fn, delay = 250) {\n  let timer;\n  return (...args) => {\n    clearTimeout(timer);\n    timer = setTimeout(() => fn(...args), delay);\n  };\n}\n`,
             localStorage: `const store = {\n  get: (k, d=null) => { try { return JSON.parse(localStorage.getItem(k)) ?? d; } catch { return d; } },\n  set: (k, v) => localStorage.setItem(k, JSON.stringify(v)),\n  remove: (k) => localStorage.removeItem(k)\n};\n`,
-            vueSetup: `<script setup>\nimport { ref, computed } from 'vue';\nconst count = ref(0);\nconst double = computed(() => count.value * 2);\n<\/script>\n`,
-            reactHooks: `import { useState, useEffect } from 'react';\n\nexport default function Component() {\n  const [count, setCount] = useState(0);\n  useEffect(() => {\n    console.log('count changed:', count);\n  }, [count]);\n  return <button onClick={() => setCount(c => c + 1)}>Count: {count}</button>;\n}\n`,
-            canvas: `const canvas = document.querySelector('canvas');\nconst ctx = canvas.getContext('2d');\ncanvas.width = window.innerWidth;\ncanvas.height = window.innerHeight;\n\nfunction animate(t) {\n  ctx.clearRect(0, 0, canvas.width, canvas.height);\n  ctx.fillStyle = '#58a6ff';\n  ctx.beginPath();\n  ctx.arc(canvas.width/2 + Math.sin(t/500)*100, canvas.height/2, 30, 0, Math.PI*2);\n  ctx.fill();\n  requestAnimationFrame(animate);\n}\nrequestAnimationFrame(animate);\n`,
-            fetchJSON: `const res = await fetch('https://jsonplaceholder.typicode.com/posts/1');\nconst data = await res.json();\nconsole.log('Post:', data);\n`
+            pythonList: `squares = [x ** 2 for x in range(10)]\nprint(squares)\n`,
+            cStdio: `#include <stdio.h>\n\nint main(void) {\n    printf("Hello, World!\\n");\n    return 0;\n}\n`,
+            cppVector: `#include <iostream>\n#include <vector>\n\nint main() {\n    std::vector<int> v = {1, 2, 3, 4, 5};\n    for (int x : v) std::cout << x << " ";\n    std::cout << std::endl;\n    return 0;\n}\n`,
+            rustMain: `fn main() {\n    println!("Hello, Rust!");\n}\n`,
+            goMain: `package main\n\nimport "fmt"\n\nfunc main() {\n    fmt.Println("Hello, Go!")\n}\n`,
+            asmSyscall: `section .data\n    msg db 'Hello', 10\n    len equ $ - msg\n\nsection .text\n    global _start\n\n_start:\n    mov rax, 1\n    mov rdi, 1\n    mov rsi, msg\n    mov rdx, len\n    syscall\n\n    mov rax, 60\n    xor rdi, rdi\n    syscall\n`
         };
         const code = snippets[id];
         if (!code) return;
@@ -862,24 +1194,17 @@ class HtmlCompiler {
         if (!query.trim()) { results.innerHTML = ''; return; }
         results.innerHTML = '';
         let total = 0;
-
         Object.entries(this.project.files).forEach(([filename, file]) => {
             const lines = (file.content || '').split('\n');
             const matches = [];
             lines.forEach((line, i) => {
-                if (line.toLowerCase().includes(query.toLowerCase())) {
-                    matches.push({ line: i + 1, text: line.trim().slice(0, 80) });
-                }
+                if (line.toLowerCase().includes(query.toLowerCase())) matches.push({ line: i + 1, text: line.trim().slice(0, 80) });
             });
             if (matches.length) {
                 total += matches.length;
                 const block = document.createElement('div');
                 block.className = 'mb-2';
-                const head = document.createElement('div');
-                head.className = 'text-[11px] font-bold text-blue-400 mb-1';
-                head.textContent = `${filename} (${matches.length})`;
-                block.appendChild(head);
-
+                block.innerHTML = `<div class="text-[11px] font-bold text-blue-400 mb-1">${this._escape(filename)} (${matches.length})</div>`;
                 matches.forEach(m => {
                     const row = document.createElement('div');
                     row.className = 'text-[11px] p-1.5 hover:bg-studio-panel rounded cursor-pointer flex items-start space-x-2';
@@ -890,7 +1215,7 @@ class HtmlCompiler {
                 results.appendChild(block);
             }
         });
-        if (total === 0) results.innerHTML = `<div class="text-[11px] text-studio-muted italic">No matches.</div>`;
+        if (!total) results.innerHTML = `<div class="text-[11px] text-studio-muted italic">No matches.</div>`;
     }
 
     _jumpToMatch(filename, line) {
@@ -952,6 +1277,7 @@ class HtmlCompiler {
         this.project = structuredClone(snaps[i].project);
         this.project.id = this.currentProjectId;
         this.updateProjectName();
+        this.renderLanguageBar();
         this.renderTabs();
         this.openFile(this.project.activeFile || Object.keys(this.project.files)[0]);
         this._saveProjects();
@@ -967,17 +1293,13 @@ class HtmlCompiler {
     }
 
     /* ============================================================
-       CDN PACKAGES
+       CDN
        ============================================================ */
     _getActiveCdn() {
         try { return JSON.parse(localStorage.getItem('htmlc_cdn_' + this.currentProjectId) || '[]'); }
         catch (_) { return []; }
     }
-
-    _saveActiveCdn(list) {
-        localStorage.setItem('htmlc_cdn_' + this.currentProjectId, JSON.stringify(list));
-    }
-
+    _saveActiveCdn(list) { localStorage.setItem('htmlc_cdn_' + this.currentProjectId, JSON.stringify(list)); }
     addCdnPackage() {
         const input = document.getElementById('pkgInput');
         const name = input?.value?.trim();
@@ -986,32 +1308,26 @@ class HtmlCompiler {
         this.addCdnUrl(url);
         if (input) input.value = '';
     }
-
     addCdnUrl(url) {
         const list = this._getActiveCdn();
         if (list.includes(url)) { this.showToast('Already added', 'info'); return; }
         list.push(url);
         this._saveActiveCdn(list);
         this._renderActiveCdn();
-        this.runCode();
+        if (this._isWebProject()) this.runCode();
         this.showToast('Library added', 'success');
     }
-
     removeCdnUrl(url) {
         const list = this._getActiveCdn().filter(u => u !== url);
         this._saveActiveCdn(list);
         this._renderActiveCdn();
-        this.runCode();
+        if (this._isWebProject()) this.runCode();
     }
-
     _renderActiveCdn() {
         const el = document.getElementById('activeCdnList');
         if (!el) return;
         const list = this._getActiveCdn();
-        if (list.length === 0) {
-            el.innerHTML = '<div class="text-[10px] text-studio-muted italic">No libraries added.</div>';
-            return;
-        }
+        if (!list.length) { el.innerHTML = '<div class="text-[10px] text-studio-muted italic">No libraries added.</div>'; return; }
         el.innerHTML = '';
         list.forEach(url => {
             const row = document.createElement('div');
@@ -1031,21 +1347,58 @@ class HtmlCompiler {
     }
 
     /* ============================================================
-       RUN CODE
+       RUN CODE — dispatcher
        ============================================================ */
-    runCode() {
+    async runCode() {
+        const lang = this.project.language || 'html';
+        const file = this.project.files[this.project.activeFile];
+        if (!file) return;
+        const code = file.content || '';
+
+        const runBtn = document.getElementById('runBtn');
+        const originalHTML = runBtn.innerHTML;
+        runBtn.disabled = true;
+        runBtn.innerHTML = '<span class="run-spinner"></span><span>Running</span>';
+
+        try {
+            this.clearConsole();
+            const ldef = LANGUAGES[lang];
+
+            if (!ldef) { this.showToast('Unknown language', 'error'); return; }
+            if (ldef.runner === 'web' || ldef.runner === 'ts') {
+                this.runWeb();
+            } else if (ldef.runner === 'pyodide') {
+                await this.runPython(code);
+            } else if (ldef.runner === 'wandbox') {
+                await this.runWandbox(ldef.wandbox, code);
+            } else if (ldef.runner === 'go') {
+                await this.runGo(code);
+            } else if (ldef.runner === 'lua') {
+                await this.runLua(code);
+            } else if (ldef.runner === 'sqljs') {
+                await this.runSql(code);
+            }
+        } catch (err) {
+            this.addConsoleLog('error', ['Run failed: ' + (err.message || err)]);
+        } finally {
+            runBtn.disabled = false;
+            runBtn.innerHTML = originalHTML;
+        }
+    }
+
+    /* ============================================================
+       RUN — Web (HTML/CSS/JS)
+       ============================================================ */
+    runWeb() {
         const iframe = document.getElementById('sandboxIframe');
         const files = this.project.files;
-
         let entryName = files['index.html'] ? 'index.html' : Object.keys(files).find(f => f.endsWith('.html'));
         if (!entryName) {
-            iframe.srcdoc = '<html><body style="color:#999;font-family:sans-serif;padding:20px">No HTML file found.</body></html>';
+            iframe.srcdoc = '<html><body style="color:#999;font-family:sans-serif;padding:20px">No HTML file found. Switch to a project that has index.html.</body></html>';
             return;
         }
-
         let html = files[entryName].content;
         const escapeRe = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-
         Object.entries(files).forEach(([name, f]) => {
             if (name === entryName) return;
             if (name.endsWith('.css')) {
@@ -1060,114 +1413,277 @@ class HtmlCompiler {
                 html = html.replace(re, `<script${attrs}>\n${f.content}\n<\/script>`);
             }
         });
-
         const cdnList = this._getActiveCdn();
         const cdnTags = cdnList.map(url => url.endsWith('.css')
             ? `<link rel="stylesheet" href="${url}">`
             : `<script src="${url}"><\/script>`
         ).join('\n');
+        const fullDoc = this._wrapSandbox(html, cdnTags);
+        iframe.srcdoc = fullDoc;
+        this.addConsoleLog('info', ['▶ Sandbox reloaded']);
+    }
 
+    /* ============================================================
+       SANDBOX BRIDGE — used by web + pyodide + lua + sql
+       ============================================================ */
+    _wrapSandbox(bodyHTML, extraHead = '') {
         const bridge = `
-            <script>
-            (function() {
-                const send = (type, payload) => window.parent.postMessage({ type, ...payload }, '*');
+        <script>
+        (function() {
+            const send = (type, payload) => window.parent.postMessage({ type, ...payload }, '*');
 
-                ['log','info','warn','error','debug'].forEach(m => {
-                    const orig = console[m];
-                    console[m] = function(...args) {
-                        try {
-                            const ser = args.map(a => {
-                                try {
-                                    if (a instanceof Error) return a.stack || a.message;
-                                    if (typeof a === 'object' && a !== null) {
-                                        const cache = new WeakSet();
-                                        return JSON.stringify(a, (k, v) => {
-                                            if (typeof v === 'object' && v !== null) {
-                                                if (cache.has(v)) return '[Circular]';
-                                                cache.add(v);
-                                            }
-                                            if (typeof v === 'function') return '[Function]';
-                                            return v;
-                                        });
-                                    }
-                                    return String(a);
-                                } catch { return String(a); }
-                            });
-                            send('CONSOLE_LOG', { level: m, args: ser });
-                        } catch {}
-                        orig.apply(console, args);
-                    };
-                });
-
-                window.addEventListener('error', e => {
-                    send('CONSOLE_LOG', { level: 'error', args: ['Uncaught: ' + e.message + ' (line ' + e.lineno + ')'] });
-                });
-                window.addEventListener('unhandledrejection', e => {
-                    send('CONSOLE_LOG', { level: 'error', args: ['Unhandled Promise: ' + (e.reason?.message || e.reason)] });
-                });
-
-                const origFetch = window.fetch;
-                window.fetch = async function(...args) {
-                    const start = performance.now();
+            ['log','info','warn','error','debug'].forEach(m => {
+                const orig = console[m];
+                console[m] = function(...args) {
                     try {
-                        const res = await origFetch.apply(this, args);
-                        send('NETWORK_LOG', { method: 'FETCH', url: String(args[0]), status: res.status, duration: Math.round(performance.now() - start) });
-                        return res;
-                    } catch (err) {
-                        send('NETWORK_LOG', { method: 'FETCH', url: String(args[0]), status: 'ERR', duration: 0 });
-                        throw err;
-                    }
+                        const ser = args.map(a => {
+                            try {
+                                if (a instanceof Error) return a.stack || a.message;
+                                if (typeof a === 'object' && a !== null) {
+                                    const cache = new WeakSet();
+                                    return JSON.stringify(a, (k, v) => {
+                                        if (typeof v === 'object' && v !== null) {
+                                            if (cache.has(v)) return '[Circular]';
+                                            cache.add(v);
+                                        }
+                                        if (typeof v === 'function') return '[Function]';
+                                        return v;
+                                    });
+                                }
+                                return String(a);
+                            } catch { return String(a); }
+                        });
+                        send('CONSOLE_LOG', { level: m, args: ser });
+                    } catch {}
+                    orig.apply(console, args);
                 };
+            });
 
-                window.__inspectorActive = false;
-                let __hl = null;
-                const clear = () => { if (__hl) { __hl.style.outline = ''; __hl.style.outlineOffset = ''; __hl = null; } };
+            window.addEventListener('error', e => {
+                send('CONSOLE_LOG', { level: 'error', args: ['Uncaught: ' + e.message + ' (line ' + e.lineno + ')'] });
+            });
+            window.addEventListener('unhandledrejection', e => {
+                send('CONSOLE_LOG', { level: 'error', args: ['Unhandled Promise: ' + (e.reason?.message || e.reason)] });
+            });
 
-                window.addEventListener('message', e => {
-                    const d = e.data || {};
-                    if (d.type === 'TOGGLE_INSPECTOR') {
-                        window.__inspectorActive = !!d.active;
-                        if (!d.active) clear();
+            const origFetch = window.fetch;
+            window.fetch = async function(...args) {
+                const start = performance.now();
+                try {
+                    const res = await origFetch.apply(this, args);
+                    send('NETWORK_LOG', { method: 'FETCH', url: String(args[0]), status: res.status, duration: Math.round(performance.now() - start) });
+                    return res;
+                } catch (err) {
+                    send('NETWORK_LOG', { method: 'FETCH', url: String(args[0]), status: 'ERR', duration: 0 });
+                    throw err;
+                }
+            };
+
+            // --- Message handlers (inspector + REPL + stdio) ---
+            window.addEventListener('message', e => {
+                const d = e.data || {};
+                if (d.type === 'TOGGLE_INSPECTOR') {
+                    window.__inspectorActive = !!d.active;
+                }
+                if (d.type === 'EVAL_REPL') {
+                    try {
+                        const r = eval(d.code);
+                        send('REPL_RESULT', { ok: true, value: typeof r === 'object' ? JSON.stringify(r) : String(r) });
+                    } catch (err) {
+                        send('REPL_RESULT', { ok: false, value: err.message });
                     }
-                    if (d.type === 'EVAL_REPL') {
-                        try {
-                            const result = eval(d.code);
-                            send('REPL_RESULT', { ok: true, value: typeof result === 'object' ? JSON.stringify(result) : String(result) });
-                        } catch (err) {
-                            send('REPL_RESULT', { ok: false, value: err.message });
-                        }
-                    }
+                }
+                if (d.type === 'STDIO_INPUT') {
+                    if (typeof window.__feedStdin === 'function') window.__feedStdin(d.line);
+                }
+            });
+
+            // Stdio support for Pyodide / Lua — reads from a queue fed by parent
+            window.__stdinQueue = [];
+            window.__stdinWaiters = [];
+            window.__feedStdin = (line) => {
+                if (window.__stdinWaiters.length) window.__stdinWaiters.shift()(line);
+                else window.__stdinQueue.push(line);
+            };
+            window.__readStdin = () => new Promise(res => {
+                if (window.__stdinQueue.length) res(window.__stdinQueue.shift());
+                else window.__stdinWaiters.push(res);
+            });
+
+            window.__inspectorActive = false;
+            let __hl = null;
+            const clear = () => { if (__hl) { __hl.style.outline = ''; __hl.style.outlineOffset = ''; __hl = null; } };
+
+            document.addEventListener('mouseover', e => {
+                if (!window.__inspectorActive) return;
+                clear();
+                e.target.style.outline = '2px solid #58a6ff';
+                e.target.style.outlineOffset = '2px';
+                __hl = e.target;
+            }, true);
+            document.addEventListener('mouseout', e => {
+                if (!window.__inspectorActive) return;
+                e.target.style.outline = '';
+                e.target.style.outlineOffset = '';
+            }, true);
+            document.addEventListener('click', e => {
+                if (!window.__inspectorActive) return;
+                e.preventDefault(); e.stopPropagation();
+                const el = e.target;
+                send('INSPECTOR_SELECT', {
+                    tagName: el.tagName, id: el.id,
+                    className: typeof el.className === 'string' ? el.className : '',
+                    selector: el.id ? '#'+el.id : el.tagName.toLowerCase(),
+                    html: el.outerHTML.slice(0, 200)
                 });
+            }, true);
+        })();
+        <\/script>`;
+        return `<!DOCTYPE html>\n<html class="${this.sandboxTheme}">\n<head>\n<meta charset="UTF-8">\n${bridge}\n${extraHead}\n</head>\n<body>\n${bodyHTML}\n</body>\n</html>`;
+    }
 
-                document.addEventListener('mouseover', e => {
-                    if (!window.__inspectorActive) return;
-                    clear();
-                    e.target.style.outline = '2px solid #58a6ff';
-                    e.target.style.outlineOffset = '2px';
-                    __hl = e.target;
-                }, true);
-                document.addEventListener('mouseout', e => {
-                    if (!window.__inspectorActive) return;
-                    e.target.style.outline = '';
-                    e.target.style.outlineOffset = '';
-                }, true);
-                document.addEventListener('click', e => {
-                    if (!window.__inspectorActive) return;
-                    e.preventDefault(); e.stopPropagation();
-                    const el = e.target;
-                    send('INSPECTOR_SELECT', {
-                        tagName: el.tagName, id: el.id,
-                        className: typeof el.className === 'string' ? el.className : '',
-                        selector: el.id ? '#'+el.id : el.tagName.toLowerCase(),
-                        html: el.outerHTML.slice(0, 200)
+    /* ============================================================
+       RUN — Python (Pyodide)
+       ============================================================ */
+    async runPython(code) {
+        const iframe = document.getElementById('sandboxIframe');
+        const html = `
+            <div id="status" style="font-family:system-ui;padding:20px;color:#58a6ff">
+                ⏳ Loading Python runtime (Pyodide)… this can take 10-20s the first time.
+            </div>
+            <pre id="out" style="font-family:monospace;padding:20px;color:#c9d1d9;white-space:pre-wrap"></pre>
+        `;
+        // Load the bridge, then run pyodide
+        const pyCode = `
+            (async () => {
+                const status = document.getElementById('status');
+                const out = document.getElementById('out');
+                try {
+                    const py = await window.loadPyodide({
+                        indexURL: 'https://cdn.jsdelivr.net/pyodide/v0.25.0/full/'
                     });
-                }, true);
+                    status.textContent = '✔ Python ready. Running…';
+                    py.setStdout({ batched: (s) => { out.textContent += s + '\\n'; } });
+                    py.setStderr({ batched: (s) => { out.textContent += s + '\\n'; } });
+                    await py.runPythonAsync(${JSON.stringify(code)});
+                    status.textContent = '✔ Finished.';
+                } catch (err) {
+                    status.textContent = '✖ Error';
+                    out.textContent += '\\n' + (err && err.message ? err.message : String(err));
+                }
             })();
+        `;
+        // Inject Pyodide loader + our script
+        const headExtras = `
+            <script src="https://cdn.jsdelivr.net/pyodide/v0.25.0/full/pyodide.js"><\/script>
+            <script>${pyCode}<\/script>
+        `;
+        iframe.srcdoc = this._wrapSandbox(html, headExtras);
+        this.addConsoleLog('info', ['▶ Loading Python…']);
+    }
+
+    /* ============================================================
+       RUN — Wandbox (C, C++, Rust, Assembly)
+       ============================================================ */
+    async runWandbox(compiler, code) {
+        this.addConsoleLog('info', ['▶ Compiling with Wandbox (' + compiler + ')…']);
+        const result = await Wandbox.run(compiler, code, '');
+        if (result.stdout) result.stdout.split('\n').forEach(l => this.addConsoleLog('log', [l]));
+        if (result.stderr) result.stderr.split('\n').forEach(l => this.addConsoleLog('error', [l]));
+        if (!result.stdout && !result.stderr) this.addConsoleLog('info', ['(no output)']);
+        this.addConsoleLog('info', ['✔ Exit: ' + result.exitCode]);
+    }
+
+    /* ============================================================
+       RUN — Go
+       ============================================================ */
+    async runGo(code) {
+        this.addConsoleLog('info', ['▶ Compiling Go…']);
+        const result = await GoPlay.run(code, '');
+        if (result.stdout) result.stdout.split('\n').forEach(l => this.addConsoleLog('log', [l]));
+        if (result.stderr) result.stderr.split('\n').forEach(l => this.addConsoleLog('error', [l]));
+        if (!result.stdout && !result.stderr) this.addConsoleLog('info', ['(no output)']);
+    }
+
+    /* ============================================================
+       RUN — Lua (Fengari)
+       ============================================================ */
+    async runLua(code) {
+        const iframe = document.getElementById('sandboxIframe');
+        const html = `
+            <pre id="out" style="font-family:monospace;padding:20px;color:#c9d1d9;white-space:pre-wrap"></pre>
+        `;
+        const luaRun = `
+            (function() {
+                const out = document.getElementById('out');
+                const origLog = console.log;
+                window.fengari = null;
+            })();
+        `;
+        const headExtras = `
+            <script src="https://cdn.jsdelivr.net/npm/fengari-web@0.1.4/dist/fengari-web.js"><\/script>
+            <script>
+                (function() {
+                    const out = document.getElementById('out');
+                    const userCode = ${JSON.stringify(code)};
+                    setTimeout(() => {
+                        try {
+                            const originalWrite = console.log;
+                            console.log = function() {
+                                const s = Array.from(arguments).join(' ');
+                                out.textContent += s + '\\n';
+                                originalWrite.apply(console, arguments);
+                            };
+                            // fengari-web exposes lauxlib, lualib, interop
+                            const fengari = window.fengari;
+                            const lua = fengari.lauxlib.luaL_newstate();
+                            fengari.lualib.luaL_openlibs(lua);
+                            // Override print
+                            fengari.lauxlib.luaL_dostring(lua,
+                                'print = function(...) local args = {...}; local s = ""; for i,v in ipairs(args) do s = s .. tostring(v) .. "\\\\t" end; io.write(s .. "\\\\n") end'
+                            );
+                            if (fengari.lauxlib.luaL_dostring(lua, userCode) !== 0) {
+                                const err = fengari.lauxlib.lua_tostring(lua, -1);
+                                out.textContent += 'Error: ' + err + '\\n';
+                            }
+                        } catch (err) {
+                            out.textContent += 'Fengari error: ' + (err.message || err) + '\\n';
+                        }
+                    }, 200);
+                })();
             <\/script>
         `;
+        iframe.srcdoc = this._wrapSandbox(html, headExtras);
+        this.addConsoleLog('info', ['▶ Loading Lua…']);
+    }
 
-        const fullDoc = `<!DOCTYPE html>\n<html class="${this.sandboxTheme}">\n<head>\n<meta charset="UTF-8">\n${bridge}\n${cdnTags}\n</head>\n<body>\n${html}\n</body>\n</html>`;
-        iframe.srcdoc = fullDoc;
+    /* ============================================================
+       RUN — SQL (sql.js)
+       ============================================================ */
+    async runSql(code) {
+        this.addConsoleLog('info', ['▶ Loading SQLite (sql.js)…']);
+        const SQL = await loadSqlRuntime();
+        const db = new SQL.Database();
+        try {
+            const result = db.exec(code);
+            if (!result.length) {
+                this.addConsoleLog('log', ['(query ok — no rows returned)']);
+            } else {
+                result.forEach(rs => {
+                    const cols = rs.columns.join(' | ');
+                    this.addConsoleLog('log', [cols]);
+                    this.addConsoleLog('log', ['-'.repeat(cols.length)]);
+                    rs.values.forEach(row => {
+                        this.addConsoleLog('log', [row.map(v => v === null ? 'NULL' : String(v)).join(' | ')]);
+                    });
+                });
+            }
+            this.addConsoleLog('info', ['✔ Query executed']);
+        } catch (err) {
+            this.addConsoleLog('error', [err.message || String(err)]);
+        } finally {
+            db.close();
+        }
     }
 
     /* ============================================================
@@ -1178,7 +1694,7 @@ class HtmlCompiler {
         if (!input) return;
         input.addEventListener('keydown', e => {
             if (e.key === 'Enter') {
-                const code = input.value.trim();
+                const code = input.value;
                 if (!code) return;
                 this.addConsoleLog('info', ['> ' + code]);
                 this._replHistory.unshift(code);
@@ -1210,10 +1726,10 @@ class HtmlCompiler {
             if (pane) pane.classList.add('hidden');
             if (btn) btn.className = 'text-studio-muted hover:text-white flex items-center space-x-1.5 pb-1';
         });
-        const activePane = document.getElementById('pane' + tab.charAt(0).toUpperCase() + tab.slice(1));
-        const activeBtn = document.getElementById('tabBtn' + tab.charAt(0).toUpperCase() + tab.slice(1));
-        if (activePane) activePane.classList.remove('hidden');
-        if (activeBtn) activeBtn.className = 'text-white font-semibold flex items-center space-x-1.5 border-b-2 border-blue-500 pb-1';
+        const ap = document.getElementById('pane' + tab.charAt(0).toUpperCase() + tab.slice(1));
+        const ab = document.getElementById('tabBtn' + tab.charAt(0).toUpperCase() + tab.slice(1));
+        if (ap) ap.classList.remove('hidden');
+        if (ab) ab.className = 'text-white font-semibold flex items-center space-x-1.5 border-b-2 border-blue-500 pb-1';
     }
 
     addConsoleLog(level, args) {
@@ -1224,19 +1740,14 @@ class HtmlCompiler {
         if (level === 'error') color = 'text-red-400 bg-red-950/20';
         if (level === 'warn') color = 'text-amber-400';
         if (level === 'info') color = 'text-blue-400';
-
         line.className = `console-entry flex items-start space-x-2 font-mono text-xs ${color} py-0.5 px-1 rounded`;
         const time = new Date().toLocaleTimeString();
         const content = args.map(a => this._renderLogArg(a)).join(' ');
         line.innerHTML = `<span class="text-studio-muted text-[10px] shrink-0">[${time}]</span><div class="flex-1 break-all">${content}</div>`;
         stream.appendChild(line);
         stream.scrollTop = stream.scrollHeight;
-
         const badge = document.getElementById('consoleBadge');
-        if (badge) {
-            badge.classList.remove('hidden');
-            badge.innerText = stream.children.length;
-        }
+        if (badge) { badge.classList.remove('hidden'); badge.innerText = stream.children.length; }
     }
 
     _renderLogArg(arg) {
@@ -1256,15 +1767,13 @@ class HtmlCompiler {
         if (typeof obj === 'boolean') return `<span class="text-purple-400">${obj}</span>`;
         if (typeof obj === 'string') return `<span class="text-emerald-400">"${this._escape(obj)}"</span>`;
         if (Array.isArray(obj)) {
-            if (obj.length === 0) return '<span class="text-studio-muted">[]</span>';
+            if (!obj.length) return '<span class="text-studio-muted">[]</span>';
             return `<span class="text-studio-muted">[</span>${obj.slice(0, 20).map(v => this._jsonTree(v, depth + 1)).join(', ')}${obj.length > 20 ? ', …' : ''}<span class="text-studio-muted">]</span>`;
         }
         if (typeof obj === 'object') {
             const entries = Object.entries(obj);
-            if (entries.length === 0) return '<span class="text-studio-muted">{}</span>';
-            const inner = entries.slice(0, 30).map(([k, v]) =>
-                `<div><span class="text-sky-400">${this._escape(k)}</span><span class="text-studio-muted">:</span> ${this._jsonTree(v, depth + 1)}</div>`
-            ).join('');
+            if (!entries.length) return '<span class="text-studio-muted">{}</span>';
+            const inner = entries.slice(0, 30).map(([k, v]) => `<div><span class="text-sky-400">${this._escape(k)}</span><span class="text-studio-muted">:</span> ${this._jsonTree(v, depth + 1)}</div>`).join('');
             return `<details ${depth < 2 ? 'open' : ''}><summary class="text-studio-muted inline-block">{${entries.length}}</summary><div class="console-tree">${inner}</div></details>`;
         }
         return this._escape(String(obj));
@@ -1328,11 +1837,8 @@ class HtmlCompiler {
                 } catch (_) {}
                 const mem = document.getElementById('memGauge');
                 if (mem) {
-                    if (performance.memory) {
-                        mem.innerText = (performance.memory.usedJSHeapSize / 1048576).toFixed(1) + ' MB';
-                    } else {
-                        mem.innerText = '—';
-                    }
+                    if (performance.memory) mem.innerText = (performance.memory.usedJSHeapSize / 1048576).toFixed(1) + ' MB';
+                    else mem.innerText = '—';
                 }
             }
             this._fpsRaf = requestAnimationFrame(tick);
@@ -1348,10 +1854,9 @@ class HtmlCompiler {
         out.innerHTML = '';
         const iframe = document.getElementById('sandboxIframe');
         const tests = [
-            { name: 'Document has <body>', run: () => !!iframe.contentDocument?.body },
-            { name: 'DOM has elements', run: () => (iframe.contentDocument?.getElementsByTagName('*').length || 0) > 0 },
-            { name: 'No console errors detected', run: () => !document.getElementById('paneConsole').innerHTML.includes('text-red-400') },
-            { name: 'Page title or h1 present', run: () => !!iframe.contentDocument?.querySelector('h1, title') }
+            { name: 'Sandbox iframe exists', run: () => !!iframe },
+            { name: 'Sandbox has DOM', run: () => (iframe.contentDocument?.getElementsByTagName('*').length || 0) > 0 },
+            { name: 'No console errors', run: () => !document.getElementById('paneConsole').innerHTML.includes('text-red-400') }
         ];
         let passed = 0;
         tests.forEach(t => {
@@ -1370,22 +1875,15 @@ class HtmlCompiler {
     }
 
     /* ============================================================
-       INSPECTOR / DEVICE FRAME / THEME
+       INSPECTOR / FRAMES / THEME
        ============================================================ */
     toggleInspector() {
         this.inspectorActive = !this.inspectorActive;
         const btn = document.getElementById('inspectorBtn');
-        if (this.inspectorActive) {
-            btn.classList.add('bg-blue-600', 'text-white', 'pulse-active');
-            this.showToast('Inspector: click elements in preview', 'info');
-        } else {
-            btn.classList.remove('bg-blue-600', 'text-white', 'pulse-active');
-        }
-        try {
-            document.getElementById('sandboxIframe').contentWindow.postMessage({ type: 'TOGGLE_INSPECTOR', active: this.inspectorActive }, '*');
-        } catch (_) {}
+        if (this.inspectorActive) { btn.classList.add('bg-blue-600', 'text-white', 'pulse-active'); this.showToast('Inspector: click elements in preview', 'info'); }
+        else btn.classList.remove('bg-blue-600', 'text-white', 'pulse-active');
+        try { document.getElementById('sandboxIframe').contentWindow.postMessage({ type: 'TOGGLE_INSPECTOR', active: this.inspectorActive }, '*'); } catch (_) {}
     }
-
     setDeviceFrame(device) {
         const iframe = document.getElementById('sandboxIframe');
         const res = document.getElementById('previewResolution');
@@ -1395,17 +1893,15 @@ class HtmlCompiler {
         else if (device === 'ipad') { iframe.classList.add('device-ipad'); res.innerText = '(820 × 1080)'; }
         else { iframe.classList.add('w-full', 'h-full', 'rounded'); res.innerText = '(100% Responsive)'; }
     }
-
     toggleSandboxTheme() {
         this.sandboxTheme = this.sandboxTheme === 'dark' ? 'light' : 'dark';
         document.getElementById('sandboxThemeIcon').className = this.sandboxTheme === 'dark' ? 'fa-solid fa-moon' : 'fa-solid fa-sun text-amber-400';
-        this.runCode();
+        if (this._isWebProject()) this.runCode();
     }
-
     openExternalPreview() {
         const files = this.project.files;
         const entry = files['index.html'] ? 'index.html' : Object.keys(files).find(f => f.endsWith('.html'));
-        if (!entry) return;
+        if (!entry) { this.showToast('No HTML file to preview', 'warn'); return; }
         let html = files[entry].content;
         const escapeRe = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
         Object.entries(files).forEach(([name, f]) => {
@@ -1434,11 +1930,8 @@ class HtmlCompiler {
             { label: 'New File', action: () => this.createFile(), icon: 'fa-file-plus' },
             { label: 'New Project', action: () => this.newProject(), icon: 'fa-folder-plus' },
             { label: 'Export ZIP', action: () => this.exportProject('zip'), icon: 'fa-file-zipper' },
-            { label: 'Toggle Console Collapse', action: () => this.toggleConsoleCollapse(), icon: 'fa-chevron-up' },
-            { label: 'Clear Console', action: () => this.clearConsole(), icon: 'fa-ban' },
-            { label: 'Responsive Frame', action: () => { document.getElementById('deviceFrameSelect').value = 'responsive'; this.setDeviceFrame('responsive'); }, icon: 'fa-desktop' },
-            { label: 'iPhone Frame', action: () => { document.getElementById('deviceFrameSelect').value = 'iphone'; this.setDeviceFrame('iphone'); }, icon: 'fa-mobile' },
-            { label: 'Open Settings', action: () => this.toggleDrawer('settingsDrawer'), icon: 'fa-gear' },
+            { label: 'Clear Output', action: () => this.clearConsole(), icon: 'fa-ban' },
+            { label: 'Open Settings', action: () => this.toggleDrawer('settingsDrawer'), icon: 'fa-gear' }
         ];
         const input = document.getElementById('cmdInput');
         input.addEventListener('input', e => this._filterCommands(e.target.value));
@@ -1447,22 +1940,18 @@ class HtmlCompiler {
             else if (e.key === 'Enter') this._runCurrentCommand();
         });
     }
-
     openCommandPalette() {
         this.openModal('commandPaletteModal');
         const input = document.getElementById('cmdInput');
-        input.value = '';
-        input.focus();
+        input.value = ''; input.focus();
         this._filterCommands('');
     }
-
     _filterCommands(q) {
         const results = document.getElementById('cmdResults');
         const query = q.toLowerCase();
         const fileHits = Object.keys(this.project.files).filter(f => f.toLowerCase().includes(query));
         const cmdHits = this._cmdCommands.filter(c => c.label.toLowerCase().includes(query));
         results.innerHTML = '';
-
         if (fileHits.length && query) {
             const sec = document.createElement('div');
             sec.innerHTML = '<div class="px-2 py-1 text-[10px] text-studio-muted uppercase">Files</div>';
@@ -1475,7 +1964,6 @@ class HtmlCompiler {
             });
             results.appendChild(sec);
         }
-
         const cmdSec = document.createElement('div');
         cmdSec.innerHTML = '<div class="px-2 py-1 text-[10px] text-studio-muted uppercase mt-2">Commands</div>';
         cmdHits.forEach(c => {
@@ -1487,7 +1975,6 @@ class HtmlCompiler {
         });
         results.appendChild(cmdSec);
     }
-
     _runCurrentCommand() {
         const first = document.querySelector('#cmdResults button');
         if (first) first.click();
@@ -1511,25 +1998,17 @@ class HtmlCompiler {
     toggleWordWrap(on) { this.editor.setOption('lineWrapping', on); }
     toggleLineNumbers(on) { this.editor.setOption('lineNumbers', on); this.editor.refresh(); }
     toggleAutoSave(on) { this._autoSaveEnabled = on; this.showToast(on ? 'Auto-save on' : 'Auto-save off', 'info'); }
-    clearStorage() {
-        if (!confirm('Delete all projects and settings?')) return;
-        localStorage.clear();
-        location.reload();
-    }
+    clearStorage() { if (!confirm('Delete all projects and settings?')) return; localStorage.clear(); location.reload(); }
 
     /* ============================================================
-       EXPORT
+       EXPORT / SHARE
        ============================================================ */
-    toggleExportMenu() {
-        document.getElementById('exportMenu').classList.toggle('hidden');
-    }
-
+    toggleExportMenu() { document.getElementById('exportMenu').classList.toggle('hidden'); }
     exportProject(type) {
         document.getElementById('exportMenu').classList.add('hidden');
         const files = this.project.files;
         const entry = files['index.html'] ? 'index.html' : Object.keys(files).find(f => f.endsWith('.html'));
         const escapeRe = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-
         if (type === 'zip') {
             const zip = new JSZip();
             Object.entries(files).forEach(([name, f]) => zip.file(name, f.content || ''));
@@ -1537,8 +2016,8 @@ class HtmlCompiler {
                 saveAs(blob, `${this.project.name.replace(/\s+/g, '-').toLowerCase()}.zip`);
                 this.showToast('Downloaded ZIP', 'success');
             });
-        } else if (type === 'html') {
-            let html = entry ? files[entry].content : '';
+        } else if (type === 'html' && entry) {
+            let html = files[entry].content;
             Object.entries(files).forEach(([name, f]) => {
                 if (name === entry) return;
                 if (name.endsWith('.css')) html = html.replace(new RegExp(`<link[^>]*href=["']${escapeRe(name)}["'][^>]*>`, 'gi'), `<style>${f.content}</style>`);
@@ -1549,10 +2028,6 @@ class HtmlCompiler {
             this.showToast('Downloaded HTML', 'success');
         }
     }
-
-    /* ============================================================
-       SHARE
-       ============================================================ */
     async shareProject() {
         const encoded = LZString.compressToEncodedURIComponent(JSON.stringify(this.project));
         const url = `${location.origin}${location.pathname}#project=${encoded}`;
@@ -1560,20 +2035,14 @@ class HtmlCompiler {
             if (navigator.clipboard && window.isSecureContext) {
                 await navigator.clipboard.writeText(url);
                 this.showToast('Share link copied!', 'success');
-            } else { throw new Error('no clipboard'); }
+            } else throw new Error('no clipboard');
         } catch (_) {
             const modal = document.createElement('div');
             modal.className = 'fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4';
-            modal.innerHTML = `
-                <div class="bg-studio-sidebar border border-studio-border rounded-xl w-full max-w-lg p-5 space-y-3">
-                    <h3 class="text-white font-bold text-sm">Copy Share Link</h3>
-                    <textarea readonly class="w-full h-24 bg-studio-bg border border-studio-border rounded p-2 text-xs text-white font-mono"></textarea>
-                    <div class="flex justify-end"><button class="close-btn text-xs px-3 py-1.5 bg-studio-panel border border-studio-border rounded text-white hover:bg-studio-border">Close</button></div>
-                </div>`;
+            modal.innerHTML = `<div class="bg-studio-sidebar border border-studio-border rounded-xl w-full max-w-lg p-5 space-y-3"><h3 class="text-white font-bold text-sm">Copy Share Link</h3><textarea readonly class="w-full h-24 bg-studio-bg border border-studio-border rounded p-2 text-xs text-white font-mono"></textarea><div class="flex justify-end"><button class="close-btn text-xs px-3 py-1.5 bg-studio-panel border border-studio-border rounded text-white hover:bg-studio-border">Close</button></div></div>`;
             document.body.appendChild(modal);
             const ta = modal.querySelector('textarea');
-            ta.value = url;
-            ta.select();
+            ta.value = url; ta.select();
             modal.querySelector('.close-btn').addEventListener('click', () => modal.remove());
         }
     }
@@ -1594,15 +2063,13 @@ class HtmlCompiler {
         if (view) view.classList.remove('hidden');
         if (btn) btn.className = 'text-blue-400 font-bold';
     }
-
     generatePalette() {
         const base = document.getElementById('paletteBaseColor').value;
         document.getElementById('paletteHexText').innerText = base;
         const hsl = this._hexToHsl(base);
         const container = document.getElementById('paletteRamp');
-        const shades = [95, 80, 60, 40, 20];
         container.innerHTML = '';
-        shades.forEach(l => {
+        [95, 80, 60, 40, 20].forEach(l => {
             const c = this._hslToHex(hsl.h, hsl.s, l);
             const wrap = document.createElement('div');
             wrap.className = 'rounded overflow-hidden';
@@ -1618,37 +2085,21 @@ class HtmlCompiler {
             container.appendChild(wrap);
         });
     }
-
-    _copyColor(c) {
-        navigator.clipboard?.writeText(c);
-        this.showToast(`Copied ${c}`, 'success');
-    }
-
+    _copyColor(c) { navigator.clipboard?.writeText(c); this.showToast(`Copied ${c}`, 'success'); }
     copyPalette() {
         const shades = Array.from(document.querySelectorAll('#paletteRamp .text-\\[10px\\]')).map(el => el.innerText);
         const css = shades.map((c, i) => `  --color-${(i+1)*100}: ${c};`).join('\n');
         navigator.clipboard?.writeText(`:root {\n${css}\n}`);
-        this.showToast('Palette copied as CSS variables', 'success');
+        this.showToast('Palette copied', 'success');
     }
-
     _hexToHsl(hex) {
         let r = parseInt(hex.slice(1,3),16)/255, g = parseInt(hex.slice(3,5),16)/255, b = parseInt(hex.slice(5,7),16)/255;
         const max = Math.max(r,g,b), min = Math.min(r,g,b);
         let h, s, l = (max+min)/2;
         if (max === min) h = s = 0;
-        else {
-            const d = max-min;
-            s = l > 0.5 ? d/(2-max-min) : d/(max+min);
-            switch (max) {
-                case r: h = (g-b)/d + (g<b?6:0); break;
-                case g: h = (b-r)/d + 2; break;
-                case b: h = (r-g)/d + 4; break;
-            }
-            h /= 6;
-        }
+        else { const d = max-min; s = l > 0.5 ? d/(2-max-min) : d/(max+min); switch (max) { case r: h = (g-b)/d + (g<b?6:0); break; case g: h = (b-r)/d + 2; break; case b: h = (r-g)/d + 4; break; } h /= 6; }
         return { h: h*360, s: s*100, l: l*100 };
     }
-
     _hslToHex(h, s, l) {
         s /= 100; l /= 100;
         const k = n => (n + h/30) % 12;
@@ -1657,7 +2108,6 @@ class HtmlCompiler {
         const toHex = x => Math.round(x*255).toString(16).padStart(2,'0');
         return '#' + toHex(f(0)) + toHex(f(8)) + toHex(f(4));
     }
-
     updateKeyframePreview() {
         const tx = document.getElementById('kfTranslateX').value;
         const sc = document.getElementById('kfScale').value;
@@ -1665,11 +2115,9 @@ class HtmlCompiler {
         document.getElementById('kfTxVal').innerText = tx;
         document.getElementById('kfScaleVal').innerText = sc;
         document.getElementById('kfRotateVal').innerText = rt;
-        const box = document.getElementById('kfBox');
-        box.style.transform = `translateX(${tx}px) scale(${sc}) rotate(${rt}deg)`;
-        document.getElementById('kfOutputCss').value = `@keyframes customAnimation {\n  0% {\n    transform: translateX(0) scale(1) rotate(0deg);\n  }\n  100% {\n    transform: translateX(${tx}px) scale(${sc}) rotate(${rt}deg);\n  }\n}`;
+        document.getElementById('kfBox').style.transform = `translateX(${tx}px) scale(${sc}) rotate(${rt}deg)`;
+        document.getElementById('kfOutputCss').value = `@keyframes customAnimation {\n  0% { transform: translateX(0) scale(1) rotate(0deg); }\n  100% { transform: translateX(${tx}px) scale(${sc}) rotate(${rt}deg); }\n}`;
     }
-
     insertKeyframeIntoSnippet() {
         const css = document.getElementById('kfOutputCss').value;
         const cursor = this.editor.getCursor();
@@ -1677,7 +2125,6 @@ class HtmlCompiler {
         this.closeModal('toolsModal');
         this.showToast('Keyframes inserted', 'success');
     }
-
     _initIcons() {
         const icons = ['fa-house','fa-user','fa-gear','fa-heart','fa-star','fa-bell','fa-envelope','fa-search','fa-camera','fa-image','fa-video','fa-music','fa-cloud','fa-sun','fa-moon','fa-fire','fa-bolt','fa-leaf','fa-tree','fa-rocket','fa-plane','fa-car','fa-bicycle','fa-book','fa-graduation-cap','fa-code','fa-terminal','fa-database','fa-server','fa-lock','fa-key','fa-shield','fa-download','fa-upload','fa-share','fa-link','fa-paperclip','fa-tag','fa-bookmark','fa-comment','fa-comments','fa-thumbs-up','fa-thumbs-down','fa-eye','fa-eye-slash','fa-trash','fa-edit','fa-copy','fa-paste','fa-cut','fa-save','fa-folder','fa-file','fa-folder-open','fa-file-code','fa-file-image','fa-file-pdf','fa-play','fa-pause','fa-stop','fa-forward','fa-backward','fa-step-forward','fa-step-backward','fa-random','fa-repeat','fa-sync','fa-power-off','fa-wifi','fa-signal','fa-battery-full','fa-plug','fa-microchip','fa-memory','fa-hdd','fa-sd-card','fa-usb','fa-mobile','fa-tablet','fa-laptop','fa-desktop','fa-tv','fa-gamepad','fa-headphones','fa-microphone'];
         const grid = document.getElementById('iconGrid');
@@ -1691,15 +2138,12 @@ class HtmlCompiler {
             grid.appendChild(btn);
         });
     }
-
     filterIcons(q) {
         const query = q.toLowerCase();
         Array.from(document.querySelectorAll('#iconGrid button')).forEach(b => {
-            const name = b.getAttribute('title').toLowerCase();
-            b.style.display = name.includes(query) ? '' : 'none';
+            b.style.display = b.getAttribute('title').toLowerCase().includes(query) ? '' : 'none';
         });
     }
-
     _insertIcon(cls) {
         const cursor = this.editor.getCursor();
         this.editor.replaceRange(`<i class="fa-solid ${cls}"></i>`, cursor);
@@ -1709,31 +2153,17 @@ class HtmlCompiler {
     /* ============================================================
        TEMPLATES
        ============================================================ */
-    loadTemplate(type) {
-        const templates = {
-            vanilla: DEFAULT_PROJECT.files,
-            vue: {
-                'index.html': { name: 'index.html', content: `<!DOCTYPE html>\n<html lang="en">\n<head>\n  <meta charset="UTF-8">\n  <title>Vue 3 App</title>\n  <script src="https://unpkg.com/vue@3/dist/vue.global.js"><\/script>\n  <script src="https://cdn.tailwindcss.com"><\/script>\n</head>\n<body class="bg-slate-900 text-white min-h-screen flex items-center justify-center">\n  <div id="app">\n    <div class="bg-slate-800 p-8 rounded-2xl text-center space-y-4">\n      <h1 class="text-2xl font-bold text-emerald-400">{{ msg }}</h1>\n      <button @click="count++" class="bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-2 rounded-lg">Count: {{ count }}</button>\n    </div>\n  </div>\n  <script src="app.js"><\/script>\n</body>\n</html>` },
-                'app.js': { name: 'app.js', content: `const { createApp, ref } = Vue;\ncreateApp({\n  setup() {\n    const msg = ref('Hello Vue 3!');\n    const count = ref(0);\n    return { msg, count };\n  }\n}).mount('#app');` }
-            },
-            react: {
-                'index.html': { name: 'index.html', content: `<!DOCTYPE html>\n<html lang="en">\n<head>\n  <meta charset="UTF-8">\n  <title>React App</title>\n  <script src="https://unpkg.com/react@18/umd/react.development.js"><\/script>\n  <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"><\/script>\n  <script src="https://unpkg.com/@babel/standalone/babel.min.js"><\/script>\n  <script src="https://cdn.tailwindcss.com"><\/script>\n</head>\n<body class="bg-slate-900 text-white min-h-screen flex items-center justify-center">\n  <div id="root"></div>\n  <script type="text/babel" src="app.jsx"><\/script>\n</body>\n</html>` },
-                'app.jsx': { name: 'app.jsx', content: `function App() {\n  const [count, setCount] = React.useState(0);\n  return (\n    <div className="bg-slate-800 p-8 rounded-2xl text-center space-y-4">\n      <h1 className="text-2xl font-bold text-blue-400">React JSX Playground</h1>\n      <button onClick={() => setCount(c => c + 1)} className="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-lg">Clicked {count} times</button>\n    </div>\n  );\n}\nReactDOM.createRoot(document.getElementById('root')).render(<App />);` }
-            },
-            canvas: {
-                'index.html': { name: 'index.html', content: `<!DOCTYPE html>\n<html lang="en">\n<head>\n  <meta charset="UTF-8">\n  <title>Canvas Demo</title>\n  <style>\n    body { margin: 0; overflow: hidden; background: #0d1117; }\n    canvas { display: block; }\n  </style>\n</head>\n<body>\n  <canvas id="c"></canvas>\n  <script src="app.js"><\/script>\n</body>\n</html>` },
-                'app.js': { name: 'app.js', content: `const canvas = document.getElementById('c');\nconst ctx = canvas.getContext('2d');\ncanvas.width = innerWidth;\ncanvas.height = innerHeight;\n\nconst particles = Array.from({ length: 80 }, () => ({\n  x: Math.random() * canvas.width,\n  y: Math.random() * canvas.height,\n  vx: (Math.random() - 0.5) * 2,\n  vy: (Math.random() - 0.5) * 2,\n  r: Math.random() * 3 + 1\n}));\n\nfunction animate() {\n  ctx.fillStyle = 'rgba(13, 17, 23, 0.15)';\n  ctx.fillRect(0, 0, canvas.width, canvas.height);\n  particles.forEach(p => {\n    p.x += p.vx; p.y += p.vy;\n    if (p.x < 0 || p.x > canvas.width) p.vx *= -1;\n    if (p.y < 0 || p.y > canvas.height) p.vy *= -1;\n    ctx.fillStyle = '#58a6ff';\n    ctx.beginPath();\n    ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);\n    ctx.fill();\n  });\n  requestAnimationFrame(animate);\n}\nanimate();` }
-            }
-        };
-        const t = templates[type];
-        if (!t) return;
+    loadTemplate(key) {
+        const starter = DEFAULT_PROJECTS[key];
+        if (!starter) return;
         this._persistCurrentIntoProjects();
         const newId = 'proj_' + Date.now();
         this.project = {
             id: newId,
-            name: type.charAt(0).toUpperCase() + type.slice(1) + ' Project',
-            activeFile: Object.keys(t)[0],
-            files: structuredClone(t)
+            name: starter.name,
+            language: starter.language,
+            activeFile: Object.keys(starter.files)[0],
+            files: structuredClone(starter.files)
         };
         this.projects.push(this.project);
         this.currentProjectId = newId;
@@ -1741,11 +2171,12 @@ class HtmlCompiler {
         localStorage.setItem('htmlc_current_project', newId);
         this.updateProjectName();
         this.openFile(this.project.activeFile);
+        this.renderLanguageBar();
         this.renderTabs();
         this.renderSidebar();
         this.runCode();
         this.closeModal('templatesModal');
-        this.showToast(`Loaded ${type} template`, 'success');
+        this.showToast(`Loaded ${starter.name} template`, 'success');
     }
 
     /* ============================================================
@@ -1754,7 +2185,6 @@ class HtmlCompiler {
     openModal(id) { const el = document.getElementById(id); el.classList.remove('hidden'); el.classList.add('flex'); }
     closeModal(id) { const el = document.getElementById(id); el.classList.add('hidden'); el.classList.remove('flex'); }
     toggleDrawer(id) { document.getElementById(id).classList.toggle('translate-x-full'); }
-
     showToast(msg, type = 'info') {
         const c = document.getElementById('toastContainer');
         const t = document.createElement('div');
@@ -1776,48 +2206,18 @@ class HtmlCompiler {
             const prev = document.getElementById(prevId);
             if (!r || !prev) return;
             let startX = 0, startW = 0;
-            const move = e => {
-                const dx = e.clientX - startX;
-                const w = Math.max(150, Math.min(600, startW + dx));
-                prev.style.width = w + 'px';
-            };
-            const up = () => {
-                r.classList.remove('active');
-                document.removeEventListener('mousemove', move);
-                document.removeEventListener('mouseup', up);
-            };
-            r.addEventListener('mousedown', e => {
-                startX = e.clientX;
-                startW = prev.getBoundingClientRect().width;
-                r.classList.add('active');
-                document.addEventListener('mousemove', move);
-                document.addEventListener('mouseup', up);
-                e.preventDefault();
-            });
+            const move = e => { prev.style.width = Math.max(150, Math.min(600, startW + (e.clientX - startX))) + 'px'; };
+            const up = () => { r.classList.remove('active'); document.removeEventListener('mousemove', move); document.removeEventListener('mouseup', up); };
+            r.addEventListener('mousedown', e => { startX = e.clientX; startW = prev.getBoundingClientRect().width; r.classList.add('active'); document.addEventListener('mousemove', move); document.addEventListener('mouseup', up); e.preventDefault(); });
         };
         const makeResizableV = (id, prevId) => {
             const r = document.getElementById(id);
             const prev = document.getElementById(prevId);
             if (!r || !prev) return;
             let startY = 0, startH = 0;
-            const move = e => {
-                const dy = e.clientY - startY;
-                const h = Math.max(32, Math.min(600, startH - dy));
-                prev.style.height = h + 'px';
-            };
-            const up = () => {
-                r.classList.remove('active');
-                document.removeEventListener('mousemove', move);
-                document.removeEventListener('mouseup', up);
-            };
-            r.addEventListener('mousedown', e => {
-                startY = e.clientY;
-                startH = prev.getBoundingClientRect().height;
-                r.classList.add('active');
-                document.addEventListener('mousemove', move);
-                document.addEventListener('mouseup', up);
-                e.preventDefault();
-            });
+            const move = e => { prev.style.height = Math.max(32, Math.min(600, startH - (e.clientY - startY))) + 'px'; };
+            const up = () => { r.classList.remove('active'); document.removeEventListener('mousemove', move); document.removeEventListener('mouseup', up); };
+            r.addEventListener('mousedown', e => { startY = e.clientY; startH = prev.getBoundingClientRect().height; r.classList.add('active'); document.addEventListener('mousemove', move); document.addEventListener('mouseup', up); e.preventDefault(); });
         };
         makeResizableH('resizerSidebar', 'sidebarPanel');
         makeResizableH('resizerMain', 'editorPane');
@@ -1829,37 +2229,24 @@ class HtmlCompiler {
        ============================================================ */
     bindGlobalEvents() {
         window.addEventListener('keydown', e => {
-            if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key.toLowerCase() === 'p') {
-                e.preventDefault();
-                this.openCommandPalette();
-            }
-            if ((e.ctrlKey || e.metaKey) && e.key === 's') {
-                e.preventDefault();
-                this.runCode();
-            }
+            if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key.toLowerCase() === 'p') { e.preventDefault(); this.openCommandPalette(); }
+            if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') { e.preventDefault(); this.runCode(); }
+            if ((e.ctrlKey || e.metaKey) && e.key === 's') { e.preventDefault(); this.runCode(); }
             if (e.key === 'Escape') {
                 ['commandPaletteModal', 'templatesModal', 'toolsModal'].forEach(id => this.closeModal(id));
                 document.getElementById('settingsDrawer').classList.add('translate-x-full');
             }
         });
-
         window.addEventListener('message', e => {
             const d = e.data || {};
             if (d.type === 'CONSOLE_LOG') this.addConsoleLog(d.level, d.args);
             if (d.type === 'NETWORK_LOG') this.addNetworkLog(d);
-            if (d.type === 'INSPECTOR_SELECT') {
-                this.showToast(`Selected <${d.tagName.toLowerCase()}>${d.id ? '#'+d.id : ''}`, 'info');
-            }
-            if (d.type === 'REPL_RESULT') {
-                this.addConsoleLog(d.ok ? 'log' : 'error', [String(d.value)]);
-            }
+            if (d.type === 'INSPECTOR_SELECT') this.showToast(`Selected <${d.tagName.toLowerCase()}>${d.id ? '#'+d.id : ''}`, 'info');
+            if (d.type === 'REPL_RESULT') this.addConsoleLog(d.ok ? 'log' : 'error', [String(d.value)]);
         });
-
         document.addEventListener('click', e => {
             const menu = document.getElementById('exportMenu');
-            if (menu && !menu.contains(e.target) && !e.target.closest('button[data-export-toggle]')) {
-                menu.classList.add('hidden');
-            }
+            if (menu && !menu.contains(e.target) && !e.target.closest('button[data-export-toggle]')) menu.classList.add('hidden');
         });
     }
 
@@ -1867,12 +2254,7 @@ class HtmlCompiler {
        HELPERS
        ============================================================ */
     _escape(s) {
-        return String(s)
-            .replace(/&/g, '&amp;')
-            .replace(/</g, '&lt;')
-            .replace(/>/g, '&gt;')
-            .replace(/"/g, '&quot;')
-            .replace(/'/g, '&#39;');
+        return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
     }
     _escapeAttr(s) { return this._escape(s); }
 }
@@ -1902,6 +2284,7 @@ window.addEventListener('load', function () {
             window.app.project = shared;
             window.app.updateProjectName();
             window.app.openFile(window.app.project.activeFile || Object.keys(window.app.project.files)[0]);
+            window.app.renderLanguageBar();
             window.app.renderTabs();
             window.app.renderSidebar();
             window.app.runCode();
@@ -1910,28 +2293,7 @@ window.addEventListener('load', function () {
         }
     } catch (err) {
         console.error('Code Playground failed to start:', err);
-        document.body.innerHTML =
-            '<div style="position:fixed;inset:0;display:flex;align-items:center;' +
-            'justify-content:center;background:#0d1117;color:#c9d1d9;' +
-            'font-family:Inter,sans-serif;padding:24px;text-align:center;z-index:9999">' +
-                '<div style="max-width:520px">' +
-                    '<h1 style="font-size:20px;font-weight:700;margin-bottom:10px">' +
-                        'Something went wrong' +
-                    '</h1>' +
-                    '<p style="font-size:13px;color:#8b949e;margin-bottom:14px">' +
-                        'The editor could not initialize. Open the browser console for details.' +
-                    '</p>' +
-                    '<pre style="font-family:ui-monospace,monospace;font-size:11px;' +
-                    'background:#161b22;border:1px solid #30363d;border-radius:10px;' +
-                    'padding:12px;text-align:left;color:#f0883e;overflow:auto">' +
-                    String(err && err.message ? err.message : err) +
-                    '</pre>' +
-                    '<button onclick="location.reload()" ' +
-                    'style="margin-top:16px;background:#1f6feb;color:#fff;border:none;' +
-                    'padding:10px 18px;border-radius:8px;font-size:13px;font-weight:600;' +
-                    'cursor:pointer">Reload</button>' +
-                '</div>' +
-            '</div>';
+        document.body.innerHTML = '<div style="position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:#0d1117;color:#c9d1d9;font-family:Inter,sans-serif;padding:24px;text-align:center;z-index:9999"><div style="max-width:520px"><h1 style="font-size:20px;font-weight:700;margin-bottom:10px">Something went wrong</h1><p style="font-size:13px;color:#8b949e;margin-bottom:14px">The editor could not initialize. Open the browser console for details.</p><pre style="font-family:ui-monospace,monospace;font-size:11px;background:#161b22;border:1px solid #30363d;border-radius:10px;padding:12px;text-align:left;color:#f0883e;overflow:auto">' + String(err && err.message ? err.message : err) + '</pre><button onclick="location.reload()" style="margin-top:16px;background:#1f6feb;color:#fff;border:none;padding:10px 18px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer">Reload</button></div></div>';
     }
 });
 
