@@ -1,503 +1,612 @@
 <!DOCTYPE html>
 <html lang="en" class="dark h-full">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="robots" content="noindex, nofollow">
-<meta name="theme-color" content="#0d1117">
-<title>Code Playground - Multi-Language</title>
 
-<link rel="stylesheet" href="output.css">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/codemirror.min.css">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/theme/dracula.min.css">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/theme/material.min.css">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/theme/monokai.min.css">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/addon/fold/foldgutter.min.css">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/addon/dialog/dialog.min.css">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/addon/hint/show-hint.min.css">
-<link rel="stylesheet" href="code.css">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex, nofollow">
+    <meta name="theme-color" content="#0d1117">
+    <title>Code Playground - Multi-Language</title>
+
+    <link rel="stylesheet" href="output.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/codemirror.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/theme/dracula.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/theme/material.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/theme/monokai.min.css">
+    <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/addon/fold/foldgutter.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/addon/dialog/dialog.min.css">
+    <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/addon/hint/show-hint.min.css">
+    <link rel="stylesheet" href="code.css">
 </head>
+
 <body class="h-full bg-studio-bg text-studio-text flex flex-col font-sans overflow-hidden select-none">
 
-<!-- ============================================================
+    <!-- ============================================================
      TOP HEADER
      ============================================================ -->
-<header class="h-12 bg-studio-sidebar border-b border-studio-border flex items-center justify-between px-3 shrink-0 z-20">
-    <div class="flex items-center space-x-3">
-        <div class="flex items-center space-x-2">
-            <div class="w-7 h-7 bg-blue-600 rounded-lg flex items-center justify-center font-bold text-white shadow-lg shadow-blue-500/30">
-                <i class="fa-solid font-mono text-sm">&lt;/&gt;</i>
+    <header
+        class="h-12 bg-studio-sidebar border-b border-studio-border flex items-center justify-between px-3 shrink-0 z-20">
+        <div class="flex items-center space-x-3">
+            <div class="flex items-center space-x-2">
+                <div
+                    class="w-7 h-7 bg-blue-600 rounded-lg flex items-center justify-center font-bold text-white shadow-lg shadow-blue-500/30">
+                    <i class="fa-solid font-mono text-sm">&lt;/&gt;</i>
+                </div>
+                <span class="font-bold tracking-wide text-white text-sm">Code Playground</span>
             </div>
-            <span class="font-bold tracking-wide text-white text-sm">Code Playground</span>
+
+            <div class="h-4 w-[1px] bg-studio-border"></div>
+
+            <div class="relative">
+                <button id="projectDropdownBtn" onclick="app.toggleProjectMenu()"
+                    class="flex items-center space-x-2 text-xs bg-studio-panel hover:bg-studio-border text-white px-2.5 py-1.5 rounded border border-studio-border transition">
+                    <i class="fa-solid fa-folder-open text-blue-400"></i>
+                    <span id="currentProjectName" class="font-medium">Untitled</span>
+                    <i class="fa-solid fa-chevron-down text-[10px] text-studio-muted"></i>
+                </button>
+                <div id="projectMenu"
+                    class="hidden absolute left-0 mt-1 w-56 bg-studio-sidebar border border-studio-border rounded-lg shadow-2xl z-50 py-1 text-xs">
+                    <div class="px-3 py-1.5 text-[10px] font-semibold text-studio-muted uppercase">Projects</div>
+                    <div id="projectList" class="max-h-48 overflow-y-auto"></div>
+                    <div class="border-t border-studio-border mt-1 pt-1">
+                        <button onclick="app.newProject()"
+                            class="w-full text-left px-3 py-1.5 hover:bg-studio-panel flex items-center space-x-2">
+                            <i class="fa-solid fa-plus text-emerald-400"></i><span>New Project</span>
+                        </button>
+                        <button onclick="app.renameProject()"
+                            class="w-full text-left px-3 py-1.5 hover:bg-studio-panel flex items-center space-x-2">
+                            <i class="fa-solid fa-pen text-blue-400"></i><span>Rename Current</span>
+                        </button>
+                        <button onclick="app.deleteProject()"
+                            class="w-full text-left px-3 py-1.5 hover:bg-studio-panel flex items-center space-x-2">
+                            <i class="fa-solid fa-trash text-red-400"></i><span>Delete Current</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <button onclick="app.openModal('templatesModal')"
+                class="text-xs bg-studio-panel hover:bg-studio-border text-studio-text px-2 py-1.5 rounded border border-studio-border transition flex items-center space-x-1">
+                <i class="fa-solid fa-wand-magic-sparkles text-amber-400"></i>
+                <span>Templates</span>
+            </button>
         </div>
 
-        <div class="h-4 w-[1px] bg-studio-border"></div>
+        <!-- LANGUAGE SELECTOR BAR -->
+        <div class="flex items-center space-x-1 overflow-x-auto max-w-[600px] px-2" id="languageBar"></div>
 
-        <div class="relative">
-            <button id="projectDropdownBtn" onclick="app.toggleProjectMenu()" class="flex items-center space-x-2 text-xs bg-studio-panel hover:bg-studio-border text-white px-2.5 py-1.5 rounded border border-studio-border transition">
-                <i class="fa-solid fa-folder-open text-blue-400"></i>
-                <span id="currentProjectName" class="font-medium">Untitled</span>
-                <i class="fa-solid fa-chevron-down text-[10px] text-studio-muted"></i>
+        <div class="flex items-center space-x-2">
+            <button id="runBtn" onclick="app.runCode()"
+                class="bg-emerald-600 hover:bg-emerald-500 text-white px-3 py-1 rounded text-xs font-semibold flex items-center space-x-1.5 shadow transition">
+                <i class="fa-solid fa-play"></i><span>Run</span>
             </button>
-            <div id="projectMenu" class="hidden absolute left-0 mt-1 w-56 bg-studio-sidebar border border-studio-border rounded-lg shadow-2xl z-50 py-1 text-xs">
-                <div class="px-3 py-1.5 text-[10px] font-semibold text-studio-muted uppercase">Projects</div>
-                <div id="projectList" class="max-h-48 overflow-y-auto"></div>
-                <div class="border-t border-studio-border mt-1 pt-1">
-                    <button onclick="app.newProject()" class="w-full text-left px-3 py-1.5 hover:bg-studio-panel flex items-center space-x-2">
-                        <i class="fa-solid fa-plus text-emerald-400"></i><span>New Project</span>
+            <label
+                class="flex items-center space-x-1.5 text-xs text-studio-muted cursor-pointer px-2 py-1 rounded hover:bg-studio-panel">
+                <input type="checkbox" id="autoRunToggle"
+                    class="rounded bg-studio-bg border-studio-border text-blue-600 focus:ring-0">
+                <span>Auto-Sync</span>
+            </label>
+            <div class="h-4 w-[1px] bg-studio-border"></div>
+            <button id="inspectorBtn" onclick="app.toggleInspector()"
+                class="text-xs px-2.5 py-1.5 rounded border border-studio-border bg-studio-panel text-studio-text hover:text-white transition flex items-center space-x-1.5">
+                <i class="fa-solid fa-crosshairs text-blue-400"></i><span>Inspector</span>
+            </button>
+            <select id="deviceFrameSelect" onchange="app.setDeviceFrame(this.value)"
+                class="text-xs bg-studio-panel border border-studio-border text-studio-text rounded px-2 py-1 focus:outline-none">
+                <option value="responsive">Responsive</option>
+                <option value="iphone">iPhone 15 Pro</option>
+                <option value="pixel">Pixel 8 Pro</option>
+                <option value="ipad">iPad Air</option>
+            </select>
+        </div>
+
+        <div class="flex items-center space-x-2">
+            <button onclick="app.openCommandPalette()" title="Ctrl+Shift+P"
+                class="p-1.5 text-studio-muted hover:text-white hover:bg-studio-panel rounded transition">
+                <i class="fa-solid fa-terminal text-sm"></i>
+            </button>
+            <button onclick="app.openModal('toolsModal')"
+                class="p-1.5 text-studio-muted hover:text-white hover:bg-studio-panel rounded transition">
+                <i class="fa-solid fa-toolbox text-sm"></i>
+            </button>
+            <button onclick="app.shareProject()"
+                class="text-xs bg-blue-600 hover:bg-blue-500 text-white px-2.5 py-1.5 rounded flex items-center space-x-1 shadow transition">
+                <i class="fa-solid fa-share-nodes"></i><span>Share</span>
+            </button>
+            <div class="relative">
+                <button data-export-toggle onclick="app.toggleExportMenu()"
+                    class="p-1.5 text-studio-muted hover:text-white hover:bg-studio-panel rounded transition"
+                    title="Export">
+                    <i class="fa-solid fa-download text-sm"></i>
+                </button>
+                <div id="exportMenu"
+                    class="hidden absolute right-0 mt-1 w-48 bg-studio-sidebar border border-studio-border rounded-lg shadow-2xl z-50 py-1 text-xs">
+                    <button onclick="app.exportProject('zip')"
+                        class="w-full text-left px-3 py-1.5 hover:bg-studio-panel flex items-center space-x-2">
+                        <i class="fa-solid fa-file-zipper text-amber-400"></i><span>Download ZIP</span>
                     </button>
-                    <button onclick="app.renameProject()" class="w-full text-left px-3 py-1.5 hover:bg-studio-panel flex items-center space-x-2">
-                        <i class="fa-solid fa-pen text-blue-400"></i><span>Rename Current</span>
-                    </button>
-                    <button onclick="app.deleteProject()" class="w-full text-left px-3 py-1.5 hover:bg-studio-panel flex items-center space-x-2">
-                        <i class="fa-solid fa-trash text-red-400"></i><span>Delete Current</span>
+                    <button onclick="app.exportProject('html')"
+                        class="w-full text-left px-3 py-1.5 hover:bg-studio-panel flex items-center space-x-2">
+                        <i class="fa-solid fa-file-code text-sky-400"></i><span>Single HTML</span>
                     </button>
                 </div>
             </div>
-        </div>
-
-        <button onclick="app.openModal('templatesModal')" class="text-xs bg-studio-panel hover:bg-studio-border text-studio-text px-2 py-1.5 rounded border border-studio-border transition flex items-center space-x-1">
-            <i class="fa-solid fa-wand-magic-sparkles text-amber-400"></i>
-            <span>Templates</span>
-        </button>
-    </div>
-
-    <!-- LANGUAGE SELECTOR BAR -->
-    <div class="flex items-center space-x-1 overflow-x-auto max-w-[600px] px-2" id="languageBar"></div>
-
-    <div class="flex items-center space-x-2">
-        <button id="runBtn" onclick="app.runCode()" class="bg-emerald-600 hover:bg-emerald-500 text-white px-3 py-1 rounded text-xs font-semibold flex items-center space-x-1.5 shadow transition">
-            <i class="fa-solid fa-play"></i><span>Run</span>
-        </button>
-        <label class="flex items-center space-x-1.5 text-xs text-studio-muted cursor-pointer px-2 py-1 rounded hover:bg-studio-panel">
-            <input type="checkbox" id="autoRunToggle" class="rounded bg-studio-bg border-studio-border text-blue-600 focus:ring-0">
-            <span>Auto-Sync</span>
-        </label>
-        <div class="h-4 w-[1px] bg-studio-border"></div>
-        <button id="inspectorBtn" onclick="app.toggleInspector()" class="text-xs px-2.5 py-1.5 rounded border border-studio-border bg-studio-panel text-studio-text hover:text-white transition flex items-center space-x-1.5">
-            <i class="fa-solid fa-crosshairs text-blue-400"></i><span>Inspector</span>
-        </button>
-        <select id="deviceFrameSelect" onchange="app.setDeviceFrame(this.value)" class="text-xs bg-studio-panel border border-studio-border text-studio-text rounded px-2 py-1 focus:outline-none">
-            <option value="responsive">Responsive</option>
-            <option value="iphone">iPhone 15 Pro</option>
-            <option value="pixel">Pixel 8 Pro</option>
-            <option value="ipad">iPad Air</option>
-        </select>
-    </div>
-
-    <div class="flex items-center space-x-2">
-        <button onclick="app.openCommandPalette()" title="Ctrl+Shift+P" class="p-1.5 text-studio-muted hover:text-white hover:bg-studio-panel rounded transition">
-            <i class="fa-solid fa-terminal text-sm"></i>
-        </button>
-        <button onclick="app.openModal('toolsModal')" class="p-1.5 text-studio-muted hover:text-white hover:bg-studio-panel rounded transition">
-            <i class="fa-solid fa-toolbox text-sm"></i>
-        </button>
-        <button onclick="app.shareProject()" class="text-xs bg-blue-600 hover:bg-blue-500 text-white px-2.5 py-1.5 rounded flex items-center space-x-1 shadow transition">
-            <i class="fa-solid fa-share-nodes"></i><span>Share</span>
-        </button>
-        <div class="relative">
-            <button data-export-toggle onclick="app.toggleExportMenu()" class="p-1.5 text-studio-muted hover:text-white hover:bg-studio-panel rounded transition" title="Export">
-                <i class="fa-solid fa-download text-sm"></i>
+            <button onclick="app.toggleDrawer('settingsDrawer')"
+                class="p-1.5 text-studio-muted hover:text-white hover:bg-studio-panel rounded transition">
+                <i class="fa-solid fa-gear text-sm"></i>
             </button>
-            <div id="exportMenu" class="hidden absolute right-0 mt-1 w-48 bg-studio-sidebar border border-studio-border rounded-lg shadow-2xl z-50 py-1 text-xs">
-                <button onclick="app.exportProject('zip')" class="w-full text-left px-3 py-1.5 hover:bg-studio-panel flex items-center space-x-2">
-                    <i class="fa-solid fa-file-zipper text-amber-400"></i><span>Download ZIP</span>
-                </button>
-                <button onclick="app.exportProject('html')" class="w-full text-left px-3 py-1.5 hover:bg-studio-panel flex items-center space-x-2">
-                    <i class="fa-solid fa-file-code text-sky-400"></i><span>Single HTML</span>
-                </button>
-            </div>
         </div>
-        <button onclick="app.toggleDrawer('settingsDrawer')" class="p-1.5 text-studio-muted hover:text-white hover:bg-studio-panel rounded transition">
-            <i class="fa-solid fa-gear text-sm"></i>
-        </button>
-    </div>
-</header>
+    </header>
 
-<!-- ============================================================
+    <!-- ============================================================
      WORKSPACE
      ============================================================ -->
-<div class="flex-1 flex overflow-hidden relative" id="workspaceContainer">
-    <div class="w-12 bg-studio-sidebar border-r border-studio-border flex flex-col items-center py-3 space-y-4 shrink-0 z-10">
-        <button onclick="app.switchSidebarTab('files')" id="btnTabFiles" class="p-2 text-blue-400 hover:bg-studio-panel rounded-lg transition" title="Files">
-            <i class="fa-solid fa-folder-tree text-lg"></i>
-        </button>
-        <button onclick="app.switchSidebarTab('packages')" id="btnTabPackages" class="p-2 text-studio-muted hover:text-white hover:bg-studio-panel rounded-lg transition" title="Packages">
-            <i class="fa-solid fa-cubes text-lg"></i>
-        </button>
-        <button onclick="app.switchSidebarTab('search')" id="btnTabSearch" class="p-2 text-studio-muted hover:text-white hover:bg-studio-panel rounded-lg transition" title="Search">
-            <i class="fa-solid fa-magnifying-glass text-lg"></i>
-        </button>
-        <button onclick="app.switchSidebarTab('snippets')" id="btnTabSnippets" class="p-2 text-studio-muted hover:text-white hover:bg-studio-panel rounded-lg transition" title="Snippets">
-            <i class="fa-solid fa-code text-lg"></i>
-        </button>
-        <button onclick="app.switchSidebarTab('snapshots')" id="btnTabSnapshots" class="p-2 text-studio-muted hover:text-white hover:bg-studio-panel rounded-lg transition" title="Snapshots">
-            <i class="fa-solid fa-clock-rotate-left text-lg"></i>
-        </button>
-    </div>
-
-    <div id="sidebarPanel" class="w-60 bg-studio-sidebar border-r border-studio-border flex flex-col shrink-0">
-        <div id="sidebarContent" class="flex-1 overflow-y-auto p-2"></div>
-    </div>
-
-    <div id="resizerSidebar" class="resizer-h"></div>
-
-    <div id="editorPane" class="flex-1 flex flex-col bg-studio-bg min-w-[200px] overflow-hidden">
-        <div id="tabsHeader" class="h-9 bg-studio-sidebar border-b border-studio-border flex items-center overflow-x-auto shrink-0 px-1"></div>
-        <div class="flex-1 relative overflow-hidden" id="cmWrapper">
-            <textarea id="cmTextarea" class="hidden"></textarea>
+    <div class="flex-1 flex overflow-hidden relative" id="workspaceContainer">
+        <div
+            class="w-12 bg-studio-sidebar border-r border-studio-border flex flex-col items-center py-3 space-y-4 shrink-0 z-10">
+            <button onclick="app.switchSidebarTab('files')" id="btnTabFiles"
+                class="p-2 text-blue-400 hover:bg-studio-panel rounded-lg transition" title="Files">
+                <i class="fa-solid fa-folder-tree text-lg"></i>
+            </button>
+            <button onclick="app.switchSidebarTab('packages')" id="btnTabPackages"
+                class="p-2 text-studio-muted hover:text-white hover:bg-studio-panel rounded-lg transition"
+                title="Packages">
+                <i class="fa-solid fa-cubes text-lg"></i>
+            </button>
+            <button onclick="app.switchSidebarTab('search')" id="btnTabSearch"
+                class="p-2 text-studio-muted hover:text-white hover:bg-studio-panel rounded-lg transition"
+                title="Search">
+                <i class="fa-solid fa-magnifying-glass text-lg"></i>
+            </button>
+            <button onclick="app.switchSidebarTab('snippets')" id="btnTabSnippets"
+                class="p-2 text-studio-muted hover:text-white hover:bg-studio-panel rounded-lg transition"
+                title="Snippets">
+                <i class="fa-solid fa-code text-lg"></i>
+            </button>
+            <button onclick="app.switchSidebarTab('snapshots')" id="btnTabSnapshots"
+                class="p-2 text-studio-muted hover:text-white hover:bg-studio-panel rounded-lg transition"
+                title="Snapshots">
+                <i class="fa-solid fa-clock-rotate-left text-lg"></i>
+            </button>
         </div>
-    </div>
 
-    <div id="resizerMain" class="resizer-h"></div>
+        <div id="sidebarPanel" class="w-60 bg-studio-sidebar border-r border-studio-border flex flex-col shrink-0">
+            <div id="sidebarContent" class="flex-1 overflow-y-auto p-2"></div>
+        </div>
 
-    <div id="previewPane" class="flex-1 flex flex-col bg-[#05070a] min-w-[250px] relative overflow-hidden">
-        <div class="h-9 bg-studio-sidebar border-b border-studio-border flex items-center justify-between px-3 shrink-0">
-            <div class="flex items-center space-x-2 text-xs text-studio-muted">
-                <span class="inline-block w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                <span class="font-medium text-studio-text" id="previewTitle">Sandbox Preview</span>
-                <span id="previewResolution" class="text-[10px] text-studio-muted font-mono">(100% Responsive)</span>
+        <div id="resizerSidebar" class="resizer-h"></div>
+
+        <div id="editorPane" class="flex-1 flex flex-col bg-studio-bg min-w-[200px] overflow-hidden">
+            <div id="tabsHeader"
+                class="h-9 bg-studio-sidebar border-b border-studio-border flex items-center overflow-x-auto shrink-0 px-1">
             </div>
-            <div class="flex items-center space-x-2">
-                <button onclick="app.toggleSandboxTheme()" class="text-xs p-1 text-studio-muted hover:text-white" title="Toggle Sandbox Theme">
-                    <i id="sandboxThemeIcon" class="fa-solid fa-moon"></i>
-                </button>
-                <button onclick="app.openExternalPreview()" class="text-xs p-1 text-studio-muted hover:text-white" title="Open in New Tab">
-                    <i class="fa-solid fa-up-right-from-square"></i>
-                </button>
+            <div class="flex-1 relative overflow-hidden" id="cmWrapper">
+                <textarea id="cmTextarea" class="hidden"></textarea>
             </div>
         </div>
 
-        <div class="flex-1 flex items-center justify-center p-2 overflow-auto bg-slate-950/50" id="previewCanvasArea">
-            <div id="deviceFrameWrapper" class="w-full h-full flex items-center justify-center transition-all">
-                <iframe id="sandboxIframe" class="w-full h-full border-0 bg-white rounded shadow-2xl transition-all" sandbox="allow-scripts allow-modals allow-forms allow-popups allow-same-origin"></iframe>
-            </div>
-        </div>
+        <div id="resizerMain" class="resizer-h"></div>
 
-        <div id="resizerConsole" class="resizer-v"></div>
-
-        <div id="consoleDrawer" class="h-48 bg-studio-sidebar border-t border-studio-border flex flex-col shrink-0">
-            <div class="h-8 bg-studio-panel border-b border-studio-border flex items-center justify-between px-3 text-xs">
-                <div class="flex items-center space-x-4">
-                    <button onclick="app.switchConsoleTab('console')" id="tabBtnConsole" class="text-white font-semibold flex items-center space-x-1.5 border-b-2 border-blue-500 pb-1">
-                        <i class="fa-solid fa-terminal text-blue-400"></i>
-                        <span>Output</span>
-                        <span id="consoleBadge" class="bg-blue-600 text-white text-[10px] px-1.5 py-0.2 rounded-full hidden">0</span>
-                    </button>
-                    <button onclick="app.switchConsoleTab('network')" id="tabBtnNetwork" class="text-studio-muted hover:text-white flex items-center space-x-1.5 pb-1">
-                        <i class="fa-solid fa-network-wired text-amber-400"></i><span>Network</span>
-                    </button>
-                    <button onclick="app.switchConsoleTab('perf')" id="tabBtnPerf" class="text-studio-muted hover:text-white flex items-center space-x-1.5 pb-1">
-                        <i class="fa-solid fa-gauge-high text-emerald-400"></i><span>Performance</span>
-                    </button>
-                    <button onclick="app.switchConsoleTab('tests')" id="tabBtnTests" class="text-studio-muted hover:text-white flex items-center space-x-1.5 pb-1">
-                        <i class="fa-solid fa-vial text-purple-400"></i><span>Tests</span>
-                    </button>
+        <div id="previewPane" class="flex-1 flex flex-col bg-[#05070a] min-w-[250px] relative overflow-hidden">
+            <div
+                class="h-9 bg-studio-sidebar border-b border-studio-border flex items-center justify-between px-3 shrink-0">
+                <div class="flex items-center space-x-2 text-xs text-studio-muted">
+                    <span class="inline-block w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                    <span class="font-medium text-studio-text" id="previewTitle">Sandbox Preview</span>
+                    <span id="previewResolution" class="text-[10px] text-studio-muted font-mono">(100%
+                        Responsive)</span>
                 </div>
                 <div class="flex items-center space-x-2">
-                    <button onclick="app.clearConsole()" class="text-studio-muted hover:text-white text-xs"><i class="fa-solid fa-ban"></i></button>
-                    <button onclick="app.toggleConsoleCollapse()" class="text-studio-muted hover:text-white text-xs">
-                        <i id="consoleCollapseIcon" class="fa-solid fa-chevron-down"></i>
+                    <button onclick="app.toggleSandboxTheme()" class="text-xs p-1 text-studio-muted hover:text-white"
+                        title="Toggle Sandbox Theme">
+                        <i id="sandboxThemeIcon" class="fa-solid fa-moon"></i>
+                    </button>
+                    <button onclick="app.openExternalPreview()" class="text-xs p-1 text-studio-muted hover:text-white"
+                        title="Open in New Tab">
+                        <i class="fa-solid fa-up-right-from-square"></i>
                     </button>
                 </div>
             </div>
 
-            <div class="flex-1 overflow-y-auto font-mono text-xs p-2" id="consoleBody">
-                <div id="paneConsole" class="space-y-0.5"></div>
-                <div id="paneNetwork" class="hidden">
-                    <table class="w-full text-left text-studio-text">
-                        <thead class="text-studio-muted border-b border-studio-border sticky top-0 bg-studio-sidebar">
-                            <tr><th class="py-1">Method</th><th>URL</th><th>Status</th><th>Time</th></tr>
-                        </thead>
-                        <tbody id="networkTableBody"></tbody>
-                    </table>
-                </div>
-                <div id="panePerf" class="hidden grid grid-cols-3 gap-4 p-2 text-center">
-                    <div class="bg-studio-panel p-3 rounded border border-studio-border">
-                        <div class="text-studio-muted text-xs">FPS</div>
-                        <div id="fpsGauge" class="text-2xl font-bold text-emerald-400">--</div>
-                    </div>
-                    <div class="bg-studio-panel p-3 rounded border border-studio-border">
-                        <div class="text-studio-muted text-xs">DOM Elements</div>
-                        <div id="domGauge" class="text-2xl font-bold text-blue-400">--</div>
-                    </div>
-                    <div class="bg-studio-panel p-3 rounded border border-studio-border">
-                        <div class="text-studio-muted text-xs">JS Heap</div>
-                        <div id="memGauge" class="text-2xl font-bold text-purple-400">--</div>
-                    </div>
-                </div>
-                <div id="paneTests" class="hidden space-y-2">
-                    <div class="flex items-center justify-between bg-studio-panel p-2 rounded border border-studio-border">
-                        <span class="text-xs text-studio-text">Inline Test Specs</span>
-                        <button onclick="app.runTests()" class="bg-purple-600 hover:bg-purple-500 text-white text-xs px-2.5 py-1 rounded">Run Tests</button>
-                    </div>
-                    <div id="testOutput" class="space-y-1"></div>
+            <div class="flex-1 flex items-center justify-center p-2 overflow-auto bg-slate-950/50"
+                id="previewCanvasArea">
+                <div id="deviceFrameWrapper" class="w-full h-full flex items-center justify-center transition-all">
+                    <iframe id="sandboxIframe" class="w-full h-full border-0 bg-white rounded shadow-2xl transition-all"
+                        sandbox="allow-scripts allow-modals allow-forms allow-popups allow-same-origin"></iframe>
                 </div>
             </div>
 
-            <div id="consoleReplBar" class="h-7 border-t border-studio-border bg-studio-bg flex items-center px-2">
-                <span class="text-blue-400 font-bold mr-2 text-xs">&gt;</span>
-                <input type="text" id="consoleReplInput" placeholder="Send input to running program..." class="flex-1 bg-transparent text-xs text-white focus:outline-none font-mono">
+            <div id="resizerConsole" class="resizer-v"></div>
+
+            <div id="consoleDrawer" class="h-48 bg-studio-sidebar border-t border-studio-border flex flex-col shrink-0">
+                <div
+                    class="h-8 bg-studio-panel border-b border-studio-border flex items-center justify-between px-3 text-xs">
+                    <div class="flex items-center space-x-4">
+                        <button onclick="app.switchConsoleTab('console')" id="tabBtnConsole"
+                            class="text-white font-semibold flex items-center space-x-1.5 border-b-2 border-blue-500 pb-1">
+                            <i class="fa-solid fa-terminal text-blue-400"></i>
+                            <span>Output</span>
+                            <span id="consoleBadge"
+                                class="bg-blue-600 text-white text-[10px] px-1.5 py-0.2 rounded-full hidden">0</span>
+                        </button>
+                        <button onclick="app.switchConsoleTab('network')" id="tabBtnNetwork"
+                            class="text-studio-muted hover:text-white flex items-center space-x-1.5 pb-1">
+                            <i class="fa-solid fa-network-wired text-amber-400"></i><span>Network</span>
+                        </button>
+                        <button onclick="app.switchConsoleTab('perf')" id="tabBtnPerf"
+                            class="text-studio-muted hover:text-white flex items-center space-x-1.5 pb-1">
+                            <i class="fa-solid fa-gauge-high text-emerald-400"></i><span>Performance</span>
+                        </button>
+                        <button onclick="app.switchConsoleTab('tests')" id="tabBtnTests"
+                            class="text-studio-muted hover:text-white flex items-center space-x-1.5 pb-1">
+                            <i class="fa-solid fa-vial text-purple-400"></i><span>Tests</span>
+                        </button>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <button onclick="app.clearConsole()" class="text-studio-muted hover:text-white text-xs"><i
+                                class="fa-solid fa-ban"></i></button>
+                        <button onclick="app.toggleConsoleCollapse()"
+                            class="text-studio-muted hover:text-white text-xs">
+                            <i id="consoleCollapseIcon" class="fa-solid fa-chevron-down"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="flex-1 overflow-y-auto font-mono text-xs p-2" id="consoleBody">
+                    <div id="paneConsole" class="space-y-0.5"></div>
+                    <div id="paneNetwork" class="hidden">
+                        <table class="w-full text-left text-studio-text">
+                            <thead
+                                class="text-studio-muted border-b border-studio-border sticky top-0 bg-studio-sidebar">
+                                <tr>
+                                    <th class="py-1">Method</th>
+                                    <th>URL</th>
+                                    <th>Status</th>
+                                    <th>Time</th>
+                                </tr>
+                            </thead>
+                            <tbody id="networkTableBody"></tbody>
+                        </table>
+                    </div>
+                    <div id="panePerf" class="hidden grid grid-cols-3 gap-4 p-2 text-center">
+                        <div class="bg-studio-panel p-3 rounded border border-studio-border">
+                            <div class="text-studio-muted text-xs">FPS</div>
+                            <div id="fpsGauge" class="text-2xl font-bold text-emerald-400">--</div>
+                        </div>
+                        <div class="bg-studio-panel p-3 rounded border border-studio-border">
+                            <div class="text-studio-muted text-xs">DOM Elements</div>
+                            <div id="domGauge" class="text-2xl font-bold text-blue-400">--</div>
+                        </div>
+                        <div class="bg-studio-panel p-3 rounded border border-studio-border">
+                            <div class="text-studio-muted text-xs">JS Heap</div>
+                            <div id="memGauge" class="text-2xl font-bold text-purple-400">--</div>
+                        </div>
+                    </div>
+                    <div id="paneTests" class="hidden space-y-2">
+                        <div
+                            class="flex items-center justify-between bg-studio-panel p-2 rounded border border-studio-border">
+                            <span class="text-xs text-studio-text">Inline Test Specs</span>
+                            <button onclick="app.runTests()"
+                                class="bg-purple-600 hover:bg-purple-500 text-white text-xs px-2.5 py-1 rounded">Run
+                                Tests</button>
+                        </div>
+                        <div id="testOutput" class="space-y-1"></div>
+                    </div>
+                </div>
+
+                <div id="consoleReplBar" class="h-7 border-t border-studio-border bg-studio-bg flex items-center px-2">
+                    <span class="text-blue-400 font-bold mr-2 text-xs">&gt;</span>
+                    <input type="text" id="consoleReplInput" placeholder="Send input to running program..."
+                        class="flex-1 bg-transparent text-xs text-white focus:outline-none font-mono">
+                </div>
             </div>
         </div>
     </div>
-</div>
 
-<!-- ============================================================
+    <!-- ============================================================
      COMMAND PALETTE
      ============================================================ -->
-<div id="commandPaletteModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden items-start justify-center pt-20">
-    <div class="bg-studio-sidebar border border-studio-border rounded-xl w-full max-w-xl shadow-2xl overflow-hidden flex flex-col">
-        <div class="p-3 border-b border-studio-border flex items-center space-x-2">
-            <i class="fa-solid fa-magnifying-glass text-studio-muted text-sm"></i>
-            <input type="text" id="cmdInput" placeholder="Type a command, search file, template..." class="bg-transparent flex-1 text-sm text-white focus:outline-none">
-            <span class="text-[10px] bg-studio-panel text-studio-muted px-1.5 py-0.5 rounded border border-studio-border">ESC</span>
+    <div id="commandPaletteModal"
+        class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden items-start justify-center pt-20">
+        <div
+            class="bg-studio-sidebar border border-studio-border rounded-xl w-full max-w-xl shadow-2xl overflow-hidden flex flex-col">
+            <div class="p-3 border-b border-studio-border flex items-center space-x-2">
+                <i class="fa-solid fa-magnifying-glass text-studio-muted text-sm"></i>
+                <input type="text" id="cmdInput" placeholder="Type a command, search file, template..."
+                    class="bg-transparent flex-1 text-sm text-white focus:outline-none">
+                <span
+                    class="text-[10px] bg-studio-panel text-studio-muted px-1.5 py-0.5 rounded border border-studio-border">ESC</span>
+            </div>
+            <div id="cmdResults" class="max-h-80 overflow-y-auto p-2 space-y-1"></div>
         </div>
-        <div id="cmdResults" class="max-h-80 overflow-y-auto p-2 space-y-1"></div>
     </div>
-</div>
 
-<!-- ============================================================
+    <!-- ============================================================
      SETTINGS DRAWER
      ============================================================ -->
-<div id="settingsDrawer" class="fixed inset-y-0 right-0 w-80 bg-studio-sidebar border-l border-studio-border z-40 transform translate-x-full transition-transform duration-300 p-4 flex flex-col space-y-4 shadow-2xl">
-    <div class="flex items-center justify-between border-b border-studio-border pb-3">
-        <h3 class="font-bold text-white text-sm flex items-center space-x-2">
-            <i class="fa-solid fa-sliders text-blue-400"></i><span>Editor Preferences</span>
-        </h3>
-        <button onclick="app.toggleDrawer('settingsDrawer')" class="text-studio-muted hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+    <div id="settingsDrawer"
+        class="fixed inset-y-0 right-0 w-80 bg-studio-sidebar border-l border-studio-border z-40 transition-transform duration-300 p-4 flex flex-col space-y-4 shadow-2xl"
+        style="transform: translateX(100%);" data-open="false">
+        <div class="flex items-center justify-between border-b border-studio-border pb-3">
+            <h3 class="font-bold text-white text-sm flex items-center space-x-2">
+                <i class="fa-solid fa-sliders text-blue-400"></i><span>Editor Preferences</span>
+            </h3>
+            <button onclick="app.toggleDrawer('settingsDrawer')" class="text-studio-muted hover:text-white"><i
+                    class="fa-solid fa-xmark"></i></button>
+        </div>
+        <div class="space-y-4 overflow-y-auto flex-1 text-xs text-studio-text">
+            <div>
+                <label class="block text-studio-muted mb-1">Editor Theme</label>
+                <select id="settingTheme" onchange="app.changeEditorTheme(this.value)"
+                    class="w-full bg-studio-panel border border-studio-border rounded p-2 text-white">
+                    <option value="dracula">Dracula Dark</option>
+                    <option value="material">Material Design</option>
+                    <option value="monokai">Monokai Pro</option>
+                </select>
+            </div>
+            <div>
+                <label class="block text-studio-muted mb-1">Keybinding Map</label>
+                <select id="settingKeymap" onchange="app.changeKeymap(this.value)"
+                    class="w-full bg-studio-panel border border-studio-border rounded p-2 text-white">
+                    <option value="default">Standard</option>
+                    <option value="vim">Vim</option>
+                    <option value="emacs">Emacs</option>
+                </select>
+            </div>
+            <div>
+                <label class="block text-studio-muted mb-1">Font Size (<span id="lblFontSize">14</span>px)</label>
+                <input type="range" min="10" max="24" value="14" oninput="app.changeFontSize(this.value)"
+                    class="w-full">
+            </div>
+            <div class="space-y-2 pt-2 border-t border-studio-border">
+                <label class="flex items-center space-x-2 cursor-pointer">
+                    <input type="checkbox" id="settingWordWrap" onchange="app.toggleWordWrap(this.checked)"
+                        class="rounded bg-studio-bg border-studio-border text-blue-600"><span>Word Wrap</span>
+                </label>
+                <label class="flex items-center space-x-2 cursor-pointer">
+                    <input type="checkbox" id="settingLineNumbers" checked
+                        onchange="app.toggleLineNumbers(this.checked)"
+                        class="rounded bg-studio-bg border-studio-border text-blue-600"><span>Line Numbers</span>
+                </label>
+                <label class="flex items-center space-x-2 cursor-pointer">
+                    <input type="checkbox" id="settingAutoSave" checked onchange="app.toggleAutoSave(this.checked)"
+                        class="rounded bg-studio-bg border-studio-border text-blue-600"><span>Auto-Save to
+                        Browser</span>
+                </label>
+            </div>
+            <div class="pt-2 border-t border-studio-border space-y-2">
+                <button onclick="app.exportProject('zip')"
+                    class="w-full bg-studio-panel hover:bg-studio-border text-white p-2 rounded border border-studio-border flex items-center justify-center space-x-2">
+                    <i class="fa-solid fa-file-zipper text-amber-400"></i><span>Export Project as ZIP</span>
+                </button>
+                <button onclick="app.clearStorage()"
+                    class="w-full bg-red-900/40 hover:bg-red-900/60 text-red-300 p-2 rounded border border-red-900/60 flex items-center justify-center space-x-2">
+                    <i class="fa-solid fa-trash"></i><span>Reset All Projects</span>
+                </button>
+            </div>
+        </div>
     </div>
-    <div class="space-y-4 overflow-y-auto flex-1 text-xs text-studio-text">
-        <div>
-            <label class="block text-studio-muted mb-1">Editor Theme</label>
-            <select id="settingTheme" onchange="app.changeEditorTheme(this.value)" class="w-full bg-studio-panel border border-studio-border rounded p-2 text-white">
-                <option value="dracula">Dracula Dark</option>
-                <option value="material">Material Design</option>
-                <option value="monokai">Monokai Pro</option>
-            </select>
-        </div>
-        <div>
-            <label class="block text-studio-muted mb-1">Keybinding Map</label>
-            <select id="settingKeymap" onchange="app.changeKeymap(this.value)" class="w-full bg-studio-panel border border-studio-border rounded p-2 text-white">
-                <option value="default">Standard</option>
-                <option value="vim">Vim</option>
-                <option value="emacs">Emacs</option>
-            </select>
-        </div>
-        <div>
-            <label class="block text-studio-muted mb-1">Font Size (<span id="lblFontSize">14</span>px)</label>
-            <input type="range" min="10" max="24" value="14" oninput="app.changeFontSize(this.value)" class="w-full">
-        </div>
-        <div class="space-y-2 pt-2 border-t border-studio-border">
-            <label class="flex items-center space-x-2 cursor-pointer">
-                <input type="checkbox" id="settingWordWrap" onchange="app.toggleWordWrap(this.checked)" class="rounded bg-studio-bg border-studio-border text-blue-600"><span>Word Wrap</span>
-            </label>
-            <label class="flex items-center space-x-2 cursor-pointer">
-                <input type="checkbox" id="settingLineNumbers" checked onchange="app.toggleLineNumbers(this.checked)" class="rounded bg-studio-bg border-studio-border text-blue-600"><span>Line Numbers</span>
-            </label>
-            <label class="flex items-center space-x-2 cursor-pointer">
-                <input type="checkbox" id="settingAutoSave" checked onchange="app.toggleAutoSave(this.checked)" class="rounded bg-studio-bg border-studio-border text-blue-600"><span>Auto-Save to Browser</span>
-            </label>
-        </div>
-        <div class="pt-2 border-t border-studio-border space-y-2">
-            <button onclick="app.exportProject('zip')" class="w-full bg-studio-panel hover:bg-studio-border text-white p-2 rounded border border-studio-border flex items-center justify-center space-x-2">
-                <i class="fa-solid fa-file-zipper text-amber-400"></i><span>Export Project as ZIP</span>
-            </button>
-            <button onclick="app.clearStorage()" class="w-full bg-red-900/40 hover:bg-red-900/60 text-red-300 p-2 rounded border border-red-900/60 flex items-center justify-center space-x-2">
-                <i class="fa-solid fa-trash"></i><span>Reset All Projects</span>
-            </button>
-        </div>
-    </div>
-</div>
 
-<!-- ============================================================
+    <!-- ============================================================
      TEMPLATES MODAL
      ============================================================ -->
-<div id="templatesModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
-    <div class="bg-studio-sidebar border border-studio-border rounded-xl w-full max-w-3xl p-5 shadow-2xl flex flex-col space-y-4">
-        <div class="flex items-center justify-between border-b border-studio-border pb-3">
-            <h3 class="text-base font-bold text-white flex items-center space-x-2">
-                <i class="fa-solid fa-cubes text-amber-400"></i><span>Select Starter Template</span>
-            </h3>
-            <button onclick="app.closeModal('templatesModal')" class="text-studio-muted hover:text-white"><i class="fa-solid fa-xmark"></i></button>
-        </div>
-
-        <div class="grid grid-cols-3 gap-3 max-h-96 overflow-y-auto">
-            <div onclick="app.loadTemplate('html')" class="bg-studio-panel border border-studio-border hover:border-amber-500 p-3 rounded-lg cursor-pointer transition flex flex-col justify-between space-y-2">
-                <div class="flex items-center space-x-2 text-amber-400 font-bold text-sm">
-                    <i class="fa-brands fa-html5 text-lg"></i><span>HTML</span>
-                </div>
-                <p class="text-xs text-studio-muted">Standard HTML boilerplate.</p>
+    <div id="templatesModal"
+        class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
+        <div
+            class="bg-studio-sidebar border border-studio-border rounded-xl w-full max-w-3xl p-5 shadow-2xl flex flex-col space-y-4">
+            <div class="flex items-center justify-between border-b border-studio-border pb-3">
+                <h3 class="text-base font-bold text-white flex items-center space-x-2">
+                    <i class="fa-solid fa-cubes text-amber-400"></i><span>Select Starter Template</span>
+                </h3>
+                <button onclick="app.closeModal('templatesModal')" class="text-studio-muted hover:text-white"><i
+                        class="fa-solid fa-xmark"></i></button>
             </div>
 
-            <div onclick="app.loadTemplate('python')" class="bg-studio-panel border border-studio-border hover:border-yellow-400 p-3 rounded-lg cursor-pointer transition flex flex-col justify-between space-y-2">
-                <div class="flex items-center space-x-2 text-yellow-400 font-bold text-sm">
-                    <i class="fa-brands fa-python text-lg"></i><span>Python</span>
+            <div class="grid grid-cols-3 gap-3 max-h-96 overflow-y-auto">
+                <div onclick="app.loadTemplate('html')"
+                    class="bg-studio-panel border border-studio-border hover:border-amber-500 p-3 rounded-lg cursor-pointer transition flex flex-col justify-between space-y-2">
+                    <div class="flex items-center space-x-2 text-amber-400 font-bold text-sm">
+                        <i class="fa-brands fa-html5 text-lg"></i><span>HTML</span>
+                    </div>
+                    <p class="text-xs text-studio-muted">Standard HTML boilerplate.</p>
                 </div>
-                <p class="text-xs text-studio-muted">Real CPython via Pyodide.</p>
-            </div>
 
-            <div onclick="app.loadTemplate('c')" class="bg-studio-panel border border-studio-border hover:border-blue-500 p-3 rounded-lg cursor-pointer transition flex flex-col justify-between space-y-2">
-                <div class="flex items-center space-x-2 text-blue-500 font-bold text-sm">
-                    <i class="fa-solid fa-c text-lg"></i><span>C</span>
+                <div onclick="app.loadTemplate('python')"
+                    class="bg-studio-panel border border-studio-border hover:border-yellow-400 p-3 rounded-lg cursor-pointer transition flex flex-col justify-between space-y-2">
+                    <div class="flex items-center space-x-2 text-yellow-400 font-bold text-sm">
+                        <i class="fa-brands fa-python text-lg"></i><span>Python</span>
+                    </div>
+                    <p class="text-xs text-studio-muted">Real CPython via Pyodide.</p>
                 </div>
-                <p class="text-xs text-studio-muted">GCC compile via Wandbox.</p>
-            </div>
 
-            <div onclick="app.loadTemplate('cpp')" class="bg-studio-panel border border-studio-border hover:border-indigo-500 p-3 rounded-lg cursor-pointer transition flex flex-col justify-between space-y-2">
-                <div class="flex items-center space-x-2 text-indigo-400 font-bold text-sm">
-                    <i class="fa-solid fa-code text-lg"></i><span>C++</span>
+                <div onclick="app.loadTemplate('c')"
+                    class="bg-studio-panel border border-studio-border hover:border-blue-500 p-3 rounded-lg cursor-pointer transition flex flex-col justify-between space-y-2">
+                    <div class="flex items-center space-x-2 text-blue-500 font-bold text-sm">
+                        <i class="fa-solid fa-c text-lg"></i><span>C</span>
+                    </div>
+                    <p class="text-xs text-studio-muted">GCC compile via Wandbox.</p>
                 </div>
-                <p class="text-xs text-studio-muted">G++ / iostream support.</p>
-            </div>
 
-            <div onclick="app.loadTemplate('rust')" class="bg-studio-panel border border-studio-border hover:border-orange-500 p-3 rounded-lg cursor-pointer transition flex flex-col justify-between space-y-2">
-                <div class="flex items-center space-x-2 text-orange-400 font-bold text-sm">
-                    <i class="fa-brands fa-rust text-lg"></i><span>Rust</span>
+                <div onclick="app.loadTemplate('cpp')"
+                    class="bg-studio-panel border border-studio-border hover:border-indigo-500 p-3 rounded-lg cursor-pointer transition flex flex-col justify-between space-y-2">
+                    <div class="flex items-center space-x-2 text-indigo-400 font-bold text-sm">
+                        <i class="fa-solid fa-code text-lg"></i><span>C++</span>
+                    </div>
+                    <p class="text-xs text-studio-muted">G++ / iostream support.</p>
                 </div>
-                <p class="text-xs text-studio-muted">Rustc via Wandbox API.</p>
-            </div>
 
-            <div onclick="app.loadTemplate('go')" class="bg-studio-panel border border-studio-border hover:border-cyan-400 p-3 rounded-lg cursor-pointer transition flex flex-col justify-between space-y-2">
-                <div class="flex items-center space-x-2 text-cyan-400 font-bold text-sm">
-                    <i class="fa-solid fa-g text-lg"></i><span>Go</span>
+                <div onclick="app.loadTemplate('rust')"
+                    class="bg-studio-panel border border-studio-border hover:border-orange-500 p-3 rounded-lg cursor-pointer transition flex flex-col justify-between space-y-2">
+                    <div class="flex items-center space-x-2 text-orange-400 font-bold text-sm">
+                        <i class="fa-brands fa-rust text-lg"></i><span>Rust</span>
+                    </div>
+                    <p class="text-xs text-studio-muted">Rustc via Wandbox API.</p>
                 </div>
-                <p class="text-xs text-studio-muted">go.dev/play compile API.</p>
-            </div>
 
-            <div onclick="app.loadTemplate('assembly')" class="bg-studio-panel border border-studio-border hover:border-pink-500 p-3 rounded-lg cursor-pointer transition flex flex-col justify-between space-y-2">
-                <div class="flex items-center space-x-2 text-pink-400 font-bold text-sm">
-                    <i class="fa-solid fa-microchip text-lg"></i><span>x86-64 ASM</span>
+                <div onclick="app.loadTemplate('go')"
+                    class="bg-studio-panel border border-studio-border hover:border-cyan-400 p-3 rounded-lg cursor-pointer transition flex flex-col justify-between space-y-2">
+                    <div class="flex items-center space-x-2 text-cyan-400 font-bold text-sm">
+                        <i class="fa-solid fa-g text-lg"></i><span>Go</span>
+                    </div>
+                    <p class="text-xs text-studio-muted">go.dev/play compile API.</p>
                 </div>
-                <p class="text-xs text-studio-muted">NASM syntax via Wandbox.</p>
-            </div>
 
-            <div onclick="app.loadTemplate('lua')" class="bg-studio-panel border border-studio-border hover:border-blue-300 p-3 rounded-lg cursor-pointer transition flex flex-col justify-between space-y-2">
-                <div class="flex items-center space-x-2 text-blue-300 font-bold text-sm">
-                    <i class="fa-solid fa-moon text-lg"></i><span>Lua</span>
+                <div onclick="app.loadTemplate('assembly')"
+                    class="bg-studio-panel border border-studio-border hover:border-pink-500 p-3 rounded-lg cursor-pointer transition flex flex-col justify-between space-y-2">
+                    <div class="flex items-center space-x-2 text-pink-400 font-bold text-sm">
+                        <i class="fa-solid fa-microchip text-lg"></i><span>x86-64 ASM</span>
+                    </div>
+                    <p class="text-xs text-studio-muted">NASM syntax via Wandbox.</p>
                 </div>
-                <p class="text-xs text-studio-muted">Fengari (Lua 5.3 in JS).</p>
-            </div>
 
-            <div onclick="app.loadTemplate('sql')" class="bg-studio-panel border border-studio-border hover:border-teal-400 p-3 rounded-lg cursor-pointer transition flex flex-col justify-between space-y-2">
-                <div class="flex items-center space-x-2 text-teal-400 font-bold text-sm">
-                    <i class="fa-solid fa-database text-lg"></i><span>SQL</span>
+                <div onclick="app.loadTemplate('lua')"
+                    class="bg-studio-panel border border-studio-border hover:border-blue-300 p-3 rounded-lg cursor-pointer transition flex flex-col justify-between space-y-2">
+                    <div class="flex items-center space-x-2 text-blue-300 font-bold text-sm">
+                        <i class="fa-solid fa-moon text-lg"></i><span>Lua</span>
+                    </div>
+                    <p class="text-xs text-studio-muted">Fengari (Lua 5.3 in JS).</p>
                 </div>
-                <p class="text-xs text-studio-muted">SQLite via sql.js.</p>
+
+                <div onclick="app.loadTemplate('sql')"
+                    class="bg-studio-panel border border-studio-border hover:border-teal-400 p-3 rounded-lg cursor-pointer transition flex flex-col justify-between space-y-2">
+                    <div class="flex items-center space-x-2 text-teal-400 font-bold text-sm">
+                        <i class="fa-solid fa-database text-lg"></i><span>SQL</span>
+                    </div>
+                    <p class="text-xs text-studio-muted">SQLite via sql.js.</p>
+                </div>
             </div>
         </div>
     </div>
-</div>
 
-<!-- ============================================================
+    <!-- ============================================================
      TOOLS MODAL
      ============================================================ -->
-<div id="toolsModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
-    <div class="bg-studio-sidebar border border-studio-border rounded-xl w-full max-w-3xl p-5 shadow-2xl flex flex-col space-y-4 max-h-[85vh] overflow-y-auto">
-        <div class="flex items-center justify-between border-b border-studio-border pb-3">
-            <h3 class="text-base font-bold text-white flex items-center space-x-2">
-                <i class="fa-solid fa-palette text-purple-400"></i><span>Developer Utilities</span>
-            </h3>
-            <button onclick="app.closeModal('toolsModal')" class="text-studio-muted hover:text-white"><i class="fa-solid fa-xmark"></i></button>
-        </div>
-
-        <div class="flex space-x-4 border-b border-studio-border pb-2 text-xs">
-            <button onclick="app.switchToolTab('palette')" id="toolTabPalette" class="text-blue-400 font-bold">Color Ramp</button>
-            <button onclick="app.switchToolTab('keyframes')" id="toolTabKeyframes" class="text-studio-muted hover:text-white">Keyframes Builder</button>
-            <button onclick="app.switchToolTab('icons')" id="toolTabIcons" class="text-studio-muted hover:text-white">Icon Picker</button>
-        </div>
-
-        <div id="toolViewPalette" class="space-y-3">
-            <div class="flex items-center space-x-3">
-                <label class="text-xs text-studio-muted">Base Color:</label>
-                <input type="color" id="paletteBaseColor" value="#1f6feb" onchange="app.generatePalette()" class="w-8 h-8 rounded bg-transparent cursor-pointer">
-                <span id="paletteHexText" class="font-mono text-xs text-white">#1f6feb</span>
-                <button onclick="app.copyPalette()" class="ml-auto text-xs bg-studio-panel border border-studio-border px-2 py-1 rounded hover:bg-studio-border">Copy CSS</button>
+    <div id="toolsModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
+        <div
+            class="bg-studio-sidebar border border-studio-border rounded-xl w-full max-w-3xl p-5 shadow-2xl flex flex-col space-y-4 max-h-[85vh] overflow-y-auto">
+            <div class="flex items-center justify-between border-b border-studio-border pb-3">
+                <h3 class="text-base font-bold text-white flex items-center space-x-2">
+                    <i class="fa-solid fa-palette text-purple-400"></i><span>Developer Utilities</span>
+                </h3>
+                <button onclick="app.closeModal('toolsModal')" class="text-studio-muted hover:text-white"><i
+                        class="fa-solid fa-xmark"></i></button>
             </div>
-            <div id="paletteRamp" class="grid grid-cols-5 gap-2"></div>
-        </div>
 
-        <div id="toolViewKeyframes" class="hidden space-y-3">
-            <div class="space-y-2 text-xs">
-                <label class="text-studio-muted">Translate X: <span id="kfTxVal">20</span>px</label>
-                <input type="range" min="-200" max="200" value="20" id="kfTranslateX" oninput="app.updateKeyframePreview()" class="w-full">
-                <label class="text-studio-muted">Scale: <span id="kfScaleVal">1.2</span></label>
-                <input type="range" min="0.5" max="2" step="0.1" value="1.2" id="kfScale" oninput="app.updateKeyframePreview()" class="w-full">
-                <label class="text-studio-muted">Rotate: <span id="kfRotateVal">0</span>deg</label>
-                <input type="range" min="-360" max="360" value="0" id="kfRotate" oninput="app.updateKeyframePreview()" class="w-full">
+            <div class="flex space-x-4 border-b border-studio-border pb-2 text-xs">
+                <button onclick="app.switchToolTab('palette')" id="toolTabPalette" class="text-blue-400 font-bold">Color
+                    Ramp</button>
+                <button onclick="app.switchToolTab('keyframes')" id="toolTabKeyframes"
+                    class="text-studio-muted hover:text-white">Keyframes Builder</button>
+                <button onclick="app.switchToolTab('icons')" id="toolTabIcons"
+                    class="text-studio-muted hover:text-white">Icon Picker</button>
             </div>
-            <div class="flex items-center justify-between bg-studio-panel p-3 rounded border border-studio-border">
-                <div class="w-12 h-12 bg-blue-600 rounded-lg transition-transform" id="kfBox"></div>
-                <textarea id="kfOutputCss" class="w-72 h-28 bg-studio-bg border border-studio-border rounded p-2 text-[10px] font-mono text-emerald-400 focus:outline-none" readonly></textarea>
-            </div>
-            <button onclick="app.insertKeyframeIntoSnippet()" class="text-xs bg-blue-600 hover:bg-blue-500 text-white px-3 py-1.5 rounded">Insert into Current File</button>
-        </div>
 
-        <div id="toolViewIcons" class="hidden space-y-3">
-            <input type="text" id="iconSearch" placeholder="Search icon name..." oninput="app.filterIcons(this.value)" class="w-full bg-studio-panel border border-studio-border text-xs rounded p-2 text-white">
-            <div id="iconGrid" class="grid grid-cols-8 gap-2 max-h-64 overflow-y-auto text-center"></div>
+            <div id="toolViewPalette" class="space-y-3">
+                <div class="flex items-center space-x-3">
+                    <label class="text-xs text-studio-muted">Base Color:</label>
+                    <input type="color" id="paletteBaseColor" value="#1f6feb" onchange="app.generatePalette()"
+                        class="w-8 h-8 rounded bg-transparent cursor-pointer">
+                    <span id="paletteHexText" class="font-mono text-xs text-white">#1f6feb</span>
+                    <button onclick="app.copyPalette()"
+                        class="ml-auto text-xs bg-studio-panel border border-studio-border px-2 py-1 rounded hover:bg-studio-border">Copy
+                        CSS</button>
+                </div>
+                <div id="paletteRamp" class="grid grid-cols-5 gap-2"></div>
+            </div>
+
+            <div id="toolViewKeyframes" class="hidden space-y-3">
+                <div class="space-y-2 text-xs">
+                    <label class="text-studio-muted">Translate X: <span id="kfTxVal">20</span>px</label>
+                    <input type="range" min="-200" max="200" value="20" id="kfTranslateX"
+                        oninput="app.updateKeyframePreview()" class="w-full">
+                    <label class="text-studio-muted">Scale: <span id="kfScaleVal">1.2</span></label>
+                    <input type="range" min="0.5" max="2" step="0.1" value="1.2" id="kfScale"
+                        oninput="app.updateKeyframePreview()" class="w-full">
+                    <label class="text-studio-muted">Rotate: <span id="kfRotateVal">0</span>deg</label>
+                    <input type="range" min="-360" max="360" value="0" id="kfRotate"
+                        oninput="app.updateKeyframePreview()" class="w-full">
+                </div>
+                <div class="flex items-center justify-between bg-studio-panel p-3 rounded border border-studio-border">
+                    <div class="w-12 h-12 bg-blue-600 rounded-lg transition-transform" id="kfBox"></div>
+                    <textarea id="kfOutputCss"
+                        class="w-72 h-28 bg-studio-bg border border-studio-border rounded p-2 text-[10px] font-mono text-emerald-400 focus:outline-none"
+                        readonly></textarea>
+                </div>
+                <button onclick="app.insertKeyframeIntoSnippet()"
+                    class="text-xs bg-blue-600 hover:bg-blue-500 text-white px-3 py-1.5 rounded">Insert into Current
+                    File</button>
+            </div>
+
+            <div id="toolViewIcons" class="hidden space-y-3">
+                <input type="text" id="iconSearch" placeholder="Search icon name..."
+                    oninput="app.filterIcons(this.value)"
+                    class="w-full bg-studio-panel border border-studio-border text-xs rounded p-2 text-white">
+                <div id="iconGrid" class="grid grid-cols-8 gap-2 max-h-64 overflow-y-auto text-center"></div>
+            </div>
         </div>
     </div>
-</div>
 
-<!-- ============================================================
+    <!-- ============================================================
      TOAST CONTAINER
      ============================================================ -->
-<div id="toastContainer" class="fixed bottom-8 right-8 z-[60] flex flex-col space-y-2 pointer-events-none"></div>
+    <div id="toastContainer" class="fixed bottom-8 right-8 z-[60] flex flex-col space-y-2 pointer-events-none"></div>
 
-<!-- ============================================================
+    <!-- ============================================================
      SCRIPTS
      ============================================================ -->
 
-<!-- CodeMirror core -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/codemirror.min.js"></script>
+    <!-- CodeMirror core -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/codemirror.min.js"></script>
 
-<!-- CodeMirror modes (all languages) -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/xml/xml.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/javascript/javascript.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/css/css.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/htmlmixed/htmlmixed.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/clike/clike.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/addon/mode/simple.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/rust/rust.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/vue/vue.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/jsx/jsx.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/markdown/markdown.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/python/python.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/go/go.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/shell/shell.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/yaml/yaml.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/sql/sql.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/lua/lua.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/asciiarmor/asciiarmor.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/gas/gas.min.js"></script>
+    <!-- CodeMirror modes (all languages) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/xml/xml.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/javascript/javascript.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/css/css.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/htmlmixed/htmlmixed.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/clike/clike.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/addon/mode/simple.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/rust/rust.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/vue/vue.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/jsx/jsx.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/markdown/markdown.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/python/python.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/go/go.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/shell/shell.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/yaml/yaml.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/sql/sql.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/lua/lua.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/asciiarmor/asciiarmor.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/gas/gas.min.js"></script>
 
-<!-- CodeMirror addons -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/addon/search/search.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/addon/search/searchcursor.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/addon/dialog/dialog.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/addon/edit/matchbrackets.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/addon/edit/closebrackets.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/addon/edit/closetag.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/addon/hint/show-hint.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/addon/hint/javascript-hint.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/addon/hint/html-hint.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/addon/hint/css-hint.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/addon/hint/anyword-hint.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/keymap/vim.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/keymap/emacs.min.js"></script>
+    <!-- CodeMirror addons -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/addon/search/search.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/addon/search/searchcursor.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/addon/dialog/dialog.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/addon/edit/matchbrackets.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/addon/edit/closebrackets.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/addon/edit/closetag.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/addon/hint/show-hint.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/addon/hint/javascript-hint.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/addon/hint/html-hint.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/addon/hint/css-hint.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/addon/hint/anyword-hint.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/keymap/vim.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/keymap/emacs.min.js"></script>
 
-<!-- Utilities -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/lz-string/1.4.4/lz-string.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+    <!-- Utilities -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lz-string/1.4.4/lz-string.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
 
-<!-- Key database + autocomplete engine (must come BEFORE code.js) -->
-<script src="key.js"></script>
+    <!-- Key database + autocomplete engine (must come BEFORE code.js) -->
+    <script src="key.js"></script>
 
-<!-- Main app -->
-<script src="code.js"></script>
+    <!-- Main app -->
+    <script src="code.js"></script>
 
 </body>
+
 </html>

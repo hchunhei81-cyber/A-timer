@@ -185,3 +185,10 @@ summary::-webkit-details-marker { display: none; }
         transform: scale(.75); transform-origin: center;
     }
 }
+
+#settingsDrawer[data-open="false"] {
+    transform: translateX(100%) !important;
+}
+#settingsDrawer[data-open="true"] {
+    transform: translateX(0) !important;
+}
